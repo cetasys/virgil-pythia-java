@@ -9,6 +9,14 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    virgil = '5.0.0'
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    // Virgil SDK
+    implementation "com.virgilsecurity.sdk:crypto:$virgil"
+    implementation "com.virgilsecurity.sdk:sdk:$virgil"
 }
