@@ -36,6 +36,7 @@ package auth;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import model.PythiaUser;
 import model.exception.TransformVerificationException;
+import model.exception.VirgilPythiaServiceException;
 
 /**
  * .._  _
@@ -47,15 +48,13 @@ import model.exception.TransformVerificationException;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public interface PythiaAuth {
-
-    PythiaUser changePassword(String newPassword) throws TransformVerificationException, CryptoException;
+public interface PythiaPasswordProtection {
 
     PythiaUser rotateSecret(Integer newVersion, String updateToken, PythiaUser pythiaUser);
 
-    PythiaUser register(String password) throws CryptoException, TransformVerificationException;
+    PythiaUser register(String password) throws CryptoException, TransformVerificationException, VirgilPythiaServiceException;
 
     boolean authenticate(String password,
                          PythiaUser pythiaUser,
-                         boolean proof) throws CryptoException, TransformVerificationException;
+                         boolean proof) throws CryptoException, TransformVerificationException, VirgilPythiaServiceException;
 }

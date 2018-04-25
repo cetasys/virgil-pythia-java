@@ -65,7 +65,7 @@ public final class PythiaConfig {
                                     "PythiaConfig -> 'transformationPublicKey.getRight()' should not be null");
 
         this.transformationPublicKey = new Tuple<>(transformationPublicKey.getLeft(),
-                                                   new Data(transformationPublicKey.getRight()));
+                                                   Data.fromBase64String(transformationPublicKey.getRight()));
 
         if (oldTransformationPublicKey != null) {
             Validator.checkNullAgrument(oldTransformationPublicKey.getLeft(),
@@ -74,7 +74,7 @@ public final class PythiaConfig {
                                         "PythiaConfig -> 'oldTransformationPublicKey.getRight()' should not be null");
 
             this.oldTransformationPublicKey = new Tuple<>(oldTransformationPublicKey.getLeft(),
-                                                          new Data(oldTransformationPublicKey.getRight()));
+                                                          Data.fromBase64String(oldTransformationPublicKey.getRight()));
         }
     }
 

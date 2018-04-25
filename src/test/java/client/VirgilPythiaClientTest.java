@@ -31,10 +31,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package crypto;
-
-import com.virgilsecurity.sdk.utils.Tuple;
-import model.Data;
+package client;
 
 /**
  * .._  _
@@ -46,20 +43,7 @@ import model.Data;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public interface PythiaCrypto {
+public class VirgilPythiaClientTest {
 
-    Tuple<Data, Data> blind(String password);
 
-    Data deblind(Data transformedPassword, Data blindingSecret);
-
-    boolean verify(Data transformedPassword,
-                   Data blindedPassword,
-                   Data tweak,
-                   Data transformationPublicKey,
-                   Data proofC,
-                   Data proofU);
-
-    Data updateDeblindedWithToken(Data deblindedPassword, Data updateToken);
-
-    Data generateSalt();
 }

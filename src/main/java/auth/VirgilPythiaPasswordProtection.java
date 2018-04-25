@@ -34,18 +34,19 @@
 package auth;
 
 import client.PythiaClient;
+import com.virgilsecurity.crypto.VirgilPythia;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.jwt.TokenContext;
 import com.virgilsecurity.sdk.jwt.contract.AccessToken;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 import com.virgilsecurity.sdk.utils.Tuple;
 import com.virgilsecurity.sdk.utils.Validator;
-import crypto.PythiaCrypto;
 import model.Data;
 import model.PythiaConfig;
 import model.PythiaUser;
 import model.TransformResponse;
 import model.exception.TransformVerificationException;
+import model.exception.VirgilPythiaServiceException;
 
 /**
  * .._  _
@@ -57,26 +58,26 @@ import model.exception.TransformVerificationException;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public final class VirgilPythiaAuth implements PythiaAuth {
+public final class VirgilPythiaPasswordProtection implements PythiaPasswordProtection {
     private static final String OPERATION_GET = "get";
 
     private final PythiaConfig config;
     private final PythiaClient pythiaClient;
-    private final PythiaCrypto pythiaCrypto;
+    private final VirgilPythia pythiaCrypto;
     private final AccessTokenProvider accessTokenProvider;
 
-    public VirgilPythiaAuth(PythiaConfig config,
-                            PythiaClient pythiaClient,
-                            PythiaCrypto pythiaCrypto,
-                            AccessTokenProvider accessTokenProvider) {
+    public VirgilPythiaPasswordProtection(PythiaConfig config,
+                                          PythiaClient pythiaClient,
+                                          VirgilPythia pythiaCrypto,
+                                          AccessTokenProvider accessTokenProvider) {
         Validator.checkNullAgrument(config,
-                                    "VirgilPythiaAuth -> 'config' should not be null");
+                                    "VirgilPythiaPasswordProtection -> 'config' should not be null");
         Validator.checkNullAgrument(pythiaClient,
-                                    "VirgilPythiaAuth -> 'pythiaClient' should not be null");
+                                    "VirgilPythiaPasswordProtection -> 'pythiaClient' should not be null");
         Validator.checkNullAgrument(pythiaCrypto,
-                                    "VirgilPythiaAuth -> 'pythiaCrypto' should not be null");
+                                    "VirgilPythiaPasswordProtection -> 'pythiaCrypto' should not be null");
         Validator.checkNullAgrument(accessTokenProvider,
-                                    "VirgilPythiaAuth -> 'accessTokenProvider' should not be null");
+                                    "VirgilPythiaPasswordProtection -> 'accessTokenProvider' should not be null");
 
         this.config = config;
         this.pythiaClient = pythiaClient;
@@ -84,16 +85,9 @@ public final class VirgilPythiaAuth implements PythiaAuth {
         this.accessTokenProvider = accessTokenProvider;
     }
 
-    @Override
-    public PythiaUser changePassword(String newPassword) throws TransformVerificationException, CryptoException {
-        return processPassword(newPassword);
-    }
+    @Override public PythiaUser register(String password)
+            throws CryptoException, TransformVerificationException, VirgilPythiaServiceException {
 
-    @Override public PythiaUser register(String password) throws CryptoException, TransformVerificationException {
-        return processPassword(password);
-    }
-
-    private PythiaUser processPassword(String password) throws CryptoException, TransformVerificationException {
         Tuple<Data, Data> blinded = pythiaCrypto.blind(password);
         Data blindedPassword = blinded.getLeft();
         Data blindingSecret = blinded.getRight();
@@ -126,7 +120,7 @@ public final class VirgilPythiaAuth implements PythiaAuth {
 
     @Override
     public PythiaUser rotateSecret(Integer newVersion, String updateToken, PythiaUser pythiaUser) {
-        Data updateTokenData = new Data(updateToken);
+        Data updateTokenData = Data.fromBase64String(updateToken);
         Data newDeblindedPassword = pythiaCrypto.updateDeblindedWithToken(pythiaUser.getDeblindedPassword(),
                                                                           updateTokenData);
 
@@ -136,7 +130,8 @@ public final class VirgilPythiaAuth implements PythiaAuth {
     @Override
     public boolean authenticate(String password,
                                 PythiaUser pythiaUser,
-                                boolean proof) throws CryptoException, TransformVerificationException {
+                                boolean proof)
+            throws CryptoException, TransformVerificationException, VirgilPythiaServiceException {
 
         TokenContext tokenContext = new TokenContext(OPERATION_GET, false);
         AccessToken accessToken = accessTokenProvider.getToken(tokenContext);

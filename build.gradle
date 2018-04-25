@@ -7,16 +7,21 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 ext {
-    virgil = '5.0.0'
+    virgil = '5.0.1'
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     // Virgil SDK
-    implementation "com.virgilsecurity.sdk:crypto:$virgil"
-    implementation "com.virgilsecurity.sdk:sdk:$virgil"
+//    implementation "com.virgilsecurity.sdk:crypto:$virgil"
+//    implementation "com.virgilsecurity.sdk:sdk:$virgil"
+
+    compile 'com.github.VirgilSecurity.virgil-sdk-java-android:crypto:master'
+    compile 'com.github.VirgilSecurity.virgil-sdk-java-android:sdk:master'
+
 }

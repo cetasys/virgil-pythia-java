@@ -31,11 +31,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package model;
+import client.PythiaClient;
+import com.virgilsecurity.crypto.VirgilPythia;
+import com.virgilsecurity.crypto.VirgilPythiaTransformResult;
+import model.Data;
+import model.TransformResponse;
 
-import com.virgilsecurity.sdk.utils.ConvertionUtils;
-
-import java.util.Arrays;
+import java.util.Random;
 
 /**
  * .._  _
@@ -47,38 +49,33 @@ import java.util.Arrays;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public final class Data {
+public class MockPythiaClient implements PythiaClient {
 
-    private final byte[] data;
+    @Override
+    public TransformResponse transformPassword(Data salt,
+                                               Data blindedPassword,
+                                               Integer version,
+                                               boolean includeProof,
+                                               String token) {
+        Random random = new Random();
+        int lenght = 32;
+        byte[] transformationKeyId = new byte[lenght];
+        random.nextBytes(transformationKeyId);
+        byte[] tweak = new byte[lenght];
+        random.nextBytes(tweak);
+        byte[] pythiaSecret = new byte[lenght];
+        random.nextBytes(pythiaSecret);
+        byte[] pythiaScopeSecret = new byte[lenght];
+        random.nextBytes(pythiaScopeSecret);
 
-    private Data(byte[] data) {
-        this.data = data;
-    }
+        VirgilPythia pythia = new VirgilPythia();
+        VirgilPythiaTransformResult transformResult =
+                pythia.transform(blindedPassword.asBytes(),
+                                 transformationKeyId,
+                                 tweak,
+                                 pythiaSecret,
+                                 pythiaScopeSecret);
 
-    public static Data fromBytes(byte[] data) {
-        return new Data(data);
-    }
-
-    public static Data fromBase64String(String base64Encoded) {
-        return new Data(ConvertionUtils.toBytes(base64Encoded));
-    }
-
-    public String asBase64String() {
-        return ConvertionUtils.toBase64String(data);
-    }
-
-    public byte[] asBytes() {
-        return data;
-    }
-
-    @Override public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Data data1 = (Data) o;
-        return Arrays.equals(data, data1.data);
-    }
-
-    @Override public int hashCode() {
-        return Arrays.hashCode(data);
+        return new TransformResponse(Data.fromBytes(transformResult.transformedPassword()));
     }
 }
