@@ -15,6 +15,16 @@ ext {
     virgil = '5.0.2-SNAPSHOT'
 }
 
+test {
+    systemProperty "ACCOUNT_ID", System.getProperty("ACCOUNT_ID")
+    systemProperty "APP_ID", System.getProperty("APP_ID")
+    systemProperty "API_PRIVATE_KEY", System.getProperty("API_PRIVATE_KEY")
+    systemProperty "API_PUBLIC_KEY", System.getProperty("API_PUBLIC_KEY")
+    systemProperty "API_PUBLIC_KEY_ID", System.getProperty("API_PUBLIC_KEY_ID")
+    systemProperty "PROOF_KEY", System.getProperty("PROOF_KEY")
+    systemProperty "PYTHIA_SERVICE_URL", System.getProperty("PYTHIA_SERVICE_URL")
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 

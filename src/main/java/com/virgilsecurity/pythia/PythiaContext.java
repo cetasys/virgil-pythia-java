@@ -144,7 +144,6 @@ public class PythiaContext {
 				throw new IllegalArgumentException("API key has invalid format", e);
 			}
 
-			// TODO use parametrized VirgilAccessTokenSigner's constructor
 			JwtGenerator generator = new JwtGenerator(this.appId, apiPrivateKey, this.apiPublicKeyIdentifier,
 					TimeSpan.fromTime(1, TimeUnit.HOURS), new VirgilAccessTokenSigner(this.crypto));
 
