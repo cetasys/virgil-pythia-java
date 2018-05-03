@@ -32,9 +32,10 @@
  */
 package com.virgilsecurity.pythia;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.virgilsecurity.pythia.model.exception.ProofKeyNotFoundException;
 import com.virgilsecurity.pythia.model.exception.ProofKeyParseException;
@@ -61,8 +62,17 @@ public class ProofKeys {
 			throw new IllegalArgumentException("No public keys found");
 		}
 
-		this.proofKeys = proofKeys.stream().map(s -> parsePublicKey(s))
-				.sorted(Comparator.comparing(ProofKey::getVersion).reversed()).collect(Collectors.toList());
+		this.proofKeys = new ArrayList<>(proofKeys.size());
+		for (String proofKey : proofKeys) {
+			this.proofKeys.add(parsePublicKey(proofKey));
+		}
+		Collections.sort(this.proofKeys, new Comparator<ProofKey>() {
+
+			@Override
+			public int compare(ProofKey pk1, ProofKey pk2) {
+				return pk2.getVersion() - pk1.getVersion();
+			}
+		});
 	}
 
 	/**
@@ -89,8 +99,12 @@ public class ProofKeys {
 	 *             if key not found.
 	 */
 	public ProofKey getProofKey(int version) {
-		return this.proofKeys.stream().filter(k -> k.getVersion() == version).findFirst()
-				.orElseThrow(() -> new ProofKeyNotFoundException());
+		for (ProofKey proofKey : this.proofKeys) {
+			if (proofKey.getVersion() == version) {
+				return proofKey;
+			}
+		}
+		throw new ProofKeyNotFoundException();
 	}
 
 	private ProofKey parsePublicKey(String publicKeyStr) {

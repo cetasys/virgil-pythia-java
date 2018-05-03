@@ -86,7 +86,7 @@ public class Pythia {
 	 *            the breach proof password.
 	 * @return the update breach proof password.
 	 */
-	BreachProofPassword updateBreachProofPassword(String updateToken, BreachProofPassword breachProofPassword) {
+	public BreachProofPassword updateBreachProofPassword(String updateToken, BreachProofPassword breachProofPassword) {
 		// Verify update token
 		if (StringUtils.isBlank(updateToken)) {
 			throw new IllegalArgumentException("Update token should not be empty");
@@ -126,13 +126,13 @@ public class Pythia {
 	 * Create breach proof password.
 	 * 
 	 * @param password
-	 *            the password.
+	 *            the end user's password.
 	 * @return the new breach proof password.
 	 * @throws CryptoException
 	 * @throws TransformVerificationException
 	 * @throws VirgilPythiaServiceException
 	 */
-	BreachProofPassword createBreachProofPassword(String password)
+	public BreachProofPassword createBreachProofPassword(String password)
 			throws CryptoException, VirgilPythiaServiceException, TransformVerificationException {
 		byte[] salt = this.pythiaCrypto.generateSalt();
 
@@ -174,7 +174,7 @@ public class Pythia {
 	 * @throws TransformVerificationException
 	 * @throws VirgilPythiaServiceException
 	 */
-	boolean verifyBreachProofPassword(String password, BreachProofPassword breachProofPassword, boolean prove)
+	public boolean verifyBreachProofPassword(String password, BreachProofPassword breachProofPassword, boolean prove)
 			throws CryptoException, TransformVerificationException, VirgilPythiaServiceException {
 		TokenContext tokenContext = new TokenContext("pythia", "transform", false);
 		AccessToken accessToken = accessTokenProvider.getToken(tokenContext);

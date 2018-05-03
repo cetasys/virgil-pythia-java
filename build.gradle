@@ -2,13 +2,14 @@ group 'com.virgilsecurity'
 version '0.1-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: "maven"
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.7
 
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url "https://jitpack.io" }
+    //maven { url "https://jitpack.io" }
 }
 
 ext {
@@ -32,8 +33,8 @@ dependencies {
     implementation "com.virgilsecurity.sdk:crypto:$virgil"
     implementation "com.virgilsecurity.sdk:sdk:$virgil"
 
-//    compile 'com.github.VirgilSecurity.virgil-sdk-java-android:crypto:master'
-//    compile 'com.github.VirgilSecurity.virgil-sdk-java-android:sdk:master'
+    //compile 'com.github.VirgilSecurity.virgil-sdk-java-android:crypto:master'
+    //compile 'com.github.VirgilSecurity.virgil-sdk-java-android:sdk:master'
     testCompile 'commons-lang:commons-lang:2.6'
 
 }
