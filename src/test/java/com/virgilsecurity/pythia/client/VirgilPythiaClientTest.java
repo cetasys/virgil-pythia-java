@@ -36,12 +36,6 @@ package com.virgilsecurity.pythia.client;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.virgilsecurity.pythia.ConfigurableTest;
 import com.virgilsecurity.pythia.crypto.BlindResult;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
@@ -57,70 +51,80 @@ import com.virgilsecurity.sdk.jwt.accessProviders.GeneratorJwtProvider;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.Before;
+import org.junit.Test;
+
 /**
+ * Integration tests for {@link VirgilPythiaClient}.
+ * 
  * @author Andrii Iakovenko
  *
  */
 public class VirgilPythiaClientTest extends ConfigurableTest {
 
-    private PythiaCrypto pythiaCrypto;
-    private PythiaClient client;
-    private AccessTokenProvider accessTokenProvider;
-    private String identity;
+  private PythiaCrypto pythiaCrypto;
+  private PythiaClient client;
+  private AccessTokenProvider accessTokenProvider;
+  private String identity;
 
-    @Before
-    public void setup() {
-        String baseUrl = getPythiaServiceUrl();
-        if (StringUtils.isBlank(baseUrl)) {
-            this.client = new VirgilPythiaClient();
-        } else {
-            this.client = new VirgilPythiaClient(baseUrl);
-        }
-
-        this.pythiaCrypto = new VirgilPythiaCrypto();
-
-        this.identity = "pythia_user_" + UUID.randomUUID().toString();
-        JwtGenerator generator = new JwtGenerator(getAppId(), getApiPrivateKey(), getApiPublicKeyId(),
-                TimeSpan.fromTime(1, TimeUnit.HOURS), new VirgilAccessTokenSigner());
-        this.accessTokenProvider = new GeneratorJwtProvider(generator, identity);
+  @Before
+  public void setup() {
+    String baseUrl = getPythiaServiceUrl();
+    if (StringUtils.isBlank(baseUrl)) {
+      this.client = new VirgilPythiaClient();
+    } else {
+      this.client = new VirgilPythiaClient(baseUrl);
     }
 
-    @Test
-    public void transformPassword_withProof() throws VirgilPythiaServiceException, CryptoException {
-        byte[] salt = this.pythiaCrypto.generateSalt();
-        String password = UUID.randomUUID().toString();
-        int version = 1;
-        boolean includeProof = true;
+    this.pythiaCrypto = new VirgilPythiaCrypto();
 
-        BlindResult blindResult = this.pythiaCrypto.blind(password);
+    this.identity = "pythia_user_" + UUID.randomUUID().toString();
+    JwtGenerator generator = new JwtGenerator(getAppId(), getApiPrivateKey(), getApiPublicKeyId(),
+        TimeSpan.fromTime(1, TimeUnit.HOURS), new VirgilAccessTokenSigner());
+    this.accessTokenProvider = new GeneratorJwtProvider(generator, identity);
+  }
 
-        TransformResponse transformResponse = this.client.transformPassword(salt, blindResult.getBlindedPassword(),
-                version, includeProof,
-                this.accessTokenProvider.getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
-                        .stringRepresentation());
-        assertNotNull(transformResponse);
-        assertNotEmpty("Transformed password", transformResponse.getTransformedPassword());
-        assertNotNull(transformResponse.getProof());
-        assertNotEmpty("Proof value C", transformResponse.getProof().getC());
-        assertNotEmpty("Proof value U", transformResponse.getProof().getU());
-    }
+  @Test
+  public void transformPassword_withProof() throws VirgilPythiaServiceException, CryptoException {
+    byte[] salt = this.pythiaCrypto.generateSalt();
+    String password = UUID.randomUUID().toString();
+    int version = 1;
+    boolean includeProof = true;
 
-    @Test
-    public void transformPassword_noProof() throws VirgilPythiaServiceException, CryptoException {
-        byte[] salt = this.pythiaCrypto.generateSalt();
-        String password = UUID.randomUUID().toString();
-        int version = 1;
-        boolean includeProof = false;
+    BlindResult blindResult = this.pythiaCrypto.blind(password);
 
-        BlindResult blindResult = this.pythiaCrypto.blind(password);
+    TransformResponse transformResponse = this.client.transformPassword(salt,
+        blindResult.getBlindedPassword(), version, includeProof,
+        this.accessTokenProvider
+            .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+            .stringRepresentation());
+    assertNotNull(transformResponse);
+    assertNotEmpty("Transformed password", transformResponse.getTransformedPassword());
+    assertNotNull(transformResponse.getProof());
+    assertNotEmpty("Proof value C", transformResponse.getProof().getC());
+    assertNotEmpty("Proof value U", transformResponse.getProof().getU());
+  }
 
-        TransformResponse transformResponse = this.client.transformPassword(salt, blindResult.getBlindedPassword(),
-                version, includeProof,
-                this.accessTokenProvider.getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
-                        .stringRepresentation());
-        assertNotNull(transformResponse);
-        assertNotEmpty("Transformed password", transformResponse.getTransformedPassword());
-        assertNull(transformResponse.getProof());
-    }
+  @Test
+  public void transformPassword_noProof() throws VirgilPythiaServiceException, CryptoException {
+    byte[] salt = this.pythiaCrypto.generateSalt();
+    String password = UUID.randomUUID().toString();
+    int version = 1;
+    boolean includeProof = false;
+
+    BlindResult blindResult = this.pythiaCrypto.blind(password);
+
+    TransformResponse transformResponse = this.client.transformPassword(salt,
+        blindResult.getBlindedPassword(), version, includeProof,
+        this.accessTokenProvider
+            .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+            .stringRepresentation());
+    assertNotNull(transformResponse);
+    assertNotEmpty("Transformed password", transformResponse.getTransformedPassword());
+    assertNull(transformResponse.getProof());
+  }
 
 }

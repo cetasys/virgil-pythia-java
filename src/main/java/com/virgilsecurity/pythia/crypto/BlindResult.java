@@ -30,47 +30,50 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package com.virgilsecurity.pythia.crypto;
 
 /**
+ * The result of blind operation.
+ * 
  * @author Andrii Iakovenko
  *
  */
 public class BlindResult {
 
-    private byte[] blindedPassword;
-    private byte[] blindingSecret;
+  private byte[] blindedPassword;
+  private byte[] blindingSecret;
 
-    /**
-     * Create a new instance of {@link BlindResult}.
-     *
-     * @param blindedPassword
-     *            the password obfuscated into a pseudo-random string.
-     * @param blindingSecret
-     *            the secret random used to blind user's password.
-     */
-    public BlindResult(byte[] blindedPassword, byte[] blindingSecret) {
-        super();
-        this.blindedPassword = blindedPassword;
-        this.blindingSecret = blindingSecret;
-    }
+  /**
+   * Create a new instance of {@link BlindResult}.
+   *
+   * @param blindedPassword
+   *          the password obfuscated into a pseudo-random string.
+   * @param blindingSecret
+   *          the secret random used to blind user's password.
+   */
+  public BlindResult(byte[] blindedPassword, byte[] blindingSecret) {
+    super();
+    this.blindedPassword = blindedPassword;
+    this.blindingSecret = blindingSecret;
+  }
 
-    /**
-     * Get the password obfuscated into a pseudo-random string.
-     * 
-     * @return the password obfuscated into a pseudo-random string.
-     */
-    public byte[] getBlindedPassword() {
-        return blindedPassword;
-    }
+  /**
+   * Get the password obfuscated into a pseudo-random string.
+   * 
+   * @return the password obfuscated into a pseudo-random string.
+   */
+  public byte[] getBlindedPassword() {
+    return blindedPassword;
+  }
 
-    /**
-     * Get the secret random used to blind user's password.
-     * 
-     * @return the secret random used to blind user's password.
-     */
-    public byte[] getBlindingSecret() {
-        return blindingSecret;
-    }
+  /**
+   * Get the secret random used to blind user's password.
+   * 
+   * @return the secret random used to blind user's password.
+   */
+  public byte[] getBlindingSecret() {
+    return blindingSecret;
+  }
 
 }

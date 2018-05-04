@@ -30,6 +30,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package com.virgilsecurity.pythia.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -37,6 +38,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.virgilsecurity.crypto.VirgilPythia;
+import com.virgilsecurity.crypto.VirgilPythiaTransformResult;
+import com.virgilsecurity.crypto.VirgilPythiaTransformationKeyPair;
 
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -50,101 +57,98 @@ import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.virgilsecurity.crypto.VirgilPythia;
-import com.virgilsecurity.crypto.VirgilPythiaTransformResult;
-import com.virgilsecurity.crypto.VirgilPythiaTransformationKeyPair;
-
 /**
+ * Unit tests for {@link VirgilPythiaCrypto}.
+ * 
  * @author Andrii Iakovenko
  *
  */
 public class VirgilPythiaCryptoTest {
 
-    private PythiaCrypto pythiaCrypto;
-    private VirgilPythia pythia;
-    private JsonObject sampleJson;
+  private PythiaCrypto pythiaCrypto;
+  private VirgilPythia pythia;
+  private JsonObject sampleJson;
 
-    @Before
-    public void setup() {
-        this.pythiaCrypto = new VirgilPythiaCrypto();
-        this.pythia = new VirgilPythia();
+  @Before
+  public void setup() {
+    this.pythiaCrypto = new VirgilPythiaCrypto();
+    this.pythia = new VirgilPythia();
 
-        sampleJson = (JsonObject) new JsonParser().parse(new InputStreamReader(this.getClass().getClassLoader()
-                .getResourceAsStream("com/virgilsecurity/pythia/crypto/pythia-crypto.json")));
-    }
+    sampleJson = (JsonObject) new JsonParser()
+        .parse(new InputStreamReader(this.getClass().getClassLoader()
+            .getResourceAsStream("com/virgilsecurity/pythia/crypto/pythia-crypto.json")));
+  }
 
-    @Test
-    public void blind() {
-        String kPassword = get("kPassword");
+  @Test
+  public void blind() {
+    String password = get("kPassword");
 
-        Set<BlindResult> blindResults = new HashSet<>();
-        for (int i = 0; i < 10; i++) {
-            BlindResult blindResult = this.pythiaCrypto.blind(kPassword);
+    Set<BlindResult> blindResults = new HashSet<>();
+    for (int i = 0; i < 10; i++) {
+      BlindResult blindResult = this.pythiaCrypto.blind(password);
 
-            // blindResult should be different on each iteration
-            for (BlindResult res : blindResults) {
-                if (ArrayUtils.isEquals(res.getBlindedPassword(), blindResult.getBlindedPassword())
-                        && ArrayUtils.isEquals(res.getBlindingSecret(), blindResult.getBlindingSecret())) {
-                    fail();
-                }
-            }
-            blindResults.add(blindResult);
+      // blindResult should be different on each iteration
+      for (BlindResult res : blindResults) {
+        if (ArrayUtils.isEquals(res.getBlindedPassword(), blindResult.getBlindedPassword())
+            && ArrayUtils.isEquals(res.getBlindingSecret(), blindResult.getBlindingSecret())) {
+          fail();
         }
+      }
+      blindResults.add(blindResult);
     }
+  }
 
-    @Test
-    public void deblind() {
-        String kPassword = get("kPassword");
-        byte[] transformationKeyID = getBytes("kTransformationKeyID");
-        byte[] pythiaSecret = getBytes("kPythiaSecret");
-        byte[] pythiaScopeSecret = getBytes("kPythiaScopeSecret");
-        byte[] kTweek = getBytes("kTweek");
-        byte[] kDeblindedPassword = getHexBytes("kDeblindedPassword");
+  @Test
+  public void deblind() {
+    String password = get("kPassword");
+    byte[] transformationKeyId = getBytes("kTransformationKeyID");
+    byte[] pythiaSecret = getBytes("kPythiaSecret");
+    byte[] pythiaScopeSecret = getBytes("kPythiaScopeSecret");
+    byte[] tweek = getBytes("kTweek");
+    byte[] deblindedPassword = getHexBytes("kDeblindedPassword");
 
-        BlindResult blindResult = this.pythiaCrypto.blind(kPassword);
+    BlindResult blindResult = this.pythiaCrypto.blind(password);
 
-        VirgilPythiaTransformationKeyPair transformationKeyPair = this.pythia
-                .computeTransformationKeyPair(transformationKeyID, pythiaSecret, pythiaScopeSecret);
-        VirgilPythiaTransformResult transformResult = pythia.transform(blindResult.getBlindedPassword(), kTweek,
-                transformationKeyPair.privateKey());
-        byte[] deblindResult = this.pythiaCrypto.deblind(transformResult.transformedPassword(),
-                blindResult.getBlindingSecret());
-        assertArrayEquals(kDeblindedPassword, deblindResult);
-    }
+    VirgilPythiaTransformationKeyPair transformationKeyPair = this.pythia
+        .computeTransformationKeyPair(transformationKeyId, pythiaSecret, pythiaScopeSecret);
+    VirgilPythiaTransformResult transformResult = pythia.transform(blindResult.getBlindedPassword(),
+        tweek, transformationKeyPair.privateKey());
+    byte[] deblindResult = this.pythiaCrypto.deblind(transformResult.transformedPassword(),
+        blindResult.getBlindingSecret());
+    assertArrayEquals(deblindedPassword, deblindResult);
+  }
 
-    @Test
-    public void verify() {
-        // TODO
-    }
+  @Test
+  public void verify() {
+    // TODO
+  }
 
-    @Test
-    public void updateDeblinded() {
-        // TODO
-    }
+  @Test
+  public void updateDeblinded() {
+    // TODO
+  }
 
-    @Test
-    public void generateSalt() {
-        byte[] salt1 = this.pythiaCrypto.generateSalt();
-        assertNotNull(salt1);
-        assertEquals(32, salt1.length);
+  @Test
+  public void generateSalt() {
+    byte[] salt1 = this.pythiaCrypto.generateSalt();
+    assertNotNull(salt1);
+    assertEquals(32, salt1.length);
 
-        byte[] salt2 = this.pythiaCrypto.generateSalt();
-        assertNotNull(salt2);
-        assertEquals(32, salt2.length);
-        assertFalse(Arrays.equals(salt1, salt2));
-    }
+    byte[] salt2 = this.pythiaCrypto.generateSalt();
+    assertNotNull(salt2);
+    assertEquals(32, salt2.length);
+    assertFalse(Arrays.equals(salt1, salt2));
+  }
 
-    private String get(String key) {
-        return this.sampleJson.get(key).getAsString();
-    }
+  private String get(String key) {
+    return this.sampleJson.get(key).getAsString();
+  }
 
-    private byte[] getBytes(String key) {
-        return this.sampleJson.get(key).getAsString().getBytes(StandardCharsets.UTF_8);
-    }
+  private byte[] getBytes(String key) {
+    return this.sampleJson.get(key).getAsString().getBytes(StandardCharsets.UTF_8);
+  }
 
-    private byte[] getHexBytes(String key) {
-        return DatatypeConverter.parseHexBinary(this.sampleJson.get(key).getAsString());
-    }
+  private byte[] getHexBytes(String key) {
+    return DatatypeConverter.parseHexBinary(this.sampleJson.get(key).getAsString());
+  }
 }

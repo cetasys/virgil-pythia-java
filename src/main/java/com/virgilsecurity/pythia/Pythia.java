@@ -33,8 +33,6 @@
 
 package com.virgilsecurity.pythia;
 
-import java.util.Arrays;
-
 import com.virgilsecurity.pythia.client.PythiaClient;
 import com.virgilsecurity.pythia.crypto.BlindResult;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
@@ -49,6 +47,8 @@ import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
+import java.util.Arrays;
+
 /**
  * This class is responsible for Pythia password protection interactions.
  * 
@@ -57,148 +57,159 @@ import com.virgilsecurity.sdk.utils.StringUtils;
  */
 public class Pythia {
 
-    private ProofKeys proofKeys;
-    private PythiaCrypto pythiaCrypto;
-    private PythiaClient pythiaClient;
-    private AccessTokenProvider accessTokenProvider;
+  private ProofKeys proofKeys;
+  private PythiaCrypto pythiaCrypto;
+  private PythiaClient pythiaClient;
+  private AccessTokenProvider accessTokenProvider;
 
-    /**
-     * Create a new instance of {@link Pythia}.
-     *
-     * @param context
-     *            the Pythia-related configuration.
-     */
-    public Pythia(PythiaContext context) {
-        if (context == null) {
-            throw new IllegalArgumentException("Context should be set");
-        }
-        this.proofKeys = context.getProofKeys();
-        this.pythiaCrypto = context.getPythiaCrypto();
-        this.pythiaClient = context.getPythiaClient();
-        this.accessTokenProvider = context.getAccessTokenProvider();
+  /**
+   * Create a new instance of {@link Pythia}.
+   *
+   * @param context
+   *          the Pythia-related configuration.
+   */
+  public Pythia(PythiaContext context) {
+    if (context == null) {
+      throw new IllegalArgumentException("Context should be set");
+    }
+    this.proofKeys = context.getProofKeys();
+    this.pythiaCrypto = context.getPythiaCrypto();
+    this.pythiaClient = context.getPythiaClient();
+    this.accessTokenProvider = context.getAccessTokenProvider();
+  }
+
+  /**
+   * Update an existing Pythia breach proof password.
+   * 
+   * @param updateToken
+   *          the update token. You can get it at developer dashboard.
+   * @param breachProofPassword
+   *          the breach proof password.
+   * @return the update breach proof password.
+   */
+  public BreachProofPassword updateBreachProofPassword(String updateToken,
+      BreachProofPassword breachProofPassword) {
+    // Verify update token
+    if (StringUtils.isBlank(updateToken)) {
+      throw new IllegalArgumentException("Update token should not be empty");
+    }
+    if (breachProofPassword == null) {
+      throw new IllegalArgumentException("Breach proof password should be set");
+    }
+    String[] parts = updateToken.split("\\.");
+    if (parts.length != 4 || !parts[0].equals("UT")) {
+      throw new IllegalArgumentException("Update token has invalid format");
+    }
+    int prevVersion = 0;
+    int nextVersion = 0;
+    byte[] updateTokenData;
+    try {
+      prevVersion = Integer.parseInt(parts[1]);
+      nextVersion = Integer.parseInt(parts[2]);
+      updateTokenData = Base64.decode(parts[3]);
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Update token has invalid format");
     }
 
-    /**
-     * Update an existing Pythia breach proof password.
-     * 
-     * @param updateToken
-     *            the update token. You can get it at developer dashboard.
-     * @param breachProofPassword
-     *            the breach proof password.
-     * @return the update breach proof password.
-     */
-    public BreachProofPassword updateBreachProofPassword(String updateToken, BreachProofPassword breachProofPassword) {
-        // Verify update token
-        if (StringUtils.isBlank(updateToken)) {
-            throw new IllegalArgumentException("Update token should not be empty");
-        }
-        if (breachProofPassword == null) {
-            throw new IllegalArgumentException("Breach proof password should be set");
-        }
-        String[] parts = updateToken.split("\\.");
-        if (parts.length != 4 || !parts[0].equals("UT")) {
-            throw new IllegalArgumentException("Update token has invalid format");
-        }
-        int prevVersion = 0;
-        int nextVersion = 0;
-        byte[] updateTokenData;
-        try {
-            prevVersion = Integer.parseInt(parts[1]);
-            nextVersion = Integer.parseInt(parts[2]);
-            updateTokenData = Base64.decode(parts[3]);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Update token has invalid format");
-        }
-
-        if (nextVersion == breachProofPassword.getVersion()) {
-            throw new IllegalArgumentException("Already migrated");
-        }
-        if (prevVersion != breachProofPassword.getVersion()) {
-            throw new IllegalArgumentException("Wrong breach proof password version");
-        }
-
-        byte[] newDeblindedPassword = this.pythiaCrypto.updateDeblinded(breachProofPassword.getDeblindedPassword(),
-                updateTokenData);
-
-        return new BreachProofPassword(breachProofPassword.getSalt(), newDeblindedPassword, nextVersion);
+    if (nextVersion == breachProofPassword.getVersion()) {
+      throw new IllegalArgumentException("Already migrated");
+    }
+    if (prevVersion != breachProofPassword.getVersion()) {
+      throw new IllegalArgumentException("Wrong breach proof password version");
     }
 
-    /**
-     * Create breach proof password.
-     * 
-     * @param password
-     *            the end user's password.
-     * @return the new breach proof password.
-     * @throws CryptoException
-     * @throws TransformVerificationException
-     * @throws VirgilPythiaServiceException
-     */
-    public BreachProofPassword createBreachProofPassword(String password)
-            throws CryptoException, VirgilPythiaServiceException, TransformVerificationException {
-        byte[] salt = this.pythiaCrypto.generateSalt();
+    byte[] newDeblindedPassword = this.pythiaCrypto
+        .updateDeblinded(breachProofPassword.getDeblindedPassword(), updateTokenData);
 
-        BlindResult blinded = this.pythiaCrypto.blind(password);
-        byte[] blindedPassword = blinded.getBlindedPassword();
-        byte[] blindingSecret = blinded.getBlindingSecret();
+    return new BreachProofPassword(breachProofPassword.getSalt(), newDeblindedPassword,
+        nextVersion);
+  }
 
-        ProofKey latestProofKey = this.proofKeys.getCurrentKey();
+  /**
+   * Create breach proof password.
+   * 
+   * @param password
+   *          the end user's password.
+   * @return the new breach proof password.
+   * @throws CryptoException
+   *           if some error occurred during crypto operation.
+   * @throws TransformVerificationException
+   *           if transform response doesn't pass validation/
+   * @throws VirgilPythiaServiceException
+   *           if Pythia service returned an error.
+   */
+  public BreachProofPassword createBreachProofPassword(String password)
+      throws CryptoException, VirgilPythiaServiceException, TransformVerificationException {
+    byte[] salt = this.pythiaCrypto.generateSalt();
 
-        TokenContext tokenContext = new TokenContext("pythia-java", "transform", false, "pythia");
-        AccessToken accessToken = accessTokenProvider.getToken(tokenContext);
-        TransformResponse transformResponse = this.pythiaClient.transformPassword(salt, blindedPassword,
-                latestProofKey.getVersion(), true, accessToken.stringRepresentation());
+    BlindResult blinded = this.pythiaCrypto.blind(password);
+    byte[] blindedPassword = blinded.getBlindedPassword();
+    byte[] blindingSecret = blinded.getBlindingSecret();
 
-        boolean isTransformVerified = pythiaCrypto.verify(transformResponse.getTransformedPassword(), blindedPassword,
-                salt, latestProofKey.getData(), transformResponse.getProof().getC(),
-                transformResponse.getProof().getU());
+    ProofKey latestProofKey = this.proofKeys.getCurrentKey();
 
-        if (!isTransformVerified) {
-            throw new TransformVerificationException();
-        }
+    TokenContext tokenContext = new TokenContext("pythia-java", "transform", false, "pythia");
+    AccessToken accessToken = accessTokenProvider.getToken(tokenContext);
+    TransformResponse transformResponse = this.pythiaClient.transformPassword(salt, blindedPassword,
+        latestProofKey.getVersion(), true, accessToken.stringRepresentation());
 
-        byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResponse.getTransformedPassword(),
-                blindingSecret);
+    boolean isTransformVerified = pythiaCrypto.verify(transformResponse.getTransformedPassword(),
+        blindedPassword, salt, latestProofKey.getData(), transformResponse.getProof().getC(),
+        transformResponse.getProof().getU());
 
-        return new BreachProofPassword(salt, deblindedPassword, latestProofKey.getVersion());
+    if (!isTransformVerified) {
+      throw new TransformVerificationException();
     }
 
-    /**
-     * Verify an existing breach proof password.
-     * 
-     * @param password
-     *            the password.
-     * @param breachProofPassword
-     *            the breach proof password.
-     * @param prove
-     * @return {@code true} if password corresponds to breach proof password.
-     * @throws CryptoException
-     * @throws TransformVerificationException
-     * @throws VirgilPythiaServiceException
-     */
-    public boolean verifyBreachProofPassword(String password, BreachProofPassword breachProofPassword, boolean prove)
-            throws CryptoException, TransformVerificationException, VirgilPythiaServiceException {
-        TokenContext tokenContext = new TokenContext("pythia-java", "transform", false, "pythia");
-        AccessToken accessToken = accessTokenProvider.getToken(tokenContext);
-        BlindResult blinded = pythiaCrypto.blind(password);
-        byte[] blindedPassword = blinded.getBlindedPassword();
-        byte[] blindingSecret = blinded.getBlindingSecret();
-        ProofKey latestProofKey = this.proofKeys.getProofKey(breachProofPassword.getVersion());
+    byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResponse.getTransformedPassword(),
+        blindingSecret);
 
-        TransformResponse transformResponse = this.pythiaClient.transformPassword(breachProofPassword.getSalt(),
-                blindedPassword, breachProofPassword.getVersion(), prove, accessToken.stringRepresentation());
+    return new BreachProofPassword(salt, deblindedPassword, latestProofKey.getVersion());
+  }
 
-        if (prove) {
-            boolean isTransformVerified = pythiaCrypto.verify(transformResponse.getTransformedPassword(),
-                    blindedPassword, breachProofPassword.getSalt(), latestProofKey.getData(),
-                    transformResponse.getProof().getC(), transformResponse.getProof().getU());
-            if (!isTransformVerified) {
-                throw new TransformVerificationException();
-            }
-        }
+  /**
+   * Verify an existing breach proof password.
+   * 
+   * @param password
+   *          the password.
+   * @param breachProofPassword
+   *          the breach proof password.
+   * @param prove
+   *          the proove flag.
+   * @return {@code true} if password corresponds to breach proof password.
+   * @throws CryptoException
+   *           if some error occurred during crypto operation.
+   * @throws TransformVerificationException
+   *           if transform response doesn't pass validation/
+   * @throws VirgilPythiaServiceException
+   *           if Pythia service returned an error.
+   */
+  public boolean verifyBreachProofPassword(String password, BreachProofPassword breachProofPassword,
+      boolean prove)
+      throws CryptoException, TransformVerificationException, VirgilPythiaServiceException {
+    TokenContext tokenContext = new TokenContext("pythia-java", "transform", false, "pythia");
+    AccessToken accessToken = accessTokenProvider.getToken(tokenContext);
+    BlindResult blinded = pythiaCrypto.blind(password);
+    byte[] blindedPassword = blinded.getBlindedPassword();
+    byte[] blindingSecret = blinded.getBlindingSecret();
+    ProofKey latestProofKey = this.proofKeys.getProofKey(breachProofPassword.getVersion());
 
-        byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResponse.getTransformedPassword(),
-                blindingSecret);
+    TransformResponse transformResponse = this.pythiaClient.transformPassword(
+        breachProofPassword.getSalt(), blindedPassword, breachProofPassword.getVersion(), prove,
+        accessToken.stringRepresentation());
 
-        return Arrays.equals(deblindedPassword, breachProofPassword.getDeblindedPassword());
+    if (prove) {
+      boolean isTransformVerified = pythiaCrypto.verify(transformResponse.getTransformedPassword(),
+          blindedPassword, breachProofPassword.getSalt(), latestProofKey.getData(),
+          transformResponse.getProof().getC(), transformResponse.getProof().getU());
+      if (!isTransformVerified) {
+        throw new TransformVerificationException();
+      }
     }
+
+    byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResponse.getTransformedPassword(),
+        blindingSecret);
+
+    return Arrays.equals(deblindedPassword, breachProofPassword.getDeblindedPassword());
+  }
 }

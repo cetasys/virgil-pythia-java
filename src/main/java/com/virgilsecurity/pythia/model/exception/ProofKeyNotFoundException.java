@@ -8,6 +8,6 @@ package com.virgilsecurity.pythia.model.exception;
  */
 public class ProofKeyNotFoundException extends RuntimeException {
 
-    private static final long serialVersionUID = -9158397431024566306L;
+  private static final long serialVersionUID = -9158397431024566306L;
 
 }

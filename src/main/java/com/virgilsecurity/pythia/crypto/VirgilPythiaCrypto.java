@@ -30,90 +30,90 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.virgilsecurity.pythia.crypto;
 
-import java.util.Random;
+package com.virgilsecurity.pythia.crypto;
 
 import com.virgilsecurity.crypto.VirgilPythia;
 import com.virgilsecurity.crypto.VirgilPythiaBlindResult;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
 
+import java.util.Random;
+
 /**
+ * Virgil implementation of all crypto operation needed by Pythia.
+ * 
  * @author Andrii Iakovenko
  *
  */
 public class VirgilPythiaCrypto implements PythiaCrypto {
 
-    private VirgilPythia virgilPythia;
-    private Random random;
+  private VirgilPythia virgilPythia;
+  private Random random;
 
-    /**
-     * Create a new instance of {@link VirgilPythiaCrypto}.
-     *
-     */
-    public VirgilPythiaCrypto() {
-        this.virgilPythia = new VirgilPythia();
-        this.random = new Random();
-    }
+  /**
+   * Create a new instance of {@link VirgilPythiaCrypto}.
+   *
+   */
+  public VirgilPythiaCrypto() {
+    this.virgilPythia = new VirgilPythia();
+    this.random = new Random();
+  }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.virgilsecurity.pythia.crypto.PythiaCrypto#blind(java.lang.String)
-     */
-    @Override
-    public BlindResult blind(String password) {
-        VirgilPythiaBlindResult blindResult = this.virgilPythia.blind(ConvertionUtils.toBytes(password));
-        return new BlindResult(blindResult.blindedPassword(), blindResult.blindingSecret());
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.virgilsecurity.pythia.crypto.PythiaCrypto#blind(java.lang.String)
+   */
+  @Override
+  public BlindResult blind(String password) {
+    VirgilPythiaBlindResult blindResult = this.virgilPythia
+        .blind(ConvertionUtils.toBytes(password));
+    return new BlindResult(blindResult.blindedPassword(), blindResult.blindingSecret());
+  }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.virgilsecurity.pythia.crypto.PythiaCrypto#deblind(byte[],
-     * byte[])
-     */
-    @Override
-    public byte[] deblind(byte[] transformedPassword, byte[] blindingSecret) {
-        return this.virgilPythia.deblind(transformedPassword, blindingSecret);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.virgilsecurity.pythia.crypto.PythiaCrypto#deblind(byte[], byte[])
+   */
+  @Override
+  public byte[] deblind(byte[] transformedPassword, byte[] blindingSecret) {
+    return this.virgilPythia.deblind(transformedPassword, blindingSecret);
+  }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.virgilsecurity.pythia.crypto.PythiaCrypto#verify(byte[], byte[],
-     * byte[], byte[], byte[], byte[])
-     */
-    @Override
-    public boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak,
-            byte[] transformationPublicKey, byte[] proofC, byte[] proofU) {
-        return this.virgilPythia.verify(transformedPassword, blindedPassword, tweak, transformationPublicKey, proofC,
-                proofU);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.virgilsecurity.pythia.crypto.PythiaCrypto#verify(byte[], byte[], byte[], byte[],
+   * byte[], byte[])
+   */
+  @Override
+  public boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak,
+      byte[] transformationPublicKey, byte[] proofC, byte[] proofU) {
+    return this.virgilPythia.verify(transformedPassword, blindedPassword, tweak,
+        transformationPublicKey, proofC, proofU);
+  }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.virgilsecurity.pythia.crypto.PythiaCrypto#updateDeblinded(byte[],
-     * byte[])
-     */
-    @Override
-    public byte[] updateDeblinded(byte[] deblindedPassword, byte[] updateToken) {
-        return this.virgilPythia.updateDeblindedWithToken(deblindedPassword, updateToken);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.virgilsecurity.pythia.crypto.PythiaCrypto#updateDeblinded(byte[], byte[])
+   */
+  @Override
+  public byte[] updateDeblinded(byte[] deblindedPassword, byte[] updateToken) {
+    return this.virgilPythia.updateDeblindedWithToken(deblindedPassword, updateToken);
+  }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.virgilsecurity.pythia.crypto.PythiaCrypto#generateSalt()
-     */
-    @Override
-    public byte[] generateSalt() {
-        byte[] rndBytes = new byte[32];
-        random.nextBytes(rndBytes);
-        return rndBytes;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.virgilsecurity.pythia.crypto.PythiaCrypto#generateSalt()
+   */
+  @Override
+  public byte[] generateSalt() {
+    byte[] rndBytes = new byte[32];
+    random.nextBytes(rndBytes);
+    return rndBytes;
+  }
 
 }

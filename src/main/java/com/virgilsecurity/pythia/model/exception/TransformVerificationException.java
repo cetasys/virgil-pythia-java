@@ -34,30 +34,52 @@
 package com.virgilsecurity.pythia.model.exception;
 
 /**
+ * This exception occurred if transform result doesn't pass validation.
+ * 
  * @author Danylo Oliinyk
  *
  */
 public class TransformVerificationException extends Exception {
 
-    private static final long serialVersionUID = -8483708234360502576L;
+  private static final long serialVersionUID = -8483708234360502576L;
 
-    public TransformVerificationException() {
-    }
+  /**
+   * Create a new instance of {@link TransformVerificationException}.
+   *
+   */
+  public TransformVerificationException() {
+  }
 
-    public TransformVerificationException(String message) {
-        super(message);
-    }
+  /**
+   * Create a new instance of {@link TransformVerificationException}.
+   *
+   * @param message
+   *          the detail message.
+   */
+  public TransformVerificationException(String message) {
+    super(message);
+  }
 
-    public TransformVerificationException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  /**
+   * Create a new instance of {@link TransformVerificationException}.
+   *
+   * @param message
+   *          the detail message.
+   * @param cause
+   *          the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   */
+  public TransformVerificationException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public TransformVerificationException(Throwable cause) {
-        super(cause);
-    }
+  /**
+   * Create a new instance of {@link TransformVerificationException}.
+   *
+   * @param cause
+   *          the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   */
+  public TransformVerificationException(Throwable cause) {
+    super(cause);
+  }
 
-    public TransformVerificationException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

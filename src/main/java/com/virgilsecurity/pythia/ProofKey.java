@@ -30,6 +30,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package com.virgilsecurity.pythia;
 
 /**
@@ -40,40 +41,40 @@ package com.virgilsecurity.pythia;
  */
 public class ProofKey {
 
-    private byte[] data;
+  private byte[] data;
 
-    private int version;
+  private int version;
 
-    /**
-     * Create a new instance of {@link ProofKey}.
-     * 
-     * @param data
-     *            the key data.
-     * @param version
-     *            the key version.
-     */
-    public ProofKey(byte[] data, int version) {
-        super();
-        this.data = data;
-        this.version = version;
-    }
+  /**
+   * Create a new instance of {@link ProofKey}.
+   * 
+   * @param data
+   *          the key data.
+   * @param version
+   *          the key version.
+   */
+  public ProofKey(byte[] data, int version) {
+    super();
+    this.data = data;
+    this.version = version;
+  }
 
-    /**
-     * Get the key data.
-     * 
-     * @return the data
-     */
-    public byte[] getData() {
-        return data;
-    }
+  /**
+   * Get the key data.
+   * 
+   * @return the data
+   */
+  public byte[] getData() {
+    return data;
+  }
 
-    /**
-     * Get the key version.
-     * 
-     * @return the version
-     */
-    public int getVersion() {
-        return version;
-    }
+  /**
+   * Get the key version.
+   * 
+   * @return the version
+   */
+  public int getVersion() {
+    return version;
+  }
 
 }

@@ -43,47 +43,51 @@ import com.google.gson.annotations.SerializedName;
  */
 public final class Proof {
 
-    @SerializedName("value_c")
-    private byte[] c;
+  @SerializedName("value_c")
+  private byte[] proofC;
 
-    @SerializedName("value_u")
-    private byte[] u;
+  @SerializedName("value_u")
+  private byte[] proofU;
 
-    /**
-     * Create a new instance of {@link Proof}.
-     *
-     */
-    public Proof() {
-    }
+  /**
+   * Create a new instance of {@link Proof}.
+   *
+   */
+  public Proof() {
+  }
 
-    /**
-     * Create a new instance of {@link Proof}.
-     *
-     * @param c
-     *            a first part of proof that transformedPassword was created
-     *            using transformationPrivateKey.
-     * @param u
-     *            a second part of proof that transformedPassword was created
-     *            using transformationPrivateKey.
-     */
-    public Proof(byte[] c, byte[] u) {
-        this.c = c;
-        this.u = u;
-    }
+  /**
+   * Create a new instance of {@link Proof}.
+   *
+   * @param c
+   *          a first part of proof that transformedPassword was created using
+   *          transformationPrivateKey.
+   * @param u
+   *          a second part of proof that transformedPassword was created using
+   *          transformationPrivateKey.
+   */
+  public Proof(byte[] c, byte[] u) {
+    this.proofC = c;
+    this.proofU = u;
+  }
 
-    /**
-     * @return a first part of proof that transformedPassword was created using
-     *         transformationPrivateKey.
-     */
-    public byte[] getC() {
-        return c;
-    }
+  /**
+   * Get the proof C value.
+   * 
+   * @return a first part of proof that transformedPassword was created using
+   *         transformationPrivateKey.
+   */
+  public byte[] getC() {
+    return proofC;
+  }
 
-    /**
-     * @return a second part of proof that transformedPassword was created using
-     *         transformationPrivateKey.
-     */
-    public byte[] getU() {
-        return u;
-    }
+  /**
+   * Get the proof U value.
+   * 
+   * @return a second part of proof that transformedPassword was created using
+   *         transformationPrivateKey.
+   */
+  public byte[] getU() {
+    return proofU;
+  }
 }

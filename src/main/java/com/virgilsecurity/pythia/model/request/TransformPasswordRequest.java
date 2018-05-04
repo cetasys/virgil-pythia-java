@@ -37,92 +37,103 @@ import com.google.gson.annotations.SerializedName;
 import com.virgilsecurity.sdk.utils.Validator;
 
 /**
+ * This class represents a response from Virgil Pythia service.
+ * 
  * @author Danylo Oliinyk
  *
  */
 public class TransformPasswordRequest {
 
-    @SerializedName("blinded_password")
-    private byte[] blindedPassword;
+  @SerializedName("blinded_password")
+  private byte[] blindedPassword;
 
-    @SerializedName("version")
-    private int version;
+  @SerializedName("version")
+  private int version;
 
-    @SerializedName("include_proof")
-    private boolean includeProof;
+  @SerializedName("include_proof")
+  private boolean includeProof;
 
-    @SerializedName("user_id")
-    private byte[] salt;
+  @SerializedName("user_id")
+  private byte[] salt;
 
-    /**
-     * For gson serialization
-     */
-    public TransformPasswordRequest() {
-    }
+  /**
+   * Create a new instance of {@link TransformPasswordRequest}.
+   *
+   */
+  public TransformPasswordRequest() {
+  }
 
-    /**
-     * Create a new instance of {@link TransformPasswordRequest}.
-     *
-     * @param salt
-     *            random 32byte salt tied to the user.
-     * @param blindedPassword
-     *            a password obfuscated into a pseudo-random string.
-     * @param version
-     *            a password version.
-     * @param includeProof
-     *            set this flag to {@code true} to include proof into service
-     *            response.
-     */
-    public TransformPasswordRequest(byte[] salt, byte[] blindedPassword, int version, boolean includeProof) {
-        Validator.checkNullAgrument(salt, "TransformPasswordRequest -> 'userId' should not be null");
-        Validator.checkEmptyAgrument(salt, "TransformPasswordRequest -> 'userId' should not be empty");
-        this.salt = salt;
+  /**
+   * Create a new instance of {@link TransformPasswordRequest}.
+   *
+   * @param salt
+   *          random 32byte salt tied to the user.
+   * @param blindedPassword
+   *          a password obfuscated into a pseudo-random string.
+   * @param version
+   *          a password version.
+   * @param includeProof
+   *          set this flag to {@code true} to include proof into service response.
+   */
+  public TransformPasswordRequest(byte[] salt, byte[] blindedPassword, int version,
+      boolean includeProof) {
+    Validator.checkNullAgrument(salt, "TransformPasswordRequest -> 'userId' should not be null");
+    Validator.checkEmptyAgrument(salt, "TransformPasswordRequest -> 'userId' should not be empty");
+    this.salt = salt;
 
-        Validator.checkNullAgrument(blindedPassword,
-                "TransformPasswordRequest -> 'blindedPassword' should not be null");
-        Validator.checkEmptyAgrument(blindedPassword,
-                "TransformPasswordRequest -> 'blindedPassword' should not be empty");
+    Validator.checkNullAgrument(blindedPassword,
+        "TransformPasswordRequest -> 'blindedPassword' should not be null");
+    Validator.checkEmptyAgrument(blindedPassword,
+        "TransformPasswordRequest -> 'blindedPassword' should not be empty");
 
-        this.blindedPassword = blindedPassword;
-        this.version = version;
-        this.includeProof = includeProof;
-    }
+    this.blindedPassword = blindedPassword;
+    this.version = version;
+    this.includeProof = includeProof;
+  }
 
-    /**
-     * @return the random 32byte salt tied to the user.
-     */
-    public byte[] getSalt() {
-        return salt;
-    }
+  /**
+   * Get the salt.
+   * 
+   * @return the random 32byte salt tied to the user.
+   */
+  public byte[] getSalt() {
+    return salt;
+  }
 
-    /**
-     * @return the password obfuscated into a pseudo-random string.
-     */
-    public byte[] getBlindedPassword() {
-        return blindedPassword;
-    }
+  /**
+   * Get the blinded password.
+   * 
+   * @return the password obfuscated into a pseudo-random string.
+   */
+  public byte[] getBlindedPassword() {
+    return blindedPassword;
+  }
 
-    /**
-     * @return the password version.
-     */
-    public int getVersion() {
-        return version;
-    }
+  /**
+   * Get the password version.
+   * 
+   * @return the password version.
+   */
+  public int getVersion() {
+    return version;
+  }
 
-    /**
-     * @return the include proof flag.
-     */
-    public boolean getIncludeProof() {
-        return includeProof;
-    }
+  /**
+   * Get the include proof flag.
+   * 
+   * @return the include proof flag.
+   */
+  public boolean getIncludeProof() {
+    return includeProof;
+  }
 
-    /**
-     * Set the include proof flag.
-     * 
-     * @param includeProof
-     *            the include proof flag.
-     */
-    public void setIncludeProof(boolean includeProof) {
-        this.includeProof = includeProof;
-    }
+  /**
+   * Set the include proof flag.
+   * 
+   * @param includeProof
+   *          the include proof flag.
+   */
+  public void setIncludeProof(boolean includeProof) {
+    this.includeProof = includeProof;
+  }
 }
