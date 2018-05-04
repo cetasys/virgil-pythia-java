@@ -115,6 +115,7 @@ public class PythiaExamplesTest extends ConfigurableTest {
     assertTrue(isValid);
   }
 
+  @SuppressWarnings("unused")
   private void updateBreachProofPassword(Pythia pythia, BreachProofPassword pwd) {
     /** Snippet start. */
     // get previous user's VerifyBreachProofPassword parameters from a
