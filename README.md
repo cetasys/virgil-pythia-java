@@ -1,5 +1,4 @@
 # Virgil Pythia Java SDK
-[![Build status]()]() 
 [![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil/blob/master/LICENSE)
 
 
