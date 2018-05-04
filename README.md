@@ -85,7 +85,7 @@ dependencies {
 
 ### Configure SDK
 
-When you create a Pythia Application on the [Virgil Dashboard](_dashboard) you will receive Application credentials including: Proof Key and App ID. Specify your Pythia Application and Virgil account credentials in a Pythia SDK class instance.
+When you create a Pythia Application on the [Virgil Dashboard](https://dashboard.virgilsecurity.com/) you will receive Application credentials including: Proof Key and App ID. Specify your Pythia Application and Virgil account credentials in a Pythia SDK class instance.
 These credentials are used for the following purposes:
 - generating a JWT token that is used for authorization on the Virgil Services
 - creating a user's breach-proof password
