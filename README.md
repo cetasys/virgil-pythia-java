@@ -36,19 +36,14 @@ You can easily add SDK dependency to your project, just follow the examples belo
 
 [Apache Maven](https://maven.apache.org/) is a software project management and comprehension tool.
 
-To integrate Virgil SDK into your Java project using Maven, set up dependencies in your pom.xml:
+To integrate Virgil SDK into your Java project using Maven, set up dependencies in your `pom.xml`:
 
 ```xml
 <dependencies>
     <dependency>
-        <groupId>com.virgilsecurity.sdk</groupId>
-        <artifactId>crypto</artifactId>
-        <version>5.0.1</version>
-    </dependency>
-    <dependency>
-        <groupId>com.virgilsecurity.sdk</groupId>
-        <artifactId>sdk</artifactId>
-        <version>5.0.1</version>
+        <groupId>com.virgilsecurity</groupId>
+        <artifactId>pythia</artifactId>
+        <version>0.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -59,12 +54,11 @@ To integrate Virgil SDK into your Java project using Maven, set up dependencies 
 
 ##### Server
 
-To integrate Virgil SDK into your Java project using Gradle, set up dependencies in your pom.xml:
+To integrate Virgil SDK into your Java project using Gradle, set up dependencies in your `build.gradle`:
 
 ```
 dependencies {
-    compile 'com.virgilsecurity.sdk:crypto:5.0.1'
-    compile 'com.virgilsecurity.sdk:sdk:5.0.1'
+    compile 'com.virgilsecurity:pythia:0.1.0'
 }
 ```
 
@@ -78,12 +72,14 @@ repositories {
 }
 ```
 
-Set up dependencies in your pom.xml:
+Set up dependencies in your `build.gradle`:
 
 ```
 dependencies {
-    compile 'com.virgilsecurity.sdk:crypto-android:5.0.1@aar'
-    compile 'com.virgilsecurity.sdk:sdk:5.0.1'
+    implementation 'com.virgilsecurity.sdk:crypto-android:5.0.2@aar'
+    implementation ('com.virgilsecurity:pythia:0.1.0') {
+        exclude group: 'com.virgilsecurity.sdk', module: 'crypto'
+    }
 }
 ```
 
@@ -150,8 +146,8 @@ First of all, you need to set up your database to store users' breach-proof pass
 </table>
 
 Now we can start creating breach-proof passwords for users. Depending on the situation, you will use one of the following Pythia SDK functions:
-- `CreateBreachProofPassword` is used to create a user's breach-proof password on your Application Server.
-- `VerifyBreachProofPassword` is used to verify a user's breach-proof password.
+- `createBreachProofPassword` is used to create a user's breach-proof password on your Application Server.
+- `verifyBreachProofPassword` is used to verify a user's breach-proof password.
 
 ### Create Breach-Proof Password
 
@@ -160,7 +156,7 @@ Use this flow to create a new breach-proof password for a user.
 > Remember, if you already have a database with user passwords, you don't have to wait until a user logs in into your system to implement Pythia. You can go through your database and create breach-proof user passwords at any time.
 
 So, in order to create a user's breach-proof password for a new database or available one, go through the following operations:
-- Take a user's password (or its hash or whatever you use) and pass it into a `CreateBreachProofPassword` function in SDK.
+- Take a user's password (or its hash or whatever you use) and pass it into a `createBreachProofPassword` function in SDK.
 - Pythia SDK will blind a password, send a request to Pythia Service to get a transformed blinded password and de-blind the transformed blinded password into a user's deblinded password (breach-proof password).
 
 ```java
@@ -170,13 +166,13 @@ BreachProofPassword pwd = pythia.createBreachProofPassword("USER_PASSWORD");
 // save Breach-proof password parameters into your users DB
 ```
 
-After performing `CreateBreachProofPassword` function you get previously mentioned parameters (`Salt`, `deblindedPassword`, `version`), save these parameters into corresponding columns in your database.
+After performing `createBreachProofPassword` function you get previously mentioned parameters (`salt`, `deblindedPassword`, `version`), save these parameters into corresponding columns in your database.
 
 Check that you updated all database records and delete the now unnecessary column where user passwords were previously stored.
 
 ### Verify Breach-Proof Password
 
-Use this flow when a user already has his or her own breach-proof password in your database. You will have to pass his or her password into an `VerifyBreachProofPassword` function:
+Use this flow when a user already has his or her own breach-proof password in your database. You will have to pass his or her password into an `verifyBreachProofPassword` function:
 
 ```java
 // get user's Breach-proof password parameters from your users DB
@@ -192,7 +188,7 @@ if (!isValid) {
 }
 ```
 
-The difference between the `VerifyBreachProofPassword` and `CreateBreachProofPassword` functions is that the verification of Pythia Service is optional in `VerifyBreachProofPassword` function, which allows you to achieve maximum performance when processing data. You can turn on a proof step in `VerifyBreachProofPassword` function if you have any suspicions that a user or Pythia Service were compromised.
+The difference between the `verifyBreachProofPassword` and `createBreachProofPassword` functions is that the verification of Pythia Service is optional in `verifyBreachProofPassword` function, which allows you to achieve maximum performance when processing data. You can turn on a proof step in `verifyBreachProofPassword` function if you have any suspicions that a user or Pythia Service were compromised.
 
 ### Update breach-proof passwords
 
@@ -204,12 +200,12 @@ How it works:
 - Access your Virgil Dashboard and press the "My Database Was Compromised" button.
 - Pythia Service generates a special updateToken and new Proof Key.
 - You then specify new Pythia Application credentials in the Pythia SDK on your Server side.
-- Then you use `UpdateBreachProofPassword` function to create new breach-proof passwords for your users.
+- Then you use `updateBreachProofPassword` function to create new breach-proof passwords for your users.
 - Finally, you save the new breach-proof passwords into your database.
 
-Here is an example of using the `UpdateBreachProofPassword` function:
+Here is an example of using the `updateBreachProofPassword` function:
 ```java
-// get previous user's VerifyBreachProofPassword parameters from a compromised DB
+// get previous user's verifyBreachProofPassword parameters from a compromised DB
 
 // ...
 
