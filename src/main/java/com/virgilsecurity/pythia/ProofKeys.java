@@ -50,81 +50,83 @@ import com.virgilsecurity.sdk.utils.StringUtils;
  */
 public class ProofKeys {
 
-	private List<ProofKey> proofKeys;
+    private List<ProofKey> proofKeys;
 
-	/**
-	 * Create a new instance of {@link ProofKeys}.
-	 * 
-	 * @param proofKeys
-	 */
-	public ProofKeys(List<String> proofKeys) {
-		if (proofKeys == null || proofKeys.isEmpty()) {
-			throw new IllegalArgumentException("No public keys found");
-		}
+    /**
+     * Create a new instance of {@link ProofKeys}.
+     * 
+     * @param proofKeys
+     *            list of Pythia public keys. Key format is
+     *            'PK.&lt;version&gt;.&lt;Base64-encoded data&gt;'.
+     */
+    public ProofKeys(List<String> proofKeys) {
+        if (proofKeys == null || proofKeys.isEmpty()) {
+            throw new IllegalArgumentException("No public keys found");
+        }
 
-		this.proofKeys = new ArrayList<>(proofKeys.size());
-		for (String proofKey : proofKeys) {
-			this.proofKeys.add(parsePublicKey(proofKey));
-		}
-		Collections.sort(this.proofKeys, new Comparator<ProofKey>() {
+        this.proofKeys = new ArrayList<>(proofKeys.size());
+        for (String proofKey : proofKeys) {
+            this.proofKeys.add(parsePublicKey(proofKey));
+        }
+        Collections.sort(this.proofKeys, new Comparator<ProofKey>() {
 
-			@Override
-			public int compare(ProofKey pk1, ProofKey pk2) {
-				return pk2.getVersion() - pk1.getVersion();
-			}
-		});
-	}
+            @Override
+            public int compare(ProofKey pk1, ProofKey pk2) {
+                return pk2.getVersion() - pk1.getVersion();
+            }
+        });
+    }
 
-	/**
-	 * Get the current Pythia public key.
-	 * 
-	 * @return the current Pythia public key.
-	 * @throws ProofKeyNotFoundException
-	 *             if key not found.
-	 */
-	public ProofKey getCurrentKey() {
-		if (this.proofKeys.isEmpty()) {
-			throw new ProofKeyNotFoundException();
-		}
-		return this.proofKeys.get(0);
-	}
+    /**
+     * Get the current Pythia public key.
+     * 
+     * @return the current Pythia public key.
+     * @throws ProofKeyNotFoundException
+     *             if key not found.
+     */
+    public ProofKey getCurrentKey() {
+        if (this.proofKeys.isEmpty()) {
+            throw new ProofKeyNotFoundException();
+        }
+        return this.proofKeys.get(0);
+    }
 
-	/**
-	 * Find Pythia public key by version.
-	 * 
-	 * @param version
-	 *            the key version for search.
-	 * @return the Pythia public key.
-	 * @throws ProofKeyNotFoundException
-	 *             if key not found.
-	 */
-	public ProofKey getProofKey(int version) {
-		for (ProofKey proofKey : this.proofKeys) {
-			if (proofKey.getVersion() == version) {
-				return proofKey;
-			}
-		}
-		throw new ProofKeyNotFoundException();
-	}
+    /**
+     * Find Pythia public key by version.
+     * 
+     * @param version
+     *            the key version for search.
+     * @return the Pythia public key.
+     * @throws ProofKeyNotFoundException
+     *             if key not found.
+     */
+    public ProofKey getProofKey(int version) {
+        for (ProofKey proofKey : this.proofKeys) {
+            if (proofKey.getVersion() == version) {
+                return proofKey;
+            }
+        }
+        throw new ProofKeyNotFoundException();
+    }
 
-	private ProofKey parsePublicKey(String publicKeyStr) {
-		if (StringUtils.isBlank(publicKeyStr)) {
-			throw new ProofKeyParseException();
-		}
-		String[] parts = publicKeyStr.split("\\.");
-		if (parts.length == 3 && "PK".equals(parts[0])) {
-			try {
-				int version = Integer.parseInt(parts[1]);
-				byte[] data = Base64.decode(parts[2]);
-				if (data.length == 0) {
-					throw new ProofKeyParseException();
-				}
-				return new ProofKey(data, version);
-			} catch (IllegalArgumentException e) {
-				throw new ProofKeyParseException();
-			}
-		}
-		throw new ProofKeyParseException();
-	}
+    private ProofKey parsePublicKey(String publicKeyStr) {
+        if (StringUtils.isBlank(publicKeyStr)) {
+            throw new ProofKeyParseException();
+        }
+        String[] parts = publicKeyStr.split("\\.");
+        if (parts.length == 3 && "PK".equals(parts[0])) {
+            try {
+                int version = Integer.parseInt(parts[1]);
+                byte[] data = Base64.decode(parts[2]);
+                if (data.length == 0) {
+                    throw new ProofKeyParseException();
+                }
+                return new ProofKey(data, version);
+            } catch (IllegalArgumentException e) {
+                throw new ProofKeyParseException();
+            }
+        }
+        throw new ProofKeyParseException();
+    }
 
 }

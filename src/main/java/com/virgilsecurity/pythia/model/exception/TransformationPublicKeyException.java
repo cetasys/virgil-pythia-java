@@ -39,25 +39,25 @@ package com.virgilsecurity.pythia.model.exception;
  */
 public class TransformationPublicKeyException extends RuntimeException {
 
-	private static final long serialVersionUID = -3200705655157806287L;
+    private static final long serialVersionUID = -3200705655157806287L;
 
-	public TransformationPublicKeyException() {
-	}
+    public TransformationPublicKeyException() {
+    }
 
-	public TransformationPublicKeyException(String message) {
-		super(message);
-	}
+    public TransformationPublicKeyException(String message) {
+        super(message);
+    }
 
-	public TransformationPublicKeyException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public TransformationPublicKeyException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public TransformationPublicKeyException(Throwable cause) {
-		super(cause);
-	}
+    public TransformationPublicKeyException(Throwable cause) {
+        super(cause);
+    }
 
-	public TransformationPublicKeyException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
+    public TransformationPublicKeyException(String message, Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

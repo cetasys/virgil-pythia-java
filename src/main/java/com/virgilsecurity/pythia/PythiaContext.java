@@ -34,6 +34,8 @@ package com.virgilsecurity.pythia;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.virgilsecurity.pythia.client.PythiaClient;
 import com.virgilsecurity.pythia.client.VirgilPythiaClient;
@@ -42,8 +44,12 @@ import com.virgilsecurity.sdk.common.TimeSpan;
 import com.virgilsecurity.sdk.crypto.VirgilAccessTokenSigner;
 import com.virgilsecurity.sdk.crypto.VirgilCrypto;
 import com.virgilsecurity.sdk.crypto.VirgilPrivateKey;
+import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
+import com.virgilsecurity.sdk.jwt.Jwt;
 import com.virgilsecurity.sdk.jwt.JwtGenerator;
-import com.virgilsecurity.sdk.jwt.accessProviders.GeneratorJwtProvider;
+import com.virgilsecurity.sdk.jwt.TokenContext;
+import com.virgilsecurity.sdk.jwt.accessProviders.CachingJwtProvider;
+import com.virgilsecurity.sdk.jwt.accessProviders.CachingJwtProvider.RenewJwtCallback;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.StringUtils;
@@ -56,193 +62,219 @@ import com.virgilsecurity.sdk.utils.StringUtils;
  */
 public class PythiaContext {
 
-	private ProofKeys proofKeys;
-	private AccessTokenProvider accessTokenProvider;
-	private PythiaClient pythiaClient;
-	private PythiaCrypto pythiaCrypto;
+    private static final Logger LOGGER = Logger.getLogger(PythiaContext.class.getName());
 
-	private PythiaContext(ProofKeys proofKeys, PythiaCrypto pythiaCrypto, PythiaClient client,
-			AccessTokenProvider accessTokenProvider) {
-		this.proofKeys = proofKeys;
-		this.pythiaCrypto = pythiaCrypto;
-		this.pythiaClient = client;
-		this.accessTokenProvider = accessTokenProvider;
-	}
+    private ProofKeys proofKeys;
+    private AccessTokenProvider accessTokenProvider;
+    private PythiaClient pythiaClient;
+    private PythiaCrypto pythiaCrypto;
 
-	/**
-	 * @return the proofKeys
-	 */
-	public ProofKeys getProofKeys() {
-		return proofKeys;
-	}
+    private PythiaContext(ProofKeys proofKeys, PythiaCrypto pythiaCrypto, PythiaClient client,
+            AccessTokenProvider accessTokenProvider) {
+        this.proofKeys = proofKeys;
+        this.pythiaCrypto = pythiaCrypto;
+        this.pythiaClient = client;
+        this.accessTokenProvider = accessTokenProvider;
+    }
 
-	/**
-	 * @return the accessTokenProvider
-	 */
-	public AccessTokenProvider getAccessTokenProvider() {
-		return accessTokenProvider;
-	}
+    /**
+     * Get proof keys.
+     * 
+     * @return the proof keys.
+     */
+    public ProofKeys getProofKeys() {
+        return proofKeys;
+    }
 
-	/**
-	 * @return the pythiaClient
-	 */
-	public PythiaClient getPythiaClient() {
-		return pythiaClient;
-	}
+    /**
+     * Get the access token provider.
+     * 
+     * @return the access token provider.
+     */
+    public AccessTokenProvider getAccessTokenProvider() {
+        return accessTokenProvider;
+    }
 
-	/**
-	 * @return the pythiaCrypto
-	 */
-	public PythiaCrypto getPythiaCrypto() {
-		return pythiaCrypto;
-	}
+    /**
+     * Get the {@link PythiaClient}
+     * 
+     * @return the Pythia client.
+     */
+    public PythiaClient getPythiaClient() {
+        return pythiaClient;
+    }
 
-	/**
-	 * The builder for {@link PythiaContext}.
-	 * 
-	 * @author Andrii Iakovenko
-	 *
-	 */
-	public static class Builder {
-		private String apiKey;
-		private String apiPublicKeyIdentifier;
-		private String appId;
-		private List<String> proofKeys;
-		private VirgilCrypto crypto;
-		private PythiaCrypto pythiaCrypto;
-		private String pythiaServiceUrl;
+    /**
+     * Get the {@link PythiaCrypto}
+     * 
+     * @return the Pythia Crypto.
+     */
+    public PythiaCrypto getPythiaCrypto() {
+        return pythiaCrypto;
+    }
 
-		/**
-		 * Build the Pythia-related config.
-		 * 
-		 * @return the instance of Pythia-related config.
-		 */
-		public PythiaContext build() {
-			if (StringUtils.isBlank(this.appId)) {
-				throw new IllegalArgumentException("Application identifier should be set");
-			}
-			if (StringUtils.isBlank(this.apiPublicKeyIdentifier)) {
-				throw new IllegalArgumentException("API public key identifier should be set");
-			}
-			if (StringUtils.isBlank(this.apiKey)) {
-				throw new IllegalArgumentException("API key should be set");
-			}
-			if (this.pythiaCrypto == null) {
-				throw new IllegalArgumentException("Pythia Crypto should be set");
-			}
+    /**
+     * The builder for {@link PythiaContext}.
+     * 
+     * @author Andrii Iakovenko
+     *
+     */
+    public static class Builder {
+        private String apiKey;
+        private String apiPublicKeyIdentifier;
+        private String appId;
+        private List<String> proofKeys;
+        private VirgilCrypto crypto;
+        private PythiaCrypto pythiaCrypto;
+        private String pythiaServiceUrl;
 
-			if (this.crypto == null) {
-				this.crypto = new VirgilCrypto();
-			}
-			VirgilCrypto crypto = this.crypto;
+        /**
+         * Build the Pythia-related config.
+         * 
+         * @return the instance of Pythia-related config.
+         */
+        public PythiaContext build() {
+            if (StringUtils.isBlank(this.appId)) {
+                LOGGER.severe("Application identifier should be set");
+                throw new IllegalArgumentException("Application identifier should be set");
+            }
+            if (StringUtils.isBlank(this.apiPublicKeyIdentifier)) {
+                LOGGER.severe("API public key identifier should be set");
+                throw new IllegalArgumentException("API public key identifier should be set");
+            }
+            if (StringUtils.isBlank(this.apiKey)) {
+                LOGGER.severe("API key should be set");
+                throw new IllegalArgumentException("API key should be set");
+            }
+            if (this.pythiaCrypto == null) {
+                LOGGER.severe("Pythia Crypto should be set");
+                throw new IllegalArgumentException("Pythia Crypto should be set");
+            }
 
-			VirgilPrivateKey apiPrivateKey = null;
-			try {
-				byte[] apiKeyData = Base64.decode(this.apiKey);
-				apiPrivateKey = crypto.importPrivateKey(apiKeyData);
-			} catch (Exception e) {
-				throw new IllegalArgumentException("API key has invalid format", e);
-			}
+            if (this.crypto == null) {
+                this.crypto = new VirgilCrypto();
+            }
+            VirgilCrypto crypto = this.crypto;
 
-			JwtGenerator generator = new JwtGenerator(this.appId, apiPrivateKey, this.apiPublicKeyIdentifier,
-					TimeSpan.fromTime(1, TimeUnit.HOURS), new VirgilAccessTokenSigner(this.crypto));
+            VirgilPrivateKey apiPrivateKey = null;
+            try {
+                byte[] apiKeyData = Base64.decode(this.apiKey);
+                apiPrivateKey = crypto.importPrivateKey(apiKeyData);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("API key has invalid format", e);
+            }
 
-			// TODO use cached JWT provider
-			AccessTokenProvider accessTokenProvider = new GeneratorJwtProvider(generator, "PYTHIA-CLIENT");
-			ProofKeys proofKeys = new ProofKeys(this.proofKeys);
-			PythiaClient client;
-			if (this.pythiaServiceUrl == null) {
-				client = new VirgilPythiaClient();
-			} else {
-				client = new VirgilPythiaClient(this.pythiaServiceUrl);
-			}
+            final JwtGenerator generator = new JwtGenerator(this.appId, apiPrivateKey, this.apiPublicKeyIdentifier,
+                    TimeSpan.fromTime(1, TimeUnit.HOURS), new VirgilAccessTokenSigner(this.crypto));
 
-			return new PythiaContext(proofKeys, pythiaCrypto, client, accessTokenProvider);
-		}
+            RenewJwtCallback renewJwtCallback = new RenewJwtCallback() {
 
-		/**
-		 * Set API key.
-		 * 
-		 * @param apiKey
-		 *            Base64-encoded API key.
-		 * @return {@link Builder} instance.
-		 */
-		public Builder setApiKey(String apiKey) {
-			this.apiKey = apiKey;
-			return this;
-		}
+                @Override
+                public Jwt renewJwt(TokenContext tokenContext) {
+                    try {
+                        return generator.generateToken("PYTHIA-CLIENT");
+                    } catch (CryptoException e) {
+                        // This should never happen
+                        LOGGER.log(Level.SEVERE, "Jwt token couldn't be generated", e);
+                    }
+                    return null;
+                }
+            };
+            AccessTokenProvider accessTokenProvider = new CachingJwtProvider(renewJwtCallback);
+            ProofKeys proofKeys = new ProofKeys(this.proofKeys);
+            PythiaClient client;
+            if (this.pythiaServiceUrl == null) {
+                client = new VirgilPythiaClient();
+            } else {
+                client = new VirgilPythiaClient(this.pythiaServiceUrl);
+            }
 
-		/**
-		 * Set API public key identifier.
-		 * 
-		 * @param apiPublicKeyIdentifier
-		 *            the API public key identifier to set.
-		 * @return {@link Builder} instance.
-		 */
-		public Builder setApiPublicKeyIdentifier(String apiPublicKeyIdentifier) {
-			this.apiPublicKeyIdentifier = apiPublicKeyIdentifier;
-			return this;
-		}
+            return new PythiaContext(proofKeys, pythiaCrypto, client, accessTokenProvider);
+        }
 
-		/**
-		 * Set Virgil Application identifier.
-		 * 
-		 * @param appId
-		 *            the application identifier to set.
-		 * @return {@link Builder} instance.
-		 */
-		public Builder setAppId(String appId) {
-			this.appId = appId;
-			return this;
-		}
+        /**
+         * Set API key.
+         * 
+         * @param apiKey
+         *            Base64-encoded API key.
+         * @return {@link Builder} instance.
+         */
+        public Builder setApiKey(String apiKey) {
+            this.apiKey = apiKey;
+            return this;
+        }
 
-		/**
-		 * Set Pythia public keys.
-		 * 
-		 * @param proofKeys
-		 *            the proofKeys to set
-		 * @return {@link Builder} instance.
-		 */
-		public Builder setProofKeys(List<String> proofKeys) {
-			this.proofKeys = proofKeys;
-			return this;
-		}
+        /**
+         * Set API public key identifier.
+         * 
+         * @param apiPublicKeyIdentifier
+         *            the API public key identifier to set.
+         * @return {@link Builder} instance.
+         */
+        public Builder setApiPublicKeyIdentifier(String apiPublicKeyIdentifier) {
+            this.apiPublicKeyIdentifier = apiPublicKeyIdentifier;
+            return this;
+        }
 
-		/**
-		 * Set Pythia Crypto.
-		 * 
-		 * @param pythiaCrypto
-		 *            the Pythia Crypto to set
-		 * @return {@link Builder} instance.
-		 */
-		public Builder setPythiaCrypto(PythiaCrypto pythiaCrypto) {
-			this.pythiaCrypto = pythiaCrypto;
-			return this;
-		}
+        /**
+         * Set Virgil Application identifier.
+         * 
+         * @param appId
+         *            the application identifier to set.
+         * @return {@link Builder} instance.
+         */
+        public Builder setAppId(String appId) {
+            this.appId = appId;
+            return this;
+        }
 
-		/**
-		 * Set Virgil Crypto.
-		 * 
-		 * @param crypto
-		 *            the Virgil Crypto to set.
-		 * @return {@link Builder} instance.
-		 */
-		public Builder setCrypto(VirgilCrypto crypto) {
-			this.crypto = crypto;
-			return this;
-		}
+        /**
+         * Set Pythia public keys.
+         * 
+         * @param proofKeys
+         *            the proofKeys to set
+         * @return {@link Builder} instance.
+         */
+        public Builder setProofKeys(List<String> proofKeys) {
+            this.proofKeys = proofKeys;
+            return this;
+        }
 
-		/**
-		 * Set Pythia service base URL.
-		 * 
-		 * @param pythiaServiceUrl
-		 * @return {@link Builder} instance.
-		 */
-		public Builder setPythiaServiceUrl(String pythiaServiceUrl) {
-			this.pythiaServiceUrl = pythiaServiceUrl;
-			return this;
-		}
+        /**
+         * Set Pythia Crypto.
+         * 
+         * @param pythiaCrypto
+         *            the Pythia Crypto to set
+         * @return {@link Builder} instance.
+         */
+        public Builder setPythiaCrypto(PythiaCrypto pythiaCrypto) {
+            this.pythiaCrypto = pythiaCrypto;
+            return this;
+        }
 
-	}
+        /**
+         * Set Virgil Crypto.
+         * 
+         * @param crypto
+         *            the Virgil Crypto to set.
+         * @return {@link Builder} instance.
+         */
+        public Builder setCrypto(VirgilCrypto crypto) {
+            this.crypto = crypto;
+            return this;
+        }
+
+        /**
+         * Set Pythia service base URL.
+         * 
+         * @param pythiaServiceUrl
+         * @return {@link Builder} instance.
+         */
+        public Builder setPythiaServiceUrl(String pythiaServiceUrl) {
+            this.pythiaServiceUrl = pythiaServiceUrl;
+            return this;
+        }
+
+    }
 
 }

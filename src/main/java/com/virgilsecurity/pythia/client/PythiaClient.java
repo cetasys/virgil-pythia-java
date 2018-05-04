@@ -44,15 +44,23 @@ import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
  */
 public interface PythiaClient {
 
-	/**
-	 * @param salt
-	 * @param blindedPassword
-	 * @param version
-	 * @param includeProof
-	 * @param token
-	 * @return
-	 * @throws VirgilPythiaServiceException
-	 */
-	TransformResponse transformPassword(byte[] salt, byte[] blindedPassword, Integer version, boolean includeProof,
-			String token) throws VirgilPythiaServiceException;
+    /**
+     * Make call to Pythia service to transform password.
+     * 
+     * @param salt
+     *            the salt.
+     * @param blindedPassword
+     *            the blinded password.
+     * @param version
+     *            the key version.
+     * @param includeProof
+     *            set this flag to {@code true} if you need proof data in
+     *            request.
+     * @param token
+     *            the authorization token.
+     * @return the plain model representing response from Pythia server.
+     * @throws VirgilPythiaServiceException
+     */
+    TransformResponse transformPassword(byte[] salt, byte[] blindedPassword, Integer version, boolean includeProof,
+            String token) throws VirgilPythiaServiceException;
 }

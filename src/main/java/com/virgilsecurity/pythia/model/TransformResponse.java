@@ -43,40 +43,59 @@ import com.virgilsecurity.sdk.utils.Validator;
  *
  */
 public final class TransformResponse {
-	@SerializedName("transformed_password")
-	private byte[] transformedPassword;
-	
-	@SerializedName("proof")
-	private Proof proof;
+    @SerializedName("transformed_password")
+    private byte[] transformedPassword;
 
-	
-	/**
-	 * Create a new instance of {@link TransformResponse}.
-	 *
-	 */
-	public TransformResponse() {
-	}
+    @SerializedName("proof")
+    private Proof proof;
 
-	public TransformResponse(byte[] transformedPassword) {
-		Validator.checkNullAgrument(transformedPassword,
-				"TransformResponse -> 'transformedPassword' should not be null");
+    /**
+     * Create a new instance of {@link TransformResponse}.
+     *
+     */
+    public TransformResponse() {
+    }
 
-		this.transformedPassword = transformedPassword;
-	}
+    /**
+     * Create a new instance of {@link TransformResponse}.
+     *
+     * @param transformedPassword
+     *            blindedPassword, protected using server secret.
+     */
+    public TransformResponse(byte[] transformedPassword) {
+        Validator.checkNullAgrument(transformedPassword,
+                "TransformResponse -> 'transformedPassword' should not be null");
 
-	public TransformResponse(byte[] transformedPassword, Proof proof) {
-		this(transformedPassword);
-		Validator.checkNullAgrument(proof, "TransformResponse -> 'proof' should not be null");
+        this.transformedPassword = transformedPassword;
+    }
 
-		this.proof = proof;
-	}
+    /**
+     * Create a new instance of {@link TransformResponse}.
+     *
+     * @param transformedPassword
+     *            blindedPassword, protected using server secret.
+     * @param proof
+     *            the proof.
+     */
+    public TransformResponse(byte[] transformedPassword, Proof proof) {
+        this(transformedPassword);
+        Validator.checkNullAgrument(proof, "TransformResponse -> 'proof' should not be null");
 
-	public byte[] getTransformedPassword() {
-		return transformedPassword;
-	}
+        this.proof = proof;
+    }
 
-	public Proof getProof() {
-		return proof;
-	}
+    /**
+     * @return the blindedPassword, protected using server secret.
+     */
+    public byte[] getTransformedPassword() {
+        return transformedPassword;
+    }
+
+    /**
+     * @return the proof.
+     */
+    public Proof getProof() {
+        return proof;
+    }
 
 }

@@ -43,78 +43,78 @@ import com.virgilsecurity.sdk.utils.StringUtils;
  */
 public class VirgilPythiaServiceException extends VirgilException {
 
-	private static final long serialVersionUID = -291746913484051059L;
+    private static final long serialVersionUID = -291746913484051059L;
 
-	private int error;
-	private String message;
-	private HttpError httpError;
+    private int error;
+    private String message;
+    private HttpError httpError;
 
-	/**
-	 * Create a new instance of {@link VirgilPythiaServiceException}.
-	 *
-	 * @param message
-	 */
-	public VirgilPythiaServiceException(String message) {
-		this.message = message;
-	}
+    /**
+     * Create a new instance of {@link VirgilPythiaServiceException}.
+     *
+     * @param message
+     */
+    public VirgilPythiaServiceException(String message) {
+        this.message = message;
+    }
 
-	/**
-	 * Create a new instance of {@link VirgilPythiaServiceException}.
-	 *
-	 * @param httpError
-	 */
-	public VirgilPythiaServiceException(HttpError httpError) {
-		this.httpError = httpError;
-	}
+    /**
+     * Create a new instance of {@link VirgilPythiaServiceException}.
+     *
+     * @param httpError
+     */
+    public VirgilPythiaServiceException(HttpError httpError) {
+        this.httpError = httpError;
+    }
 
-	/**
-	 * Create a new instance of {@link VirgilPythiaServiceException}.
-	 *
-	 * @param error
-	 * @param message
-	 * @param httpError
-	 */
-	public VirgilPythiaServiceException(int error, String message, HttpError httpError) {
-		this.error = error;
-		this.message = message;
-		this.httpError = httpError;
-	}
+    /**
+     * Create a new instance of {@link VirgilPythiaServiceException}.
+     *
+     * @param error
+     * @param message
+     * @param httpError
+     */
+    public VirgilPythiaServiceException(int error, String message, HttpError httpError) {
+        this.error = error;
+        this.message = message;
+        this.httpError = httpError;
+    }
 
-	/**
-	 * @return the serialversionuid
-	 */
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
+    /**
+     * @return the serialversionuid
+     */
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
 
-	/**
-	 * @return the error
-	 */
-	public int getError() {
-		return error;
-	}
+    /**
+     * @return the error
+     */
+    public int getError() {
+        return error;
+    }
 
-	/**
-	 * @return the message
-	 */
-	public String getMessage() {
-		StringBuilder sb = new StringBuilder("\n");
-		if (httpError != null) {
+    /**
+     * @return the message
+     */
+    public String getMessage() {
+        StringBuilder sb = new StringBuilder("\n");
+        if (httpError != null) {
             sb.append("Http response: ").append(httpError.getCode());
             if (!StringUtils.isBlank(httpError.getMessage())) {
                 sb.append(":").append(httpError.getMessage());
             }
             sb.append("\n");
         }
-		sb.append("Server response:").append(error).append(":").append(message);
-		return sb.toString();
-	}
+        sb.append("Server response:").append(error).append(":").append(message);
+        return sb.toString();
+    }
 
-	/**
-	 * @return the httpError
-	 */
-	public HttpError getHttpError() {
-		return httpError;
-	}
+    /**
+     * @return the httpError
+     */
+    public HttpError getHttpError() {
+        return httpError;
+    }
 
 }

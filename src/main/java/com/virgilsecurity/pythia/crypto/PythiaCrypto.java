@@ -40,49 +40,71 @@ package com.virgilsecurity.pythia.crypto;
  */
 public interface PythiaCrypto {
 
-	/**
-	 * Blind password.
-	 * 
-	 * @param password
-	 *            the password to be blinded.
-	 * @return {@link BlindResult} which contains pair of blinded password and
-	 *         blinding secret.
-	 */
-	BlindResult blind(String password);
+    /**
+     * Turns password into a pseudo-random string.
+     * 
+     * @param password
+     *            Random end user's password.
+     * @return {@link BlindResult} which contains pair of blinded password and
+     *         blinding secret.
+     */
+    BlindResult blind(String password);
 
-	/**
-	 * Deblind password.
-	 * 
-	 * @param transformedPassword
-	 * @param blindingSecret
-	 * @return deblinded password.
-	 */
-	byte[] deblind(byte[] transformedPassword, byte[] blindingSecret);
+    /**
+     * Unmasks transformedPassword value with previously returned blindingSecret
+     * from {@linkplain #blind(String)}.
+     * 
+     * @param transformedPassword
+     *            the blindedPassword, protected using server secret.
+     * @param blindingSecret
+     *            the secret random used to blind user's password.
+     * @return protected deblinded password.
+     */
+    byte[] deblind(byte[] transformedPassword, byte[] blindingSecret);
 
-	/**
-	 * @param transformedPassword
-	 * @param blindedPassword
-	 * @param tweak
-	 * @param transformationPublicKey
-	 * @param proofC
-	 * @param proofU
-	 * @return
-	 */
-	boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak, byte[] transformationPublicKey,
-			byte[] proofC, byte[] proofU);
+    /**
+     * This operation allows client to verify that transform result is correct,
+     * assuming the client has previously stored tweak.
+     * 
+     * @param transformedPassword
+     *            the blindedPassword, protected using server secret.
+     * @param blindedPassword
+     *            a blinded password returned from {@linkplain #blind(String)}
+     * @param tweak
+     *            the random 32byte salt.
+     * @param transformationPublicKey
+     *            the public key corresponding to transformationPrivateKey
+     *            value.
+     * @param proofC
+     *            the first part of proof that transformedPassword was created
+     *            using transformationPrivateKey.
+     * @param proofU
+     *            the second part of proof that transformedPassword was created
+     *            using transformationPrivateKey.
+     * @return {@code true} if verification success.
+     */
+    boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak, byte[] transformationPublicKey,
+            byte[] proofC, byte[] proofU);
 
-	/**
-	 * Update deblinded password.
-	 * 
-	 * @param deblindedPassword
-	 * @param updateToken
-	 * @return updated deblinded password.
-	 */
-	byte[] updateDeblinded(byte[] deblindedPassword, byte[] updateToken);
+    /**
+     * Updates previously stored deblindedPassword with passwordUpdateToken.
+     * After this call, transform called with new arguments will return
+     * corresponding values.
+     * 
+     * @param deblindedPassword
+     *            a value corresponding to a password, protected by Pythia
+     *            service with transform operation.
+     * @param updateToken
+     *            an update token.
+     * @return deblinded protected password updated with token.
+     */
+    byte[] updateDeblinded(byte[] deblindedPassword, byte[] updateToken);
 
-	/**
-	 * @return
-	 */
-	byte[] generateSalt();
+    /**
+     * Generate salt.
+     * 
+     * @return the random salt.
+     */
+    byte[] generateSalt();
 
 }

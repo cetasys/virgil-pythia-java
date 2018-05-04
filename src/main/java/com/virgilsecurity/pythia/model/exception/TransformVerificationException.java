@@ -39,25 +39,25 @@ package com.virgilsecurity.pythia.model.exception;
  */
 public class TransformVerificationException extends Exception {
 
-	private static final long serialVersionUID = -8483708234360502576L;
+    private static final long serialVersionUID = -8483708234360502576L;
 
-	public TransformVerificationException() {
-	}
+    public TransformVerificationException() {
+    }
 
-	public TransformVerificationException(String message) {
-		super(message);
-	}
+    public TransformVerificationException(String message) {
+        super(message);
+    }
 
-	public TransformVerificationException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public TransformVerificationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public TransformVerificationException(Throwable cause) {
-		super(cause);
-	}
+    public TransformVerificationException(Throwable cause) {
+        super(cause);
+    }
 
-	public TransformVerificationException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
+    public TransformVerificationException(String message, Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

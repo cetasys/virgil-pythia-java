@@ -43,35 +43,47 @@ import com.google.gson.annotations.SerializedName;
  */
 public final class Proof {
 
-	@SerializedName("value_c")
-	private byte[] c;
+    @SerializedName("value_c")
+    private byte[] c;
 
-	@SerializedName("value_u")
-	private byte[] u;
+    @SerializedName("value_u")
+    private byte[] u;
 
-	/**
-	 * Create a new instance of {@link Proof}.
-	 *
-	 */
-	public Proof() {
-	}
+    /**
+     * Create a new instance of {@link Proof}.
+     *
+     */
+    public Proof() {
+    }
 
-	/**
-	 * Create a new instance of {@link Proof}.
-	 *
-	 * @param c
-	 * @param u
-	 */
-	public Proof(byte[] c, byte[] u) {
-		this.c = c;
-		this.u = u;
-	}
+    /**
+     * Create a new instance of {@link Proof}.
+     *
+     * @param c
+     *            a first part of proof that transformedPassword was created
+     *            using transformationPrivateKey.
+     * @param u
+     *            a second part of proof that transformedPassword was created
+     *            using transformationPrivateKey.
+     */
+    public Proof(byte[] c, byte[] u) {
+        this.c = c;
+        this.u = u;
+    }
 
-	public byte[] getC() {
-		return c;
-	}
+    /**
+     * @return a first part of proof that transformedPassword was created using
+     *         transformationPrivateKey.
+     */
+    public byte[] getC() {
+        return c;
+    }
 
-	public byte[] getU() {
-		return u;
-	}
+    /**
+     * @return a second part of proof that transformedPassword was created using
+     *         transformationPrivateKey.
+     */
+    public byte[] getU() {
+        return u;
+    }
 }

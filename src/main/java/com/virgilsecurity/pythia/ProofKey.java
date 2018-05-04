@@ -40,34 +40,40 @@ package com.virgilsecurity.pythia;
  */
 public class ProofKey {
 
-	private byte[] data;
+    private byte[] data;
 
-	private int version;
+    private int version;
 
-	/**
-	 * Create a new instance of {@link ProofKey}.
-	 * 
-	 * @param data
-	 * @param version
-	 */
-	public ProofKey(byte[] data, int version) {
-		super();
-		this.data = data;
-		this.version = version;
-	}
+    /**
+     * Create a new instance of {@link ProofKey}.
+     * 
+     * @param data
+     *            the key data.
+     * @param version
+     *            the key version.
+     */
+    public ProofKey(byte[] data, int version) {
+        super();
+        this.data = data;
+        this.version = version;
+    }
 
-	/**
-	 * @return the data
-	 */
-	public byte[] getData() {
-		return data;
-	}
+    /**
+     * Get the key data.
+     * 
+     * @return the data
+     */
+    public byte[] getData() {
+        return data;
+    }
 
-	/**
-	 * @return the version
-	 */
-	public int getVersion() {
-		return version;
-	}
+    /**
+     * Get the key version.
+     * 
+     * @return the version
+     */
+    public int getVersion() {
+        return version;
+    }
 
 }

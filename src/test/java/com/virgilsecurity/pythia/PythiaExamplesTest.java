@@ -51,81 +51,82 @@ import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
  */
 public class PythiaExamplesTest extends ConfigurableTest {
 
-	@Test
-	public void pythia_parameters() throws Exception {
-		Pythia pythia = sdk_configuration();
-		BreachProofPassword pwd = CreateBreachProofPassword(pythia);
-		VerifyBreachProofPassword(pythia, pwd);
-	}
+    @Test
+    public void pythia_parameters() throws Exception {
+        Pythia pythia = sdk_configuration();
+        BreachProofPassword pwd = CreateBreachProofPassword(pythia);
+        Thread.sleep(2000);
+        VerifyBreachProofPassword(pythia, pwd);
+    }
 
-	private Pythia sdk_configuration() {
-		/** Snippet start */
+    private Pythia sdk_configuration() {
+        /** Snippet start */
 
-		// here set your Virgil Account and Pythia Application credentials
-		PythiaContext context = new PythiaContext.Builder() //
-				.setPythiaServiceUrl(getPythiaServiceUrl()) /**
-															 * Remove this line
-															 * from code snippet
-															 */
-				.setAppId(getAppId()).setApiPublicKeyIdentifier(getApiPublicKeyId()).setApiKey(getApiPrivateKeyStr())
-				.setProofKeys(Arrays.asList(getProofKey())).setPythiaCrypto(new VirgilPythiaCrypto()).build();
+        // here set your Virgil Account and Pythia Application credentials
+        PythiaContext context = new PythiaContext.Builder() //
+                .setPythiaServiceUrl(getPythiaServiceUrl()) /**
+                                                             * Remove this line
+                                                             * from code snippet
+                                                             */
+                .setAppId(getAppId()).setApiPublicKeyIdentifier(getApiPublicKeyId()).setApiKey(getApiPrivateKeyStr())
+                .setProofKeys(Arrays.asList(getProofKey())).setPythiaCrypto(new VirgilPythiaCrypto()).build();
 
-		Pythia pythia = new Pythia(context);
+        Pythia pythia = new Pythia(context);
 
-		/** Snippet end */
-		return pythia;
-	}
+        /** Snippet end */
+        return pythia;
+    }
 
-	private BreachProofPassword CreateBreachProofPassword(Pythia pythia)
-			throws CryptoException, VirgilPythiaServiceException, TransformVerificationException {
-		/** Snippet start */
+    private BreachProofPassword CreateBreachProofPassword(Pythia pythia)
+            throws CryptoException, VirgilPythiaServiceException, TransformVerificationException {
+        /** Snippet start */
 
-		// create a new Breach-proof password using user's password or its hash
-		BreachProofPassword pwd = pythia.createBreachProofPassword("USER_PASSWORD");
+        // create a new Breach-proof password using user's password or its hash
+        BreachProofPassword pwd = pythia.createBreachProofPassword("USER_PASSWORD");
 
-		// save Breach-proof password parameters into your users DB
+        // save Breach-proof password parameters into your users DB
 
-		/** Snippet end */
+        /** Snippet end */
 
-		assertNotNull(pwd);
-		return pwd;
-	}
+        assertNotNull(pwd);
+        return pwd;
+    }
 
-	private void VerifyBreachProofPassword(Pythia pythia, BreachProofPassword pwd) throws Exception {
-		/** Snippet start */
+    private void VerifyBreachProofPassword(Pythia pythia, BreachProofPassword pwd) throws Exception {
+        /** Snippet start */
 
-		// get user's Breach-proof password parameters from your users DB
+        // get user's Breach-proof password parameters from your users DB
 
-		// ...
+        // ...
 
-		// calculate user's Breach-proof password parameters
-		// compare these parameters with parameters from your DB
-		boolean isValid = pythia.verifyBreachProofPassword("USER_PASSWORD", pwd, true);
+        // calculate user's Breach-proof password parameters
+        // compare these parameters with parameters from your DB
+        boolean isValid = pythia.verifyBreachProofPassword("USER_PASSWORD", pwd, true);
 
-		if (!isValid) {
-			throw new Exception("Authentication failed");
-		}
+        if (!isValid) {
+            throw new Exception("Authentication failed");
+        }
 
-		/** Snippet end */
+        /** Snippet end */
 
-		assertTrue(isValid);
-	}
+        assertTrue(isValid);
+    }
 
-	private void UpdateBreachProofPassword(Pythia pythia, BreachProofPassword pwd) {
-		/** Snippet start */
-		// get previous user's VerifyBreachProofPassword parameters from a
-		// compromised DB
+    private void UpdateBreachProofPassword(Pythia pythia, BreachProofPassword pwd) {
+        /** Snippet start */
+        // get previous user's VerifyBreachProofPassword parameters from a
+        // compromised DB
 
-		// ...
+        // ...
 
-		// set up an updateToken that you got on the Virgil Dashboard
-		// update previous user's Breach-proof password, and save new one into
-		// your DB
+        // set up an updateToken that you got on the Virgil Dashboard
+        // update previous user's Breach-proof password, and save new one into
+        // your DB
 
-		BreachProofPassword updatedPwd = pythia.updateBreachProofPassword("UT.1.2.UPDATE_TOKEN", pwd);
-		/** Snippet end */
+        BreachProofPassword updatedPwd = pythia.updateBreachProofPassword("UT.1.2.UPDATE_TOKEN", pwd);
+        /** Snippet end */
 
-		assertNotNull(updatedPwd);
-	}
+        assertNotNull(updatedPwd);
+    }
 
 }

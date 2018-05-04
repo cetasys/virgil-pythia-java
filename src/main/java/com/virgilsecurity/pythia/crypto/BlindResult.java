@@ -38,33 +38,39 @@ package com.virgilsecurity.pythia.crypto;
  */
 public class BlindResult {
 
-	private byte[] blindedPassword;
-	private byte[] blindingSecret;
+    private byte[] blindedPassword;
+    private byte[] blindingSecret;
 
-	/**
-	 * Create a new instance of {@link BlindResult}.
-	 *
-	 * @param blindedPassword
-	 * @param blindingSecret
-	 */
-	public BlindResult(byte[] blindedPassword, byte[] blindingSecret) {
-		super();
-		this.blindedPassword = blindedPassword;
-		this.blindingSecret = blindingSecret;
-	}
+    /**
+     * Create a new instance of {@link BlindResult}.
+     *
+     * @param blindedPassword
+     *            the password obfuscated into a pseudo-random string.
+     * @param blindingSecret
+     *            the secret random used to blind user's password.
+     */
+    public BlindResult(byte[] blindedPassword, byte[] blindingSecret) {
+        super();
+        this.blindedPassword = blindedPassword;
+        this.blindingSecret = blindingSecret;
+    }
 
-	/**
-	 * @return the blindedPassword
-	 */
-	public byte[] getBlindedPassword() {
-		return blindedPassword;
-	}
+    /**
+     * Get the password obfuscated into a pseudo-random string.
+     * 
+     * @return the password obfuscated into a pseudo-random string.
+     */
+    public byte[] getBlindedPassword() {
+        return blindedPassword;
+    }
 
-	/**
-	 * @return the blindingSecret
-	 */
-	public byte[] getBlindingSecret() {
-		return blindingSecret;
-	}
+    /**
+     * Get the secret random used to blind user's password.
+     * 
+     * @return the secret random used to blind user's password.
+     */
+    public byte[] getBlindingSecret() {
+        return blindingSecret;
+    }
 
 }
