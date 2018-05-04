@@ -247,4 +247,9 @@
         </module>
         <module name="CommentsIndentation"/>
     </module>
+    <!--- Headers -->
+    <module name="RegexpHeader">
+        <property name="headerFile" value="${checkstyle.header.file}"/>
+        <property name="fileExtensions" value="java"/>
+    </module>
 </module>
