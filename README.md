@@ -1,4 +1,5 @@
 # Virgil Pythia Java SDK
+[![Build Status](https://api.travis-ci.org/VirgilSecurity/pythia-java.svg?branch=master)](https://travis-ci.org/VirgilSecurity/pythia-java)
 [![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil/blob/master/LICENSE)
 
 
