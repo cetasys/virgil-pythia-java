@@ -47,6 +47,7 @@ import com.virgilsecurity.pythia.crypto.BlindResult;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
 import com.virgilsecurity.pythia.crypto.VirgilPythiaCrypto;
 import com.virgilsecurity.pythia.model.BreachProofPassword;
+import com.virgilsecurity.pythia.model.exception.ThrottlingException;
 import com.virgilsecurity.pythia.model.exception.TransformVerificationException;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
@@ -215,6 +216,15 @@ public class PythiaTest extends ConfigurableTest {
       assertArrayEquals(ConvertionUtils.hexToBytes(deblinded2),
           updatedBreachProofPassword.getDeblindedPassword());
     }
+  }
+
+  @Test(expected = ThrottlingException.class)
+  public void throttling() throws CryptoException, VirgilPythiaServiceException,
+      TransformVerificationException, InterruptedException {
+    BreachProofPassword breachProofPassword = this.pythia.createBreachProofPassword(password);
+    assertNotNull(breachProofPassword);
+
+    this.pythia.verifyBreachProofPassword(this.password, breachProofPassword, false);
   }
 
 }

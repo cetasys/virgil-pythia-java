@@ -34,6 +34,7 @@
 package com.virgilsecurity.pythia.client;
 
 import com.virgilsecurity.pythia.model.TransformResponse;
+import com.virgilsecurity.pythia.model.exception.ThrottlingException;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.pythia.model.request.TransformPasswordRequest;
 import com.virgilsecurity.sdk.common.ErrorResponse;
@@ -136,8 +137,12 @@ public final class VirgilPythiaClient implements PythiaClient {
             } else {
               ErrorResponse error = ConvertionUtils.getGson().fromJson(errBody,
                   ErrorResponse.class);
-              throw new VirgilPythiaServiceException(error.getCode(), error.getMessage(),
-                  httpError);
+              if (error.getCode() == 60007) {
+                throw new ThrottlingException(error.getCode(), error.getMessage(), httpError);
+              } else {
+                throw new VirgilPythiaServiceException(error.getCode(), error.getMessage(),
+                    httpError);
+              }
             }
           }
         } else {
@@ -153,6 +158,9 @@ public final class VirgilPythiaClient implements PythiaClient {
         LOGGER.fine("Disconnecting...");
         urlConnection.disconnect();
       }
+    } catch (VirgilPythiaServiceException e) {
+      LOGGER.log(Level.SEVERE, "Pythia service returned an error", e);
+      throw e;
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Some service issue occurred during request executing", e);
       throw new VirgilPythiaServiceException(

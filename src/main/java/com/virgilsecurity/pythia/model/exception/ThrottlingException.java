@@ -34,46 +34,20 @@
 package com.virgilsecurity.pythia.model.exception;
 
 import com.virgilsecurity.sdk.common.HttpError;
-import com.virgilsecurity.sdk.crypto.exceptions.VirgilException;
-import com.virgilsecurity.sdk.utils.StringUtils;
 
 /**
- * This exception occurred if call to the Virgil Pythia service failed.
+ * This exception occurred if client sends too many requests to Pythia service.
  * 
  * @author Andrii Iakovenko
  *
  */
-public class VirgilPythiaServiceException extends VirgilException {
+public class ThrottlingException extends VirgilPythiaServiceException {
 
-  private static final long serialVersionUID = -291746913484051059L;
-
-  private int error;
-  private String message;
-  private HttpError httpError;
+  private static final long serialVersionUID = -4525437630458784428L;
 
   /**
-   * Create a new instance of {@link VirgilPythiaServiceException}.
-   *
-   * @param message
-   *          the detail message.
-   */
-  public VirgilPythiaServiceException(String message) {
-    this.message = message;
-  }
-
-  /**
-   * Create a new instance of {@link VirgilPythiaServiceException}.
-   *
-   * @param httpError
-   *          the http error.
-   */
-  public VirgilPythiaServiceException(HttpError httpError) {
-    this.httpError = httpError;
-  }
-
-  /**
-   * Create a new instance of {@link VirgilPythiaServiceException}.
-   *
+   * Create a new instance of {@link ThrottlingException}.
+   * 
    * @param error
    *          the error code.
    * @param message
@@ -81,46 +55,8 @@ public class VirgilPythiaServiceException extends VirgilException {
    * @param httpError
    *          the http error.
    */
-  public VirgilPythiaServiceException(int error, String message, HttpError httpError) {
-    this.error = error;
-    this.message = message;
-    this.httpError = httpError;
-  }
-
-  /**
-   * Get the error code.
-   * 
-   * @return the error code.
-   */
-  public int getError() {
-    return error;
-  }
-
-  /**
-   * Get the detail message.
-   * 
-   * @return the detail message.
-   */
-  public String getMessage() {
-    StringBuilder sb = new StringBuilder("\n");
-    if (httpError != null) {
-      sb.append("Http response: ").append(httpError.getCode());
-      if (!StringUtils.isBlank(httpError.getMessage())) {
-        sb.append(":").append(httpError.getMessage());
-      }
-      sb.append("\n");
-    }
-    sb.append("Server response: ").append(error).append(":").append(message);
-    return sb.toString();
-  }
-
-  /**
-   * Get the http error.
-   * 
-   * @return the http error.
-   */
-  public HttpError getHttpError() {
-    return httpError;
+  public ThrottlingException(int error, String message, HttpError httpError) {
+    super(error, message, httpError);
   }
 
 }

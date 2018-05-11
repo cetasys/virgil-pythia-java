@@ -146,15 +146,15 @@ public class Pythia {
     byte[] blindedPassword = blinded.getBlindedPassword();
     byte[] blindingSecret = blinded.getBlindingSecret();
 
-    ProofKey latestProofKey = this.proofKeys.getCurrentKey();
+    ProofKey currentProofKey = this.proofKeys.getCurrentKey();
 
     TokenContext tokenContext = new TokenContext("pythia-java", "transform", false, "pythia");
     AccessToken accessToken = accessTokenProvider.getToken(tokenContext);
     TransformResponse transformResponse = this.pythiaClient.transformPassword(salt, blindedPassword,
-        latestProofKey.getVersion(), true, accessToken.stringRepresentation());
+        currentProofKey.getVersion(), true, accessToken.stringRepresentation());
 
     boolean isTransformVerified = pythiaCrypto.verify(transformResponse.getTransformedPassword(),
-        blindedPassword, salt, latestProofKey.getData(), transformResponse.getProof().getC(),
+        blindedPassword, salt, currentProofKey.getData(), transformResponse.getProof().getC(),
         transformResponse.getProof().getU());
 
     if (!isTransformVerified) {
@@ -164,7 +164,7 @@ public class Pythia {
     byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResponse.getTransformedPassword(),
         blindingSecret);
 
-    return new BreachProofPassword(salt, deblindedPassword, latestProofKey.getVersion());
+    return new BreachProofPassword(salt, deblindedPassword, currentProofKey.getVersion());
   }
 
   /**
@@ -175,7 +175,7 @@ public class Pythia {
    * @param breachProofPassword
    *          the breach proof password.
    * @param prove
-   *          the proove flag.
+   *          require include proof for transformation from Virgil Pythia server.
    * @return {@code true} if password corresponds to breach proof password.
    * @throws CryptoException
    *           if some error occurred during crypto operation.
@@ -192,7 +192,7 @@ public class Pythia {
     BlindResult blinded = pythiaCrypto.blind(password);
     byte[] blindedPassword = blinded.getBlindedPassword();
     byte[] blindingSecret = blinded.getBlindingSecret();
-    ProofKey latestProofKey = this.proofKeys.getProofKey(breachProofPassword.getVersion());
+    ProofKey actualProofKey = this.proofKeys.getProofKey(breachProofPassword.getVersion());
 
     TransformResponse transformResponse = this.pythiaClient.transformPassword(
         breachProofPassword.getSalt(), blindedPassword, breachProofPassword.getVersion(), prove,
@@ -200,7 +200,7 @@ public class Pythia {
 
     if (prove) {
       boolean isTransformVerified = pythiaCrypto.verify(transformResponse.getTransformedPassword(),
-          blindedPassword, breachProofPassword.getSalt(), latestProofKey.getData(),
+          blindedPassword, breachProofPassword.getSalt(), actualProofKey.getData(),
           transformResponse.getProof().getC(), transformResponse.getProof().getU());
       if (!isTransformVerified) {
         throw new TransformVerificationException();
