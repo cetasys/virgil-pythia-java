@@ -13,7 +13,6 @@ branches:
 branches:
   only:
     - master
-    - travis-setup
 
 install: true
 before_script:
