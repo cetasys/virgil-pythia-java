@@ -33,10 +33,15 @@
 
 package com.virgilsecurity.pythia.client;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import com.virgilsecurity.pythia.ConfigurableTest;
+import com.virgilsecurity.pythia.ProofKeys;
 import com.virgilsecurity.pythia.crypto.BlindResult;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
 import com.virgilsecurity.pythia.crypto.VirgilPythiaCrypto;
@@ -51,6 +56,7 @@ import com.virgilsecurity.sdk.jwt.accessProviders.GeneratorJwtProvider;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -89,42 +95,159 @@ public class VirgilPythiaClientTest extends ConfigurableTest {
 
   @Test
   public void transformPassword_withProof() throws VirgilPythiaServiceException, CryptoException {
+    // YTC-10
     byte[] salt = this.pythiaCrypto.generateSalt();
     String password = UUID.randomUUID().toString();
     int version = 1;
     boolean includeProof = true;
+    String token = this.accessTokenProvider
+        .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+        .stringRepresentation();
 
     BlindResult blindResult = this.pythiaCrypto.blind(password);
 
     TransformResponse transformResponse = this.client.transformPassword(salt,
-        blindResult.getBlindedPassword(), version, includeProof,
-        this.accessTokenProvider
-            .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
-            .stringRepresentation());
+        blindResult.getBlindedPassword(), version, includeProof, token);
     assertNotNull(transformResponse);
     assertNotEmpty("Transformed password", transformResponse.getTransformedPassword());
     assertNotNull(transformResponse.getProof());
     assertNotEmpty("Proof value C", transformResponse.getProof().getC());
     assertNotEmpty("Proof value U", transformResponse.getProof().getU());
+
+    byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResponse.getTransformedPassword(),
+        blindResult.getBlindingSecret());
+    assertNotEmpty("Deblinded password", deblindedPassword);
+
+    ProofKeys proofKeys = new ProofKeys(getProofKeys1());
+    boolean verified = this.pythiaCrypto.verify(transformResponse.getTransformedPassword(),
+        blindResult.getBlindedPassword(), salt, proofKeys.getCurrentKey().getData(),
+        transformResponse.getProof().getC(), transformResponse.getProof().getU());
+    assertTrue(verified);
+  }
+
+  @Test
+  public void transformPassword_withProof_multitime()
+      throws VirgilPythiaServiceException, CryptoException, InterruptedException {
+    // YTC-11
+    byte[] salt = this.pythiaCrypto.generateSalt();
+    String password = UUID.randomUUID().toString();
+    int version = 1;
+    boolean includeProof = true;
+    String token = this.accessTokenProvider
+        .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+        .stringRepresentation();
+
+    BlindResult blindResult = this.pythiaCrypto.blind(password);
+
+    TransformResponse transformResponse1 = this.client.transformPassword(salt,
+        blindResult.getBlindedPassword(), version, includeProof, token);
+    assertNotNull(transformResponse1);
+    assertNotEmpty("Transformed password", transformResponse1.getTransformedPassword());
+    assertNotNull(transformResponse1.getProof());
+    assertNotEmpty("Proof value C", transformResponse1.getProof().getC());
+    assertNotEmpty("Proof value U", transformResponse1.getProof().getU());
+
+    byte[] deblindedPassword1 = this.pythiaCrypto
+        .deblind(transformResponse1.getTransformedPassword(), blindResult.getBlindingSecret());
+    assertNotEmpty("Deblinded password", deblindedPassword1);
+
+    ProofKeys proofKeys = new ProofKeys(getProofKeys1());
+    boolean verified = this.pythiaCrypto.verify(transformResponse1.getTransformedPassword(),
+        blindResult.getBlindedPassword(), salt, proofKeys.getCurrentKey().getData(),
+        transformResponse1.getProof().getC(), transformResponse1.getProof().getU());
+    assertTrue(verified);
+
+    Thread.sleep(2000);
+    TransformResponse transformResponse2 = this.client.transformPassword(salt,
+        blindResult.getBlindedPassword(), version, includeProof, token);
+    assertNotNull(transformResponse2);
+    assertNotEmpty("Transformed password", transformResponse2.getTransformedPassword());
+    assertNotNull(transformResponse1.getProof());
+    assertNotEmpty("Proof value C", transformResponse2.getProof().getC());
+    assertNotEmpty("Proof value U", transformResponse2.getProof().getU());
+    assertFalse(
+        Arrays.equals(transformResponse1.getProof().getC(), transformResponse2.getProof().getC()));
+    assertFalse(
+        Arrays.equals(transformResponse1.getProof().getU(), transformResponse2.getProof().getU()));
+
+    byte[] deblindedPassword2 = this.pythiaCrypto
+        .deblind(transformResponse2.getTransformedPassword(), blindResult.getBlindingSecret());
+    assertNotEmpty("Deblinded password", deblindedPassword2);
+    assertArrayEquals(deblindedPassword1, deblindedPassword2);
+
+    verified = this.pythiaCrypto.verify(transformResponse2.getTransformedPassword(),
+        blindResult.getBlindedPassword(), salt, proofKeys.getCurrentKey().getData(),
+        transformResponse2.getProof().getC(), transformResponse2.getProof().getU());
+    assertTrue(verified);
   }
 
   @Test
   public void transformPassword_noProof() throws VirgilPythiaServiceException, CryptoException {
+    // YTC-9
     byte[] salt = this.pythiaCrypto.generateSalt();
     String password = UUID.randomUUID().toString();
     int version = 1;
     boolean includeProof = false;
+    String token = this.accessTokenProvider
+        .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+        .stringRepresentation();
 
     BlindResult blindResult = this.pythiaCrypto.blind(password);
 
     TransformResponse transformResponse = this.client.transformPassword(salt,
-        blindResult.getBlindedPassword(), version, includeProof,
-        this.accessTokenProvider
-            .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
-            .stringRepresentation());
+        blindResult.getBlindedPassword(), version, includeProof, token);
     assertNotNull(transformResponse);
     assertNotEmpty("Transformed password", transformResponse.getTransformedPassword());
     assertNull(transformResponse.getProof());
+
+    byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResponse.getTransformedPassword(),
+        blindResult.getBlindingSecret());
+    assertNotEmpty("Deblinded password", deblindedPassword);
+  }
+
+  @Test
+  public void transformPassword_noProof_multipassword()
+      throws VirgilPythiaServiceException, CryptoException, InterruptedException {
+    // YTC-12
+    byte[] salt = this.pythiaCrypto.generateSalt();
+    int version = 1;
+    boolean includeProof = false;
+    String token = this.accessTokenProvider
+        .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+        .stringRepresentation();
+
+    BlindResult blindResult1 = this.pythiaCrypto.blind("some password");
+    TransformResponse transformResponse1 = this.client.transformPassword(salt,
+        blindResult1.getBlindedPassword(), version, includeProof, token);
+    byte[] deblindedPassword1 = this.pythiaCrypto
+        .deblind(transformResponse1.getTransformedPassword(), blindResult1.getBlindingSecret());
+
+    Thread.sleep(2000);
+    BlindResult blindResult2 = this.pythiaCrypto.blind("some password");
+    TransformResponse transformResponse2 = this.client.transformPassword(salt,
+        blindResult2.getBlindedPassword(), version, includeProof, token);
+    byte[] deblindedPassword2 = this.pythiaCrypto
+        .deblind(transformResponse2.getTransformedPassword(), blindResult2.getBlindingSecret());
+    assertArrayEquals(deblindedPassword1, deblindedPassword2);
+
+    Thread.sleep(2000);
+    BlindResult blindResult3 = this.pythiaCrypto.blind("another password");
+    TransformResponse transformResponse3 = this.client.transformPassword(salt,
+        blindResult3.getBlindedPassword(), version, includeProof, token);
+    byte[] deblindedPassword3 = this.pythiaCrypto
+        .deblind(transformResponse3.getTransformedPassword(), blindResult3.getBlindingSecret());
+    assertFalse(Arrays.equals(deblindedPassword2, deblindedPassword3));
+  }
+
+  @Test
+  public void generateSeed_nullBrainKeyId() throws CryptoException, VirgilPythiaServiceException {
+    String token = this.accessTokenProvider.getToken(new TokenContext("seed", false, "pythia"))
+        .stringRepresentation();
+
+    BlindResult blindResult = this.pythiaCrypto.blind("some password");
+    byte[] seed = this.client.generateSeed(blindResult.getBlindedPassword(), null, token);
+    assertNotNull(seed);
+    assertNotEquals(0, seed.length);
   }
 
 }

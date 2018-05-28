@@ -42,8 +42,6 @@ import com.virgilsecurity.pythia.model.exception.TransformVerificationException;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
 /**
@@ -71,7 +69,7 @@ public class PythiaExamplesTest extends ConfigurableTest {
                                                      * Remove this line from code snippet
                                                      */
         .setAppId(getAppId()).setApiPublicKeyIdentifier(getApiPublicKeyId())
-        .setApiKey(getApiPrivateKeyStr()).setProofKeys(Arrays.asList(getProofKey()))
+        .setApiKey(getApiPrivateKeyStr()).setProofKeys(getProofKeys1())
         .setPythiaCrypto(new VirgilPythiaCrypto()).build();
 
     Pythia pythia = new Pythia(context);

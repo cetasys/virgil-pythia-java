@@ -37,14 +37,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.virgilsecurity.pythia.model.exception.ProofKeyNotFoundException;
 import com.virgilsecurity.pythia.model.exception.ProofKeyParseException;
 import com.virgilsecurity.sdk.utils.Base64;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -55,6 +59,13 @@ import org.junit.Test;
  */
 public class ProofKeysTest {
 
+  private SampleDataHolder sample;
+
+  @Before
+  public void setup() {
+    sample = new SampleDataHolder("com/virgilsecurity/pythia/pythia-sdk.json");
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void instantiate_null() {
     new ProofKeys(null);
@@ -63,12 +74,16 @@ public class ProofKeysTest {
   @SuppressWarnings("unchecked")
   @Test(expected = IllegalArgumentException.class)
   public void instantiate_empty() {
+    // YTC-7
     new ProofKeys(Collections.EMPTY_LIST);
   }
 
   @Test(expected = ProofKeyParseException.class)
   public void instantiate_trash() {
-    new ProofKeys(Arrays.asList("12345"));
+    // YTC-8
+    String invalidProofKey = this.sample.get("kInvalidProofKey");
+
+    new ProofKeys(Arrays.asList(invalidProofKey));
   }
 
   @Test
@@ -117,21 +132,29 @@ public class ProofKeysTest {
 
   @Test
   public void instantiate_unorderedKeys() {
-    List<String> keys = Arrays.asList("PK.1.a2V5IDEgZGF0YQ==", "PK.2.a2V5IDIgZGF0YQ==",
-        "PK.0.a2V5IDAgZGF0YQ==");
+    // YTC-6
+    JsonArray array = this.sample.getArray("kProofKeys");
+    List<String> keys = new ArrayList<>(array.size());
+    for (JsonElement jsonElement : array) {
+      String key = jsonElement.getAsString();
+      keys.add(key);
+    }
     ProofKeys proofKeys = new ProofKeys(keys);
 
-    ProofKey key = proofKeys.getCurrentKey();
-    verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
+    ProofKey key = proofKeys.getProofKey(1);
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 1);
 
     key = proofKeys.getProofKey(2);
-    verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 2);
 
-    key = proofKeys.getProofKey(0);
-    verifyKey(key, "a2V5IDAgZGF0YQ==", 0);
+    key = proofKeys.getProofKey(4);
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 4);
 
-    key = proofKeys.getProofKey(1);
-    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
+    key = proofKeys.getProofKey(5);
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 5);
+
+    key = proofKeys.getCurrentKey();
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 5);
 
     try {
       key = proofKeys.getProofKey(3);

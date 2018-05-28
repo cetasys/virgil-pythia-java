@@ -33,6 +33,10 @@
 
 package com.virgilsecurity.pythia.crypto;
 
+import com.virgilsecurity.sdk.crypto.KeysType;
+import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
+import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
+
 /**
  * Interface for all crypto operation needed by Pythia.
  * 
@@ -104,5 +108,18 @@ public interface PythiaCrypto {
    * @return the random salt.
    */
   byte[] generateSalt();
+
+  /**
+   * Generates key pair of given type using random seed.
+   * 
+   * @param type
+   *          type of key pair.
+   * @param seed
+   *          random seed.
+   * @return generated key pair.
+   * @throws CryptoException
+   *           if crypto operation failed.
+   */
+  VirgilKeyPair generateKeyPair(KeysType type, byte[] seed) throws CryptoException;
 
 }

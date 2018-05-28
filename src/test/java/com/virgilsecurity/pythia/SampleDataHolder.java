@@ -31,50 +31,80 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.virgilsecurity.pythia.client;
+package com.virgilsecurity.pythia;
 
-import com.virgilsecurity.pythia.model.TransformResponse;
-import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
+import javax.xml.bind.DatatypeConverter;
 
 /**
- * Interface to abstract from Pythia server interactions.
+ * This class could store JSON sample data and provide common operations with a sample.
  * 
- * @author Danylo Oliinyk
+ * @author Andrii Iakovenko
  *
  */
-public interface PythiaClient {
+public class SampleDataHolder {
+
+  private JsonObject sampleJson;
 
   /**
-   * Make call to Pythia service to transform password.
-   * 
-   * @param salt
-   *          the salt.
-   * @param blindedPassword
-   *          the blinded password.
-   * @param version
-   *          the key version.
-   * @param includeProof
-   *          set this flag to {@code true} if you need proof data in request.
-   * @param token
-   *          the authorization token.
-   * @return the plain model representing response from Pythia server.
-   * @throws VirgilPythiaServiceException
-   *           if transformPassword is not successful.
+   * Create a new instance of {@link SampleDataHolder}.
+   *
+   * @param path
+   *          the path to the sample resource.
    */
-  TransformResponse transformPassword(byte[] salt, byte[] blindedPassword, Integer version,
-      boolean includeProof, String token) throws VirgilPythiaServiceException;
+  public SampleDataHolder(String path) {
+    sampleJson = (JsonObject) new JsonParser()
+        .parse(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(path)));
+  }
 
   /**
-   * Generates seed using given blinded password and brainkey id.
+   * Get sample data as a string.
    * 
-   * @param blindedPassword
-   *          blinded password.
-   * @param brainKeyId
-   *          brainkey id.
-   * @param token
-   *          authorization token.
-   * @return Generated seed.
+   * @param key
+   *          the key.
+   * @return a value by key.
    */
-  byte[] generateSeed(byte[] blindedPassword, String brainKeyId, String token)
-      throws VirgilPythiaServiceException;
+  public String get(String key) {
+    return this.sampleJson.get(key).getAsString();
+  }
+
+  /**
+   * Get sample data as an array.
+   * 
+   * @param key
+   *          the key.
+   * @return an array by key.
+   */
+  public JsonArray getArray(String key) {
+    return this.sampleJson.get(key).getAsJsonArray();
+  }
+
+  /**
+   * Get sample data as byte array.
+   * 
+   * @param key
+   *          the key.
+   * @return byte array by key.
+   */
+  public byte[] getBytes(String key) {
+    return this.sampleJson.get(key).getAsString().getBytes(StandardCharsets.UTF_8);
+  }
+
+  /**
+   * Get sample data as byte array decoded from HEX-string.
+   * 
+   * @param key
+   *          the key.
+   * @return byte array.
+   */
+  public byte[] getHexBytes(String key) {
+    return DatatypeConverter.parseHexBinary(this.sampleJson.get(key).getAsString());
+  }
+
 }

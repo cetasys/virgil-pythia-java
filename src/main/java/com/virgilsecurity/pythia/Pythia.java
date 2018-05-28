@@ -115,7 +115,7 @@ public class Pythia {
       throw new IllegalArgumentException("Already migrated");
     }
     if (prevVersion != breachProofPassword.getVersion()) {
-      throw new IllegalArgumentException("Wrong breach proof password version");
+      throw new IllegalArgumentException("Wrong user version");
     }
 
     byte[] newDeblindedPassword = this.pythiaCrypto

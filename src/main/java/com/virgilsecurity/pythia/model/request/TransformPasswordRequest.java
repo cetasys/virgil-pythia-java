@@ -37,7 +37,7 @@ import com.google.gson.annotations.SerializedName;
 import com.virgilsecurity.sdk.utils.Validator;
 
 /**
- * This class represents a response from Virgil Pythia service.
+ * This class represents a request to Virgil Pythia service to transform password.
  * 
  * @author Danylo Oliinyk
  *

@@ -35,6 +35,10 @@ package com.virgilsecurity.pythia.crypto;
 
 import com.virgilsecurity.crypto.VirgilPythia;
 import com.virgilsecurity.crypto.VirgilPythiaBlindResult;
+import com.virgilsecurity.sdk.crypto.KeysType;
+import com.virgilsecurity.sdk.crypto.VirgilCrypto;
+import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
+import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
 
 import java.util.Random;
@@ -47,6 +51,7 @@ import java.util.Random;
  */
 public class VirgilPythiaCrypto implements PythiaCrypto {
 
+  private VirgilCrypto virgilCrypto;
   private VirgilPythia virgilPythia;
   private Random random;
 
@@ -55,6 +60,7 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    *
    */
   public VirgilPythiaCrypto() {
+    this.virgilCrypto = new VirgilCrypto();
     this.virgilPythia = new VirgilPythia();
     this.random = new Random();
   }
@@ -114,6 +120,21 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
     byte[] rndBytes = new byte[32];
     random.nextBytes(rndBytes);
     return rndBytes;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * com.virgilsecurity.pythia.crypto.PythiaCrypto#generateKeyPair(com.virgilsecurity.sdk.crypto.
+   * KeysType, byte[])
+   */
+  @Override
+  public VirgilKeyPair generateKeyPair(KeysType type, byte[] seed) throws CryptoException {
+    com.virgilsecurity.crypto.VirgilKeyPair keyPair = com.virgilsecurity.crypto.VirgilKeyPair
+        .generateFromKeyMaterial(VirgilCrypto.toVirgilKeyPairType(type), seed);
+
+    return this.virgilCrypto.wrapKeyPair(keyPair.privateKey(), keyPair.publicKey());
   }
 
 }

@@ -76,9 +76,10 @@
   </developers>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.virgil-sdk>5.0.2</version.virgil-sdk>
+    <version.virgil-sdk>5.0.3-SNAPSHOT</version.virgil-sdk>
     <version.commons-lang>2.6</version.commons-lang>
     <version.junit>4.12</version.junit>
+    <version.mockito>2.13.0</version.mockito>
     <gpg.keyname>empty</gpg.keyname>
   </properties>
   <dependencyManagement>
@@ -106,6 +107,12 @@
         <version>${version.junit}</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${version.mockito}</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -125,6 +132,10 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
     </dependency>
   </dependencies>
   <build>

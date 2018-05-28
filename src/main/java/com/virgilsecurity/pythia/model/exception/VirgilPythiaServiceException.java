@@ -88,6 +88,18 @@ public class VirgilPythiaServiceException extends VirgilException {
   }
 
   /**
+   * Create a new instance of {@link VirgilPythiaServiceException}.
+   * 
+   * @param message
+   *          the detail message
+   * @param cause
+   *          the cause
+   */
+  public VirgilPythiaServiceException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  /**
    * Get the error code.
    * 
    * @return the error code.

@@ -31,50 +31,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.virgilsecurity.pythia.client;
+package com.virgilsecurity.pythia.model;
 
-import com.virgilsecurity.pythia.model.TransformResponse;
-import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
+import com.google.gson.annotations.SerializedName;
 
 /**
- * Interface to abstract from Pythia server interactions.
+ * This class represents a response from Virgil Pythia service.
  * 
- * @author Danylo Oliinyk
+ * @author Andrii Iakovenko
  *
  */
-public interface PythiaClient {
+public class GenerateSeedResponse {
+
+  @SerializedName("seed")
+  private byte[] seed;
 
   /**
-   * Make call to Pythia service to transform password.
+   * Get the seed.
    * 
-   * @param salt
-   *          the salt.
-   * @param blindedPassword
-   *          the blinded password.
-   * @param version
-   *          the key version.
-   * @param includeProof
-   *          set this flag to {@code true} if you need proof data in request.
-   * @param token
-   *          the authorization token.
-   * @return the plain model representing response from Pythia server.
-   * @throws VirgilPythiaServiceException
-   *           if transformPassword is not successful.
+   * @return the seed
    */
-  TransformResponse transformPassword(byte[] salt, byte[] blindedPassword, Integer version,
-      boolean includeProof, String token) throws VirgilPythiaServiceException;
+  public byte[] getSeed() {
+    return seed;
+  }
 
-  /**
-   * Generates seed using given blinded password and brainkey id.
-   * 
-   * @param blindedPassword
-   *          blinded password.
-   * @param brainKeyId
-   *          brainkey id.
-   * @param token
-   *          authorization token.
-   * @return Generated seed.
-   */
-  byte[] generateSeed(byte[] blindedPassword, String brainKeyId, String token)
-      throws VirgilPythiaServiceException;
 }

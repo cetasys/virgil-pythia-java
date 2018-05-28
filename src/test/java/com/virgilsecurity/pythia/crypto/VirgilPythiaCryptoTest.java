@@ -39,19 +39,21 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.virgilsecurity.crypto.VirgilPythia;
 import com.virgilsecurity.crypto.VirgilPythiaTransformResult;
 import com.virgilsecurity.crypto.VirgilPythiaTransformationKeyPair;
+import com.virgilsecurity.pythia.SampleDataHolder;
+import com.virgilsecurity.sdk.crypto.KeysType;
+import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
+import com.virgilsecurity.sdk.crypto.VirgilPrivateKey;
+import com.virgilsecurity.sdk.crypto.VirgilPublicKey;
+import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.xml.bind.DatatypeConverter;
+import java.util.UUID;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
@@ -67,21 +69,19 @@ public class VirgilPythiaCryptoTest {
 
   private PythiaCrypto pythiaCrypto;
   private VirgilPythia pythia;
-  private JsonObject sampleJson;
+  private SampleDataHolder sample;
 
   @Before
   public void setup() {
     this.pythiaCrypto = new VirgilPythiaCrypto();
     this.pythia = new VirgilPythia();
 
-    sampleJson = (JsonObject) new JsonParser()
-        .parse(new InputStreamReader(this.getClass().getClassLoader()
-            .getResourceAsStream("com/virgilsecurity/pythia/crypto/pythia-crypto.json")));
+    this.sample = new SampleDataHolder("com/virgilsecurity/pythia/crypto/pythia-crypto.json");
   }
 
   @Test
   public void blind() {
-    String password = get("kPassword");
+    String password = this.sample.get("kPassword");
 
     Set<BlindResult> blindResults = new HashSet<>();
     for (int i = 0; i < 10; i++) {
@@ -100,12 +100,12 @@ public class VirgilPythiaCryptoTest {
 
   @Test
   public void deblind() {
-    String password = get("kPassword");
-    byte[] transformationKeyId = getBytes("kTransformationKeyID");
-    byte[] pythiaSecret = getBytes("kPythiaSecret");
-    byte[] pythiaScopeSecret = getBytes("kPythiaScopeSecret");
-    byte[] tweek = getBytes("kTweek");
-    byte[] deblindedPassword = getHexBytes("kDeblindedPassword");
+    String password = this.sample.get("kPassword");
+    byte[] transformationKeyId = this.sample.getBytes("kTransformationKeyID");
+    byte[] pythiaSecret = this.sample.getBytes("kPythiaSecret");
+    byte[] pythiaScopeSecret = this.sample.getBytes("kPythiaScopeSecret");
+    byte[] tweek = this.sample.getBytes("kTweek");
+    byte[] deblindedPassword = this.sample.getHexBytes("kDeblindedPassword");
 
     BlindResult blindResult = this.pythiaCrypto.blind(password);
 
@@ -140,15 +140,25 @@ public class VirgilPythiaCryptoTest {
     assertFalse(Arrays.equals(salt1, salt2));
   }
 
-  private String get(String key) {
-    return this.sampleJson.get(key).getAsString();
+  @Test
+  public void generateKeyPair() throws CryptoException {
+    byte[] seed = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+
+    VirgilKeyPair keyPair = this.pythiaCrypto.generateKeyPair(KeysType.Default, seed);
+    assertNotNull(keyPair);
+
+    VirgilPrivateKey privateKey = keyPair.getPrivateKey();
+    assertNotNull(privateKey);
+    assertNotNull(privateKey.getIdentifier());
+    assertNotNull(privateKey.getRawKey());
+
+    VirgilPublicKey publicKey = keyPair.getPublicKey();
+    assertNotNull(publicKey);
+    assertNotNull(publicKey.getIdentifier());
+    assertNotNull(publicKey.getRawKey());
+
+    assertArrayEquals(privateKey.getIdentifier(), publicKey.getIdentifier());
+    assertFalse(Arrays.equals(privateKey.getRawKey(), publicKey.getRawKey()));
   }
 
-  private byte[] getBytes(String key) {
-    return this.sampleJson.get(key).getAsString().getBytes(StandardCharsets.UTF_8);
-  }
-
-  private byte[] getHexBytes(String key) {
-    return DatatypeConverter.parseHexBinary(this.sampleJson.get(key).getAsString());
-  }
 }

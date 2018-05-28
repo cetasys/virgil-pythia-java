@@ -33,9 +33,11 @@
 
 package com.virgilsecurity.pythia.client;
 
+import com.virgilsecurity.pythia.model.GenerateSeedResponse;
 import com.virgilsecurity.pythia.model.TransformResponse;
 import com.virgilsecurity.pythia.model.exception.ThrottlingException;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
+import com.virgilsecurity.pythia.model.request.GenerateSeedRequest;
 import com.virgilsecurity.pythia.model.request.TransformPasswordRequest;
 import com.virgilsecurity.sdk.common.ErrorResponse;
 import com.virgilsecurity.sdk.common.HttpError;
@@ -44,6 +46,7 @@ import com.virgilsecurity.sdk.utils.StringUtils;
 import com.virgilsecurity.sdk.utils.Validator;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -100,71 +103,113 @@ public final class VirgilPythiaClient implements PythiaClient {
 
     TransformPasswordRequest request = new TransformPasswordRequest(salt, blindedPassword, version,
         includeProof);
-    String body = ConvertionUtils.serializeToJson(request);
 
     try {
-      // Create connection
-      URL url = new URL(baseUrl, "/pythia/v1/password");
-      HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-      try {
-        urlConnection.setRequestMethod("POST");
-        urlConnection.setDoOutput(true);
-        urlConnection.setUseCaches(false);
-        urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-
-        // Set authorization token
-        if (!StringUtils.isBlank(token)) {
-          urlConnection.setRequestProperty("Authorization", "Virgil " + token);
-        } else {
-          LOGGER.warning("Provided token is blank");
-        }
-
-        // Send payload
-        urlConnection.getOutputStream().write(ConvertionUtils.toBytes(body));
-
-        if (urlConnection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
-          LOGGER.warning("Http error occurred...");
-          HttpError httpError = new HttpError(urlConnection.getResponseCode(),
-              urlConnection.getResponseMessage());
-
-          // Get error code from request
-          try (InputStream in = new BufferedInputStream(urlConnection.getErrorStream())) {
-            LOGGER.fine("Trying to get error info...");
-            String errBody = ConvertionUtils.toString(in);
-            if (StringUtils.isBlank(errBody)) {
-              throw new VirgilPythiaServiceException(httpError);
-            } else {
-              ErrorResponse error = ConvertionUtils.getGson().fromJson(errBody,
-                  ErrorResponse.class);
-              if (error.getCode() == 60007) {
-                throw new ThrottlingException(error.getCode(), error.getMessage(), httpError);
-              } else {
-                throw new VirgilPythiaServiceException(error.getCode(), error.getMessage(),
-                    httpError);
-              }
-            }
-          }
-        } else {
-          LOGGER.fine("Extracting response body...");
-          try (InputStream instream = new BufferedInputStream(urlConnection.getInputStream())) {
-            String responseBody = ConvertionUtils.toString(instream);
-            TransformResponse transformResponse = ConvertionUtils.getGson().fromJson(responseBody,
-                TransformResponse.class);
-            return transformResponse;
-          }
-        }
-      } finally {
-        LOGGER.fine("Disconnecting...");
-        urlConnection.disconnect();
-      }
+      HttpURLConnection urlConnection = createConnection("/pythia/v1/password", token);
+      return execute(urlConnection, request, TransformResponse.class);
     } catch (VirgilPythiaServiceException e) {
       LOGGER.log(Level.SEVERE, "Pythia service returned an error", e);
       throw e;
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Some service issue occurred during request executing", e);
       throw new VirgilPythiaServiceException(
-          "VirgilPythiaClient -> transformPassword was not successful");
+          "VirgilPythiaClient -> transformPassword was not successful", e);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.virgilsecurity.pythia.client.PythiaClient#generateSeed(byte[], java.lang.String,
+   * java.lang.String)
+   */
+  @Override
+  public byte[] generateSeed(byte[] blindedPassword, String brainKeyId, String token)
+      throws VirgilPythiaServiceException {
+    GenerateSeedRequest request = new GenerateSeedRequest(blindedPassword, brainKeyId);
+
+    try {
+      HttpURLConnection urlConnection = createConnection("pythia/v1/brainkey", token);
+      return execute(urlConnection, request, GenerateSeedResponse.class).getSeed();
+    } catch (VirgilPythiaServiceException e) {
+      LOGGER.log(Level.SEVERE, "Pythia service returned an error", e);
+      throw e;
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Some service issue occurred during request executing", e);
+      throw new VirgilPythiaServiceException(
+          "VirgilPythiaClient -> generateSeed was not successful", e);
+    }
+  }
+
+  /**
+   * Create HTTP connection to Pythia service.
+   * 
+   * @param spec
+   *          the {@code String} to parse as a URL.
+   * @param token
+   *          access token.
+   * @return the created connection.
+   * @throws IOException
+   *           if connection can't be created.
+   */
+  private HttpURLConnection createConnection(String spec, String token) throws IOException {
+    // Create connection
+    URL url = new URL(baseUrl, spec);
+    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+    urlConnection.setRequestMethod("POST");
+    urlConnection.setDoOutput(true);
+    urlConnection.setUseCaches(false);
+    urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+    // Set authorization token
+    if (!StringUtils.isBlank(token)) {
+      urlConnection.setRequestProperty("Authorization", "Virgil " + token);
+    } else {
+      LOGGER.warning("Provided token is blank");
+    }
+
+    return urlConnection;
+  }
+
+  private <T> T execute(HttpURLConnection urlConnection, Object requestBody, Class<T> clazz)
+      throws IOException, VirgilPythiaServiceException {
+    String body = ConvertionUtils.serializeToJson(requestBody);
+    try {
+      // Send payload
+      urlConnection.getOutputStream().write(ConvertionUtils.toBytes(body));
+
+      if (urlConnection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
+        LOGGER.warning("Http error occurred...");
+        HttpError httpError = new HttpError(urlConnection.getResponseCode(),
+            urlConnection.getResponseMessage());
+
+        // Get error code from request
+        try (InputStream in = new BufferedInputStream(urlConnection.getErrorStream())) {
+          LOGGER.fine("Trying to get error info...");
+          String errBody = ConvertionUtils.toString(in);
+          if (StringUtils.isBlank(errBody)) {
+            throw new VirgilPythiaServiceException(httpError);
+          } else {
+            ErrorResponse error = ConvertionUtils.getGson().fromJson(errBody, ErrorResponse.class);
+            if (error.getCode() == 60007) {
+              throw new ThrottlingException(error.getCode(), error.getMessage(), httpError);
+            } else {
+              throw new VirgilPythiaServiceException(error.getCode(), error.getMessage(),
+                  httpError);
+            }
+          }
+        }
+      } else {
+        LOGGER.fine("Extracting response body...");
+        try (InputStream instream = new BufferedInputStream(urlConnection.getInputStream())) {
+          String responseBody = ConvertionUtils.toString(instream);
+          T response = ConvertionUtils.getGson().fromJson(responseBody, clazz);
+          return response;
+        }
+      }
+    } finally {
+      LOGGER.fine("Disconnecting...");
+      urlConnection.disconnect();
     }
   }
 }

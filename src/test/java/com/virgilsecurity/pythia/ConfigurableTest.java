@@ -44,6 +44,9 @@ import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Base class for tests which uses environment-specific parameters.
  * 
@@ -59,7 +62,10 @@ public class ConfigurableTest {
   private VirgilPrivateKey apiPrivateKey;
   private VirgilPublicKey apiPublicKey;
   private String apiPublicKeyId;
-  private String proofKey;
+  private String proofKeys1;
+  private String proofKeys2;
+  private String proofKeys3;
+  private String updateToken2to3;
 
   /**
    * Create a new instance of {@link ConfigurableTest}.
@@ -173,18 +179,63 @@ public class ConfigurableTest {
   }
 
   /**
-   * Get the proof key.
+   * Get the single proof key.
    * 
    * @return the proof key.
    */
-  public String getProofKey() {
-    if (this.proofKey == null) {
-      this.proofKey = getPropertyByName("PROOF_KEY");
-      if (this.proofKey == null) {
-        fail("Proof key is not defined");
+  public List<String> getProofKeys1() {
+    if (this.proofKeys1 == null) {
+      this.proofKeys1 = getPropertyByName("PROOF_KEYS1");
+      if (this.proofKeys1 == null) {
+        fail("PROOF_KEYS1 is not defined");
       }
     }
-    return this.proofKey;
+    return Arrays.asList(this.proofKeys1);
+  }
+
+  /**
+   * Get the proof keys pair.
+   * 
+   * @return the proof keys.
+   */
+  public List<String> getProofKeys2() {
+    if (this.proofKeys2 == null) {
+      this.proofKeys2 = getPropertyByName("PROOF_KEYS2");
+      if (this.proofKeys2 == null) {
+        fail("PROOF_KEYS2 is not defined");
+      }
+    }
+    return Arrays.asList(this.proofKeys2.split(","));
+  }
+
+  /**
+   * Get the proof keys trinity.
+   * 
+   * @return the proof keys.
+   */
+  public List<String> getProofKeys3() {
+    if (this.proofKeys3 == null) {
+      this.proofKeys3 = getPropertyByName("PROOF_KEYS3");
+      if (this.proofKeys3 == null) {
+        fail("PROOF_KEYS3 is not defined");
+      }
+    }
+    return Arrays.asList(this.proofKeys3.split(","));
+  }
+
+  /**
+   * Get update token from version 2 to version3.
+   * 
+   * @return the update token.
+   */
+  public String getUpdateToken2to3() {
+    if (this.updateToken2to3 == null) {
+      this.updateToken2to3 = getPropertyByName("UPDATE_TOKEN_2_3");
+      if (this.updateToken2to3 == null) {
+        fail("UPDATE_TOKEN_2_3 is not defined");
+      }
+    }
+    return this.updateToken2to3;
   }
 
   /**

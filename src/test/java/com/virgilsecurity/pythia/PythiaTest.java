@@ -38,6 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.virgilsecurity.crypto.VirgilPythia;
 import com.virgilsecurity.crypto.VirgilPythiaProveResult;
@@ -55,7 +56,9 @@ import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,40 +74,144 @@ public class PythiaTest extends ConfigurableTest {
   private Pythia pythia;
   private PythiaCrypto pythiaCrypto;
   private String password;
+  private SampleDataHolder sample;
 
-  /**
-   * Setup test.
-   * 
-   * @throws InterruptedException
-   *           if thread is interrupted.
-   */
   @Before
-  public void setup() throws InterruptedException {
+  public void setup() {
+    sample = new SampleDataHolder("com/virgilsecurity/pythia/pythia-sdk.json");
+  }
+
+  private void setup(List<String> proofKeys) {
+    setup(new VirgilPythiaCrypto(), proofKeys);
+  }
+
+  private void setup(PythiaCrypto pythiaCrypto, List<String> proofKeys) {
     PythiaContext context = new PythiaContext.Builder().setAppId(getAppId())
         .setApiKey(getApiPrivateKeyStr()).setApiPublicKeyIdentifier(getApiPublicKeyId())
-        .setProofKeys(Arrays.asList(getProofKey())).setPythiaCrypto(new VirgilPythiaCrypto())
+        .setProofKeys(proofKeys).setPythiaCrypto(pythiaCrypto)
         .setPythiaServiceUrl(getPythiaServiceUrl()).build();
 
     this.pythia = new Pythia(context);
     this.pythiaCrypto = new VirgilPythiaCrypto();
-    this.password = UUID.randomUUID().toString();
+    this.password = "some password";
 
-    Thread.sleep(2000);
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
   @Test
   public void createBreachProofPassword()
       throws CryptoException, VirgilPythiaServiceException, TransformVerificationException {
-    BreachProofPassword breachProofPassword = this.pythia.createBreachProofPassword(this.password);
-    assertNotNull(breachProofPassword);
-    assertNotEmpty("Salt", breachProofPassword.getSalt());
-    assertNotEmpty("Deblinded password", breachProofPassword.getDeblindedPassword());
-    assertEquals(1, breachProofPassword.getVersion());
+    // YTC-13
+    setup(getProofKeys1());
+
+    BreachProofPassword bpp1 = this.pythia.createBreachProofPassword(this.password);
+    assertNotNull(bpp1);
+    assertNotEmpty("Salt", bpp1.getSalt());
+    assertEquals(32, bpp1.getSalt().length);
+    assertNotEmpty("Deblinded password", bpp1.getDeblindedPassword());
+    assertTrue(bpp1.getDeblindedPassword().length > 300);
+    assertEquals(1, bpp1.getVersion());
+
+    BreachProofPassword bpp2 = this.pythia.createBreachProofPassword(this.password);
+    assertNotNull(bpp2);
+    assertNotEmpty("Salt", bpp2.getSalt());
+    assertEquals(32, bpp2.getSalt().length);
+    assertNotEmpty("Deblinded password", bpp2.getDeblindedPassword());
+    assertTrue(bpp2.getDeblindedPassword().length > 300);
+    assertEquals(1, bpp2.getVersion());
+
+    assertFalse(Arrays.equals(bpp1.getSalt(), bpp2.getSalt()));
+    assertFalse(Arrays.equals(bpp1.getDeblindedPassword(), bpp2.getDeblindedPassword()));
+  }
+
+  @Test
+  public void createBreachProofPassword_3keys()
+      throws CryptoException, VirgilPythiaServiceException, TransformVerificationException {
+    // YTC-14
+    setup(getProofKeys3());
+
+    BreachProofPassword bpp = this.pythia.createBreachProofPassword(this.password);
+    assertEquals(3, bpp.getVersion());
+  }
+
+  @Test
+  public void verifyBreachProofPassword() throws CryptoException, VirgilPythiaServiceException,
+      TransformVerificationException, InterruptedException {
+    // YTC-15
+    setup(getProofKeys2());
+
+    BreachProofPassword bpp = this.pythia.createBreachProofPassword(password);
+    assertNotNull(bpp);
+
+    Thread.sleep(2000);
+    assertTrue(this.pythia.verifyBreachProofPassword(this.password, bpp, false));
+
+    Thread.sleep(2000);
+    assertTrue(this.pythia.verifyBreachProofPassword(this.password, bpp, true));
+
+    Thread.sleep(2000);
+    assertFalse(this.pythia.verifyBreachProofPassword("other password", bpp, false));
+
+    Thread.sleep(2000);
+    assertFalse(this.pythia.verifyBreachProofPassword("other password", bpp, true));
+  }
+
+  @Test
+  public void verifyBreachProofPassword_stubbedCrypto() throws CryptoException,
+      VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
+    // YTC-16
+    final AtomicBoolean ab = new AtomicBoolean(true);
+    setup(new VirgilPythiaCrypto() {
+      /*
+       * (non-Javadoc)
+       * 
+       * @see com.virgilsecurity.pythia.crypto.VirgilPythiaCrypto#verify(byte[], byte[], byte[],
+       * byte[], byte[], byte[])
+       */
+      @Override
+      public boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak,
+          byte[] transformationPublicKey, byte[] proofC, byte[] proofU) {
+        boolean result = ab.get();
+        ab.set(false);
+        return result;
+      }
+    }, getProofKeys2());
+
+    BreachProofPassword bpp = this.pythia.createBreachProofPassword(password);
+    assertNotNull(bpp);
+
+    Thread.sleep(2000);
+    assertTrue(this.pythia.verifyBreachProofPassword(this.password, bpp, false));
+
+    Thread.sleep(2000);
+    try {
+      this.pythia.verifyBreachProofPassword(this.password, bpp, true);
+      fail();
+    } catch (Exception e) {
+      // Nothing to do here
+    }
+
+    Thread.sleep(2000);
+    assertFalse(this.pythia.verifyBreachProofPassword("other password", bpp, false));
+
+    Thread.sleep(2000);
+    try {
+      this.pythia.verifyBreachProofPassword("other password", bpp, true);
+      fail();
+    } catch (Exception e) {
+      // Nothing to do here
+    }
   }
 
   @Test
   public void verifyBreachProofPassword_noProve() throws CryptoException,
       VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
+    setup(getProofKeys1());
+
     BreachProofPassword breachProofPassword = this.pythia.createBreachProofPassword(password);
     assertNotNull(breachProofPassword);
 
@@ -117,6 +224,8 @@ public class PythiaTest extends ConfigurableTest {
   @Test
   public void verifyBreachProofPassword_withProve() throws CryptoException,
       VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
+    setup(getProofKeys1());
+
     BreachProofPassword breachProofPassword = this.pythia.createBreachProofPassword(password);
     assertNotNull(breachProofPassword);
 
@@ -129,6 +238,8 @@ public class PythiaTest extends ConfigurableTest {
   @Test
   public void verifyBreachProofPassword_wrongPasswordNoProve() throws CryptoException,
       VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
+    setup(getProofKeys1());
+
     BreachProofPassword breachProofPassword = this.pythia
         .createBreachProofPassword(UUID.randomUUID().toString());
     assertNotNull(breachProofPassword);
@@ -142,6 +253,8 @@ public class PythiaTest extends ConfigurableTest {
   @Test
   public void verifyBreachProofPassword_wrongPasswordWithProve() throws CryptoException,
       VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
+    setup(getProofKeys1());
+
     BreachProofPassword breachProofPassword = this.pythia
         .createBreachProofPassword(UUID.randomUUID().toString());
     assertNotNull(breachProofPassword);
@@ -155,6 +268,8 @@ public class PythiaTest extends ConfigurableTest {
   @Test
   public void updateBreachProofPassword() throws CryptoException, VirgilPythiaServiceException,
       TransformVerificationException, InterruptedException {
+    setup(getProofKeys1());
+
     String password = "password";
     String domain1 = "virgil.com";
     String username = "alice";
@@ -218,9 +333,93 @@ public class PythiaTest extends ConfigurableTest {
     }
   }
 
+  @Test
+  public void updateBreachProofPassword_twoPythias() throws CryptoException,
+      VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
+    // YTC-17
+    setup(getProofKeys2());
+
+    BreachProofPassword bpp1 = this.pythia.createBreachProofPassword(password);
+    assertNotNull(bpp1);
+    assertEquals(2, bpp1.getVersion());
+
+    Thread.sleep(2000);
+    setup(getProofKeys3());
+    BreachProofPassword bpp2 = this.pythia.updateBreachProofPassword(getUpdateToken2to3(), bpp1);
+    assertNotNull(bpp2);
+    assertArrayEquals(bpp1.getSalt(), bpp2.getSalt());
+    assertFalse(Arrays.equals(bpp1.getDeblindedPassword(), bpp2.getDeblindedPassword()));
+    assertEquals(3, bpp2.getVersion());
+
+    Thread.sleep(2000);
+    assertTrue(this.pythia.verifyBreachProofPassword(this.password, bpp1, false));
+
+    Thread.sleep(2000);
+    assertTrue(this.pythia.verifyBreachProofPassword(this.password, bpp2, false));
+  }
+
+  @Test
+  public void updateBreachProofPassword_alreadyMigrated() throws CryptoException,
+      VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
+    // YTC-18
+    setup(getProofKeys3());
+
+    BreachProofPassword bpp1 = this.pythia.createBreachProofPassword(password);
+    assertNotNull(bpp1);
+    assertEquals(3, bpp1.getVersion());
+
+    Thread.sleep(2000);
+    try {
+      this.pythia.updateBreachProofPassword(getUpdateToken2to3(), bpp1);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("Already migrated", e.getMessage());
+    }
+  }
+
+  @Test
+  public void updateBreachProofPassword_wrongUser() throws CryptoException,
+      VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
+    // YTC-19
+    setup(getProofKeys1());
+
+    BreachProofPassword bpp1 = this.pythia.createBreachProofPassword(password);
+    assertNotNull(bpp1);
+    assertEquals(1, bpp1.getVersion());
+
+    Thread.sleep(2000);
+    try {
+      this.pythia.updateBreachProofPassword(getUpdateToken2to3(), bpp1);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("Wrong user version", e.getMessage());
+    }
+  }
+
+  @Test
+  public void updateBreachProofPassword_incorrectTokenFormat() throws CryptoException,
+      VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
+    // YTC-20
+    setup(getProofKeys1());
+
+    BreachProofPassword bpp1 = this.pythia.createBreachProofPassword(password);
+    assertNotNull(bpp1);
+    assertEquals(1, bpp1.getVersion());
+
+    Thread.sleep(2000);
+    try {
+      this.pythia.updateBreachProofPassword(sample.get("kInvalidUpdateToken"), bpp1);
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertEquals("Update token has invalid format", e.getMessage());
+    }
+  }
+
   @Test(expected = ThrottlingException.class)
   public void throttling() throws CryptoException, VirgilPythiaServiceException,
       TransformVerificationException, InterruptedException {
+    setup(getProofKeys1());
+
     BreachProofPassword breachProofPassword = this.pythia.createBreachProofPassword(password);
     assertNotNull(breachProofPassword);
 
