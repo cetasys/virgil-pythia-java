@@ -34,15 +34,21 @@
 package com.virgilsecurity.pythia.client.brainkey;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import com.virgilsecurity.crypto.VirgilPythia;
+import com.virgilsecurity.crypto.VirgilPythiaTransformResult;
+import com.virgilsecurity.crypto.VirgilPythiaTransformationKeyPair;
 import com.virgilsecurity.pythia.ConfigurableTest;
+import com.virgilsecurity.pythia.SampleDataHolder;
 import com.virgilsecurity.pythia.brainkey.BrainKey;
 import com.virgilsecurity.pythia.brainkey.BrainKeyContext;
 import com.virgilsecurity.pythia.client.PythiaClient;
 import com.virgilsecurity.pythia.client.VirgilPythiaClient;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
 import com.virgilsecurity.pythia.crypto.VirgilPythiaCrypto;
+import com.virgilsecurity.pythia.model.TransformResponse;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.sdk.common.TimeSpan;
 import com.virgilsecurity.sdk.crypto.VirgilAccessTokenSigner;
@@ -52,8 +58,11 @@ import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.jwt.JwtGenerator;
 import com.virgilsecurity.sdk.jwt.accessProviders.GeneratorJwtProvider;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
+import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -70,14 +79,18 @@ public class BrainKeyTest extends ConfigurableTest {
   private static final String TEXT = "Lorem Ipsum is simply dummy text";
 
   private VirgilCrypto virgilCrypto;
+  private VirgilPythia virgilPythia;
   private PythiaCrypto pythiaCrypto;
   private PythiaClient pythiaClient;
   private BrainKey brainKey;
   private String identity;
 
+  private SampleDataHolder sample;
+
   @Before
   public void setup() {
     this.virgilCrypto = new VirgilCrypto();
+    this.virgilPythia = new VirgilPythia();
     this.pythiaCrypto = new VirgilPythiaCrypto();
 
     String baseUrl = getPythiaServiceUrl();
@@ -96,6 +109,8 @@ public class BrainKeyTest extends ConfigurableTest {
         .setAccessTokenProvider(accessTokenProvider).setPythiaCrypto(pythiaCrypto)
         .setPythiaClient(pythiaClient).build();
     this.brainKey = new BrainKey(context);
+
+    sample = new SampleDataHolder("com/virgilsecurity/pythia/brainkey.json");
   }
 
   @Test
@@ -108,6 +123,84 @@ public class BrainKeyTest extends ConfigurableTest {
     byte[] decryptedText = this.virgilCrypto.decrypt(encryptedText, keyPair.getPrivateKey());
 
     assertArrayEquals(data, decryptedText);
+  }
+
+  @Test
+  public void generateKeyPair_multipleKeys()
+      throws CryptoException, VirgilPythiaServiceException, InterruptedException {
+    // YTC-22
+    VirgilKeyPair keyPair1 = this.brainKey.generateKeyPair(sample.get("kPassword1"));
+
+    Thread.sleep(2000);
+    VirgilKeyPair keyPair2 = this.brainKey.generateKeyPair(sample.get("kPassword1"));
+    assertArrayEquals(keyPair1.getPrivateKey().getIdentifier(),
+        keyPair2.getPrivateKey().getIdentifier());
+
+    Thread.sleep(2000);
+    VirgilKeyPair keyPair3 = this.brainKey.generateKeyPair(sample.get("kPassword2"));
+    assertFalse(Arrays.equals(keyPair1.getPrivateKey().getIdentifier(),
+        keyPair3.getPrivateKey().getIdentifier()));
+
+    Thread.sleep(2000);
+    VirgilKeyPair keyPair4 = this.brainKey.generateKeyPair(sample.get("kPassword1"),
+        sample.get("kBrainKeyId"));
+    assertFalse(Arrays.equals(keyPair1.getPrivateKey().getIdentifier(),
+        keyPair4.getPrivateKey().getIdentifier()));
+  }
+
+  @Test
+  public void generateKeyPair_fakeClient() throws VirgilPythiaServiceException, CryptoException {
+    // YTC-21
+    PythiaClient mockedClient = new PythiaClient() {
+
+      @Override
+      public TransformResponse transformPassword(byte[] salt, byte[] blindedPassword,
+          Integer version, boolean includeProof, String token) throws VirgilPythiaServiceException {
+        return null;
+      }
+
+      @Override
+      public byte[] generateSeed(byte[] blindedPassword, String brainKeyId, String token)
+          throws VirgilPythiaServiceException {
+        byte[] transformationKeyId = sample.getBytes("kTransformationKeyId");
+        byte[] pythiaSecret = sample.getBytes("kSecret");
+        byte[] pythiaScopeSecret = sample.getBytes("kScopeSecret");
+        byte[] tweek = ("userId" + (brainKeyId == null ? "" : brainKeyId))
+            .getBytes(StandardCharsets.UTF_8);
+
+        VirgilPythiaTransformationKeyPair transformationKeyPair = virgilPythia
+            .computeTransformationKeyPair(transformationKeyId, pythiaSecret, pythiaScopeSecret);
+        VirgilPythiaTransformResult transformResult = virgilPythia.transform(blindedPassword, tweek,
+            transformationKeyPair.privateKey());
+
+        return transformResult.transformedPassword();
+      }
+    };
+
+    JwtGenerator generator = new JwtGenerator(getAppId(), getApiPrivateKey(), getApiPublicKeyId(),
+        TimeSpan.fromTime(1, TimeUnit.HOURS), new VirgilAccessTokenSigner());
+    AccessTokenProvider accessTokenProvider = new GeneratorJwtProvider(generator, identity);
+    BrainKeyContext context = new BrainKeyContext.Builder()
+        .setAccessTokenProvider(accessTokenProvider).setPythiaCrypto(pythiaCrypto)
+        .setPythiaClient(mockedClient).build();
+    BrainKey mockedBrainKey = new BrainKey(context);
+
+    VirgilKeyPair keyPair1 = mockedBrainKey.generateKeyPair(sample.get("kPassword1"));
+    assertArrayEquals(Base64.decode(sample.get("kKeyId1")),
+        keyPair1.getPrivateKey().getIdentifier());
+
+    VirgilKeyPair keyPair2 = mockedBrainKey.generateKeyPair(sample.get("kPassword1"));
+    assertArrayEquals(Base64.decode(sample.get("kKeyId1")),
+        keyPair2.getPrivateKey().getIdentifier());
+
+    VirgilKeyPair keyPair3 = mockedBrainKey.generateKeyPair(sample.get("kPassword2"));
+    assertArrayEquals(Base64.decode(sample.get("kKeyId2")),
+        keyPair3.getPrivateKey().getIdentifier());
+
+    VirgilKeyPair keyPair4 = mockedBrainKey.generateKeyPair(sample.get("kPassword1"),
+        sample.get("kBrainKeyId"));
+    assertArrayEquals(Base64.decode(sample.get("kKeyId3")),
+        keyPair4.getPrivateKey().getIdentifier());
   }
 
 }
