@@ -66,6 +66,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -107,6 +108,7 @@ public class BrainKeyExamplesTest extends ConfigurableTest {
   }
 
   @Test
+  @Ignore
   public void generate_brainKey()
       throws CryptoException, VirgilServiceException, VirgilPythiaServiceException {
     /** Snippet start. */
