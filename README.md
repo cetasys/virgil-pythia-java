@@ -43,7 +43,7 @@ To integrate Virgil SDK into your Java project using Maven, set up dependencies 
     <dependency>
         <groupId>com.virgilsecurity</groupId>
         <artifactId>pythia</artifactId>
-        <version>0.1.0</version>
+        <version>0.2.0</version>
     </dependency>
 </dependencies>
 ```
@@ -58,7 +58,7 @@ To integrate Virgil SDK into your Java project using Gradle, set up dependencies
 
 ```
 dependencies {
-    compile 'com.virgilsecurity:pythia:0.1.0'
+    compile 'com.virgilsecurity:pythia:0.2.0'
 }
 ```
 
@@ -76,8 +76,8 @@ Set up dependencies in your `build.gradle`:
 
 ```
 dependencies {
-    implementation 'com.virgilsecurity.sdk:crypto-android:5.0.2@aar'
-    implementation ('com.virgilsecurity:pythia:0.1.0') {
+    implementation 'com.virgilsecurity.sdk:crypto-android:5.0.3@aar'
+    implementation ('com.virgilsecurity:pythia:0.2.0') {
         exclude group: 'com.virgilsecurity.sdk', module: 'crypto'
     }
 }
@@ -215,6 +215,39 @@ Here is an example of using the `updateBreachProofPassword` function:
 
 BreachProofPassword updatedPwd =
     pythia.updateBreachProofPassword("UT.1.2.UPDATE_TOKEN", pwd);
+```
+
+### Generate BrainKey
+
+```java
+// 1. Specify your JWT provider
+
+// Get generated token from server-side
+final String authenticatedQueryToServerSide = "eyJraWQiOiI3MGI0NDdlMzIxZjNhMGZkIiwidHlwIjoiSldUIiwiYWxnIjoiVkVEUzUxMiIsImN0eSI6InZpcmdpbC1qd3Q7dj0xIn0.eyJleHAiOjE1MTg2OTg5MTcsImlzcyI6InZpcmdpbC1iZTAwZTEwZTRlMWY0YmY1OGY5YjRkYzg1ZDc5Yzc3YSIsInN1YiI6ImlkZW50aXR5LUFsaWNlIiwiaWF0IjoxNTE4NjEyNTE3fQ.MFEwDQYJYIZIAWUDBAIDBQAEQP4Yo3yjmt8WWJ5mqs3Yrqc_VzG6nBtrW2KIjP-kxiIJL_7Wv0pqty7PDbDoGhkX8CJa6UOdyn3rBWRvMK7p7Ak";
+
+// Setup AccessTokenProvider
+AccessTokenProvider accessTokenProvider = new CachingJwtProvider(new RenewJwtCallback() {
+
+    @Override
+    public Jwt renewJwt(TokenContext tokenContext) {
+        return new Jwt(authenticatedQueryToServerSide);
+    }
+});
+
+// 2. Setup BrainKey
+
+BrainKeyContext brainKeyContext = new BrainKeyContext.Builder()
+        .setAccessTokenProvider(accessTokenProvider)
+        .setPythiaCrypto(new VirgilPythiaCrypto())
+        .setPythiaClient(new VirgilPythiaClient())
+        .build();
+BrainKey brainKey = new BrainKey(brainKeyContext);
+
+VirgilKeyPair keyPair = brainKey.generateKeyPair("Your password");
+
+// 3. Publish user's on the Cards Service
+Card card = cardManager.publishCard(keyPair.getPrivateKey(), keyPair.getPublicKey(),
+        YOUR_IDENTITY);
 ```
 
 ## Docs
