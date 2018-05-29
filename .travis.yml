@@ -1,15 +1,20 @@
-language: android
-jdk: oraclejdk8
-android:
-  components:
-    - tools
-    - platform-tools
-    - build-tools-25.0.0
-    - android-22
+language: java
+jdk:
+  - openjdk7
 
 os: linux
 
+# Blacklist
 branches:
   except:
-    - docs-review
-    - master-readme-review
+    - readme
+
+# Whitelist
+branches:
+  only:
+    - master
+
+install: true
+before_script:
+  - sudo sed -i 's/security.provider.9/#security.provider.9/g' $JAVA_HOME/jre/lib/security/java.security
+script: "mvn clean package"
