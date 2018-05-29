@@ -35,7 +35,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.virgilsecurity</groupId>
   <artifactId>pythia</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.2.0</version>
   <packaging>jar</packaging>
   <name>Virgil Pythia Java SDK</name>
   <description>
@@ -76,7 +76,7 @@
   </developers>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.virgil-sdk>5.0.3-SNAPSHOT</version.virgil-sdk>
+    <version.virgil-sdk>5.0.3</version.virgil-sdk>
     <version.commons-lang>2.6</version.commons-lang>
     <version.junit>4.12</version.junit>
     <version.mockito>2.13.0</version.mockito>
