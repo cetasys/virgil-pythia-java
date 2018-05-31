@@ -31,7 +31,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.virgilsecurity.pythia.client.brainkey;
+package com.virgilsecurity.pythia.brainkey;
 
 import com.virgilsecurity.pythia.brainkey.BrainKeyContext;
 import com.virgilsecurity.pythia.client.PythiaClient;
