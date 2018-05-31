@@ -31,50 +31,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.virgilsecurity.pythia.client;
+package com.virgilsecurity.pythia.model.request;
 
-import com.virgilsecurity.pythia.model.TransformResponse;
-import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
+import com.google.gson.annotations.SerializedName;
 
 /**
- * Interface to abstract from Pythia server interactions.
+ * This class represents a request to Virgil Pythia service to generate a seed.
  * 
- * @author Danylo Oliinyk
+ * @author Andrii Iakovenko
  *
  */
-public interface PythiaClient {
+public class GenerateSeedRequest {
+
+  @SerializedName("blinded_password")
+  private byte[] blindedPassword;
+
+  @SerializedName("brainkey_id")
+  private String brainkeyId;
 
   /**
-   * Make call to Pythia service to transform password.
-   * 
-   * @param salt
-   *          the salt.
+   * Create a new instance of {@link GenerateSeedRequest}.
+   *
    * @param blindedPassword
-   *          the blinded password.
-   * @param version
-   *          the key version.
-   * @param includeProof
-   *          set this flag to {@code true} if you need proof data in request.
-   * @param token
-   *          the authorization token.
-   * @return the plain model representing response from Pythia server.
-   * @throws VirgilPythiaServiceException
-   *           if transformPassword is not successful.
+   *          a password obfuscated into a pseudo-random string.
    */
-  TransformResponse transformPassword(byte[] salt, byte[] blindedPassword, Integer version,
-      boolean includeProof, String token) throws VirgilPythiaServiceException;
+  public GenerateSeedRequest(byte[] blindedPassword) {
+    this.blindedPassword = blindedPassword;
+  }
 
   /**
-   * Generates seed using given blinded password and brainkey id.
-   * 
+   * Create a new instance of {@link GenerateSeedRequest}.
+   *
    * @param blindedPassword
-   *          blinded password.
-   * @param brainKeyId
-   *          brainkey id.
-   * @param token
-   *          authorization token.
-   * @return Generated seed.
+   *          a password obfuscated into a pseudo-random string.
+   * @param brainkeyId
+   *          Brainkey ID value.
    */
-  byte[] generateSeed(byte[] blindedPassword, String brainKeyId, String token)
-      throws VirgilPythiaServiceException;
+  public GenerateSeedRequest(byte[] blindedPassword, String brainkeyId) {
+    this(blindedPassword);
+    this.brainkeyId = brainkeyId;
+  }
+
 }

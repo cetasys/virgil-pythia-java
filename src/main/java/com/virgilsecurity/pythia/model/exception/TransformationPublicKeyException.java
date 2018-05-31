@@ -34,30 +34,52 @@
 package com.virgilsecurity.pythia.model.exception;
 
 /**
+ * This exception occurred if public key transformation failed.
+ * 
  * @author Danylo Oliinyk
  *
  */
 public class TransformationPublicKeyException extends RuntimeException {
 
-    private static final long serialVersionUID = -3200705655157806287L;
+  private static final long serialVersionUID = -3200705655157806287L;
 
-    public TransformationPublicKeyException() {
-    }
+  /**
+   * Create a new instance of {@link TransformationPublicKeyException}.
+   *
+   */
+  public TransformationPublicKeyException() {
+  }
 
-    public TransformationPublicKeyException(String message) {
-        super(message);
-    }
+  /**
+   * Create a new instance of {@link TransformationPublicKeyException}.
+   *
+   * @param message
+   *          the detail message.
+   */
+  public TransformationPublicKeyException(String message) {
+    super(message);
+  }
 
-    public TransformationPublicKeyException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  /**
+   * Create a new instance of {@link TransformationPublicKeyException}.
+   *
+   * @param message
+   *          the detail message.
+   * @param cause
+   *          the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   */
+  public TransformationPublicKeyException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public TransformationPublicKeyException(Throwable cause) {
-        super(cause);
-    }
+  /**
+   * Create a new instance of {@link TransformationPublicKeyException}.
+   *
+   * @param cause
+   *          the cause (which is saved for later retrieval by the {@link #getCause()} method).
+   */
+  public TransformationPublicKeyException(Throwable cause) {
+    super(cause);
+  }
 
-    public TransformationPublicKeyException(String message, Throwable cause, boolean enableSuppression,
-            boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

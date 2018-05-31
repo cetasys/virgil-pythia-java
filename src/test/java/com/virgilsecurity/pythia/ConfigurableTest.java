@@ -30,6 +30,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package com.virgilsecurity.pythia;
 
 import static org.junit.Assert.assertNotNull;
@@ -43,120 +44,229 @@ import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
+ * Base class for tests which uses environment-specific parameters.
+ * 
  * @author Andrii Iakovenko
  *
  */
 public class ConfigurableTest {
 
-    private VirgilCrypto crypto;
-    private String accountId;
-    private String appId;
-    private String apiPrivateKeyStr;
-    private VirgilPrivateKey apiPrivateKey;
-    private VirgilPublicKey apiPublicKey;
-    private String apiPublicKeyId;
-    private String proofKey;
+  private VirgilCrypto crypto;
+  private String accountId;
+  private String appId;
+  private String apiPrivateKeyStr;
+  private VirgilPrivateKey apiPrivateKey;
+  private VirgilPublicKey apiPublicKey;
+  private String apiPublicKeyId;
+  private String proofKeys1;
+  private String proofKeys2;
+  private String proofKeys3;
+  private String updateToken2to3;
 
-    /**
-     * Create a new instance of {@link ConfigurableTest}.
-     *
-     */
-    public ConfigurableTest() {
-        this.crypto = new VirgilCrypto();
-    }
+  /**
+   * Create a new instance of {@link ConfigurableTest}.
+   *
+   */
+  public ConfigurableTest() {
+    this.crypto = new VirgilCrypto();
+  }
 
-    public String getPythiaServiceUrl() {
-        return getPropertyByName("PYTHIA_SERVICE_URL");
-    }
+  /**
+   * Get Pythia service base URL.
+   * 
+   * @return Pythia service base URL.
+   */
+  public String getPythiaServiceUrl() {
+    return getPropertyByName("PYTHIA_SERVICE_URL");
+  }
 
-    public String getAccountId() {
-        if (this.accountId == null) {
-            this.accountId = getPropertyByName("ACCOUNT_ID");
-            if (this.accountId == null) {
-                fail("Account ID is not defined");
-            }
-        }
-        return this.accountId;
+  /**
+   * Get the account identifier.
+   * 
+   * @return the account identifier.
+   */
+  public String getAccountId() {
+    if (this.accountId == null) {
+      this.accountId = getPropertyByName("ACCOUNT_ID");
+      if (this.accountId == null) {
+        fail("Account ID is not defined");
+      }
     }
+    return this.accountId;
+  }
 
-    public String getAppId() {
-        if (this.appId == null) {
-            this.appId = getPropertyByName("APP_ID");
-            if (this.appId == null) {
-                fail("App ID is not defined");
-            }
-        }
-        return this.appId;
+  /**
+   * Get the application identifier.
+   * 
+   * @return the application identifier.
+   */
+  public String getAppId() {
+    if (this.appId == null) {
+      this.appId = getPropertyByName("APP_ID");
+      if (this.appId == null) {
+        fail("App ID is not defined");
+      }
     }
+    return this.appId;
+  }
 
-    public String getApiPrivateKeyStr() {
-        if (this.apiPrivateKeyStr == null) {
-            this.apiPrivateKeyStr = getPropertyByName("API_PRIVATE_KEY");
-            if (this.apiPrivateKeyStr == null) {
-                fail("API Private Key is not defined");
-            }
-        }
-        return this.apiPrivateKeyStr;
+  /**
+   * Get API Private Key as Base64-encoded string.
+   * 
+   * @return API Private Key as Base64-encoded string.
+   */
+  public String getApiPrivateKeyStr() {
+    if (this.apiPrivateKeyStr == null) {
+      this.apiPrivateKeyStr = getPropertyByName("API_PRIVATE_KEY");
+      if (this.apiPrivateKeyStr == null) {
+        fail("API Private Key is not defined");
+      }
     }
+    return this.apiPrivateKeyStr;
+  }
 
-    public VirgilPrivateKey getApiPrivateKey() {
-        if (this.apiPrivateKey == null) {
-            try {
-                this.apiPrivateKey = this.crypto.importPrivateKey(ConvertionUtils.base64ToBytes(getApiPrivateKeyStr()));
-            } catch (CryptoException e) {
-                fail("API Private Key has invalid format");
-            }
-        }
-        return this.apiPrivateKey;
+  /**
+   * Get API Private Key.
+   * 
+   * @return API Private Key.
+   */
+  public VirgilPrivateKey getApiPrivateKey() {
+    if (this.apiPrivateKey == null) {
+      try {
+        this.apiPrivateKey = this.crypto
+            .importPrivateKey(ConvertionUtils.base64ToBytes(getApiPrivateKeyStr()));
+      } catch (CryptoException e) {
+        fail("API Private Key has invalid format");
+      }
     }
+    return this.apiPrivateKey;
+  }
 
-    public VirgilPublicKey getApiPublicKey() {
-        if (this.apiPublicKey == null) {
-            try {
-                this.apiPublicKey = this.crypto
-                        .importPublicKey(ConvertionUtils.base64ToBytes(getPropertyByName("API_PUBLIC_KEY")));
-            } catch (CryptoException e) {
-                fail("API Public Key is not defined");
-            }
-        }
-        return this.apiPublicKey;
+  /**
+   * Get API Public Key.
+   * 
+   * @return API Public Key.
+   */
+  public VirgilPublicKey getApiPublicKey() {
+    if (this.apiPublicKey == null) {
+      try {
+        this.apiPublicKey = this.crypto
+            .importPublicKey(ConvertionUtils.base64ToBytes(getPropertyByName("API_PUBLIC_KEY")));
+      } catch (CryptoException e) {
+        fail("API Public Key is not defined");
+      }
     }
+    return this.apiPublicKey;
+  }
 
-    public String getApiPublicKeyId() {
-        if (this.apiPublicKeyId == null) {
-            this.apiPublicKeyId = getPropertyByName("API_PUBLIC_KEY_ID");
-            if (this.apiPublicKeyId == null) {
-                fail("API Public Key ID is not defined");
-            }
-        }
-        return this.apiPublicKeyId;
+  /**
+   * Get API Private Key identifier.
+   * 
+   * @return API Private Key identifier.
+   */
+  public String getApiPublicKeyId() {
+    if (this.apiPublicKeyId == null) {
+      this.apiPublicKeyId = getPropertyByName("API_PUBLIC_KEY_ID");
+      if (this.apiPublicKeyId == null) {
+        fail("API Public Key ID is not defined");
+      }
     }
+    return this.apiPublicKeyId;
+  }
 
-    public String getProofKey() {
-        if (this.proofKey == null) {
-            this.proofKey = getPropertyByName("PROOF_KEY");
-            if (this.proofKey == null) {
-                fail("Proof key is not defined");
-            }
-        }
-        return this.proofKey;
+  /**
+   * Get the single proof key.
+   * 
+   * @return the proof key.
+   */
+  public List<String> getProofKeys1() {
+    if (this.proofKeys1 == null) {
+      this.proofKeys1 = getPropertyByName("PROOF_KEYS1");
+      if (this.proofKeys1 == null) {
+        fail("PROOF_KEYS1 is not defined");
+      }
     }
+    return Arrays.asList(this.proofKeys1);
+  }
 
-    public String getPropertyByName(String propertyName) {
-        String result = System.getProperty(propertyName);
-        if (StringUtils.isBlank(result)) {
-            result = System.getenv(propertyName);
-        }
-        if (StringUtils.isBlank(result)) {
-            return null;
-        }
-        return result;
+  /**
+   * Get the proof keys pair.
+   * 
+   * @return the proof keys.
+   */
+  public List<String> getProofKeys2() {
+    if (this.proofKeys2 == null) {
+      this.proofKeys2 = getPropertyByName("PROOF_KEYS2");
+      if (this.proofKeys2 == null) {
+        fail("PROOF_KEYS2 is not defined");
+      }
     }
+    return Arrays.asList(this.proofKeys2.split(","));
+  }
 
-    public void assertNotEmpty(String dataDescription, byte[] array) {
-        assertNotNull(String.format("%s should not be null", dataDescription), array);
-        assertTrue(String.format("%s should not be empty", dataDescription), array.length > 0);
+  /**
+   * Get the proof keys trinity.
+   * 
+   * @return the proof keys.
+   */
+  public List<String> getProofKeys3() {
+    if (this.proofKeys3 == null) {
+      this.proofKeys3 = getPropertyByName("PROOF_KEYS3");
+      if (this.proofKeys3 == null) {
+        fail("PROOF_KEYS3 is not defined");
+      }
     }
+    return Arrays.asList(this.proofKeys3.split(","));
+  }
+
+  /**
+   * Get update token from version 2 to version3.
+   * 
+   * @return the update token.
+   */
+  public String getUpdateToken2to3() {
+    if (this.updateToken2to3 == null) {
+      this.updateToken2to3 = getPropertyByName("UPDATE_TOKEN_2_3");
+      if (this.updateToken2to3 == null) {
+        fail("UPDATE_TOKEN_2_3 is not defined");
+      }
+    }
+    return this.updateToken2to3;
+  }
+
+  /**
+   * Get property value by property name.
+   * 
+   * @param propertyName
+   *          the property name.
+   * @return the property value of {@code null} if property is not set.
+   */
+  public String getPropertyByName(String propertyName) {
+    String result = System.getProperty(propertyName);
+    if (StringUtils.isBlank(result)) {
+      result = System.getenv(propertyName);
+    }
+    if (StringUtils.isBlank(result)) {
+      return null;
+    }
+    return result;
+  }
+
+  /**
+   * Assert that array is not null and not empty.
+   * 
+   * @param arrayDescription
+   *          the short array description.
+   * @param array
+   *          the array to be verified.
+   */
+  public void assertNotEmpty(String arrayDescription, byte[] array) {
+    assertNotNull(String.format("%s should not be null", arrayDescription), array);
+    assertTrue(String.format("%s should not be empty", arrayDescription), array.length > 0);
+  }
 
 }

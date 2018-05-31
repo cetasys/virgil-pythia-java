@@ -30,128 +30,159 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package com.virgilsecurity.pythia;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.Test;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.virgilsecurity.pythia.model.exception.ProofKeyNotFoundException;
 import com.virgilsecurity.pythia.model.exception.ProofKeyParseException;
 import com.virgilsecurity.sdk.utils.Base64;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
 /**
+ * Unit tests for {@link ProofKeys}.
+ * 
  * @author Andrii Iakovenko
  *
  */
 public class ProofKeysTest {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void instantiate_null() {
-        new ProofKeys(null);
+  private SampleDataHolder sample;
+
+  @Before
+  public void setup() {
+    sample = new SampleDataHolder("com/virgilsecurity/pythia/pythia-sdk.json");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void instantiate_null() {
+    new ProofKeys(null);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test(expected = IllegalArgumentException.class)
+  public void instantiate_empty() {
+    // YTC-7
+    new ProofKeys(Collections.EMPTY_LIST);
+  }
+
+  @Test(expected = ProofKeyParseException.class)
+  public void instantiate_trash() {
+    // YTC-8
+    String invalidProofKey = this.sample.get("kInvalidProofKey");
+
+    new ProofKeys(Arrays.asList(invalidProofKey));
+  }
+
+  @Test
+  public void instantiate_singleKey() {
+    ProofKeys proofKeys = new ProofKeys(Arrays.asList("PK.1.a2V5IDEgZGF0YQ=="));
+
+    ProofKey key = proofKeys.getCurrentKey();
+    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
+
+    key = proofKeys.getProofKey(1);
+    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
+
+    try {
+      key = proofKeys.getProofKey(2);
+      fail();
+    } catch (ProofKeyNotFoundException e) {
+      // nothing to do here
     }
+  }
 
-    @SuppressWarnings("unchecked")
-    @Test(expected = IllegalArgumentException.class)
-    public void instantiate_empty() {
-        new ProofKeys(Collections.EMPTY_LIST);
+  @Test
+  public void instantiate_orderedKeys() {
+    List<String> keys = Arrays.asList("PK.0.a2V5IDAgZGF0YQ==", "PK.1.a2V5IDEgZGF0YQ==",
+        "PK.2.a2V5IDIgZGF0YQ==");
+    ProofKeys proofKeys = new ProofKeys(keys);
+
+    ProofKey key = proofKeys.getCurrentKey();
+    verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
+
+    key = proofKeys.getProofKey(2);
+    verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
+
+    key = proofKeys.getProofKey(0);
+    verifyKey(key, "a2V5IDAgZGF0YQ==", 0);
+
+    key = proofKeys.getProofKey(1);
+    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
+
+    try {
+      key = proofKeys.getProofKey(3);
+      fail();
+    } catch (ProofKeyNotFoundException e) {
+      // nothing to do here
     }
+  }
 
-    @Test(expected = ProofKeyParseException.class)
-    public void instantiate_trash() {
-        new ProofKeys(Arrays.asList("12345"));
+  @Test
+  public void instantiate_unorderedKeys() {
+    // YTC-6
+    JsonArray array = this.sample.getArray("kProofKeys");
+    List<String> keys = new ArrayList<>(array.size());
+    for (JsonElement jsonElement : array) {
+      String key = jsonElement.getAsString();
+      keys.add(key);
     }
+    ProofKeys proofKeys = new ProofKeys(keys);
 
-    @Test
-    public void instantiate_singleKey() {
-        ProofKeys proofKeys = new ProofKeys(Arrays.asList("PK.1.a2V5IDEgZGF0YQ=="));
+    ProofKey key = proofKeys.getProofKey(1);
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 1);
 
-        ProofKey key = proofKeys.getCurrentKey();
-        verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
+    key = proofKeys.getProofKey(2);
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 2);
 
-        key = proofKeys.getProofKey(1);
-        verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
+    key = proofKeys.getProofKey(4);
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 4);
 
-        try {
-            key = proofKeys.getProofKey(2);
-            fail();
-        } catch (ProofKeyNotFoundException e) {
-        }
+    key = proofKeys.getProofKey(5);
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 5);
+
+    key = proofKeys.getCurrentKey();
+    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 5);
+
+    try {
+      key = proofKeys.getProofKey(3);
+      fail();
+    } catch (ProofKeyNotFoundException e) {
+      // nothing to do here
     }
+  }
 
-    @Test
-    public void instantiate_orderedKeys() {
-        List<String> keys = Arrays.asList("PK.0.a2V5IDAgZGF0YQ==", "PK.1.a2V5IDEgZGF0YQ==", "PK.2.a2V5IDIgZGF0YQ==");
-        ProofKeys proofKeys = new ProofKeys(keys);
+  @Test(expected = ProofKeyParseException.class)
+  public void instantiate_invalidKeyPrefix() {
+    new ProofKeys(Arrays.asList("PV.1.a2V5IDEgZGF0YQ=="));
+  }
 
-        ProofKey key = proofKeys.getCurrentKey();
-        verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
+  @Test(expected = ProofKeyParseException.class)
+  public void instantiate_invalidKeyVersion() {
+    new ProofKeys(Arrays.asList("PK.v1.a2V5IDEgZGF0YQ=="));
+  }
 
-        key = proofKeys.getProofKey(2);
-        verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
+  @Test(expected = ProofKeyParseException.class)
+  public void instantiate_invalidKeyData() {
+    new ProofKeys(Arrays.asList("PK.1. "));
+  }
 
-        key = proofKeys.getProofKey(0);
-        verifyKey(key, "a2V5IDAgZGF0YQ==", 0);
-
-        key = proofKeys.getProofKey(1);
-        verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
-
-        try {
-            key = proofKeys.getProofKey(3);
-            fail();
-        } catch (ProofKeyNotFoundException e) {
-        }
-    }
-
-    @Test
-    public void instantiate_unorderedKeys() {
-        List<String> keys = Arrays.asList("PK.1.a2V5IDEgZGF0YQ==", "PK.2.a2V5IDIgZGF0YQ==", "PK.0.a2V5IDAgZGF0YQ==");
-        ProofKeys proofKeys = new ProofKeys(keys);
-
-        ProofKey key = proofKeys.getCurrentKey();
-        verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
-
-        key = proofKeys.getProofKey(2);
-        verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
-
-        key = proofKeys.getProofKey(0);
-        verifyKey(key, "a2V5IDAgZGF0YQ==", 0);
-
-        key = proofKeys.getProofKey(1);
-        verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
-
-        try {
-            key = proofKeys.getProofKey(3);
-            fail();
-        } catch (ProofKeyNotFoundException e) {
-        }
-    }
-
-    @Test(expected = ProofKeyParseException.class)
-    public void instantiate_invalidKeyPrefix() {
-        new ProofKeys(Arrays.asList("PV.1.a2V5IDEgZGF0YQ=="));
-    }
-
-    @Test(expected = ProofKeyParseException.class)
-    public void instantiate_invalidKeyVersion() {
-        new ProofKeys(Arrays.asList("PK.v1.a2V5IDEgZGF0YQ=="));
-    }
-
-    @Test(expected = ProofKeyParseException.class)
-    public void instantiate_invalidKeyData() {
-        new ProofKeys(Arrays.asList("PK.1. "));
-    }
-
-    private void verifyKey(ProofKey key, String dataStr, int version) {
-        assertNotNull(key);
-        assertEquals(dataStr, Base64.encode(key.getData()));
-        assertEquals(version, key.getVersion());
-    }
+  private void verifyKey(ProofKey key, String dataStr, int version) {
+    assertNotNull(key);
+    assertEquals(dataStr, Base64.encode(key.getData()));
+    assertEquals(version, key.getVersion());
+  }
 
 }

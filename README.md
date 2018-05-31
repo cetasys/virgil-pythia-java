@@ -7,13 +7,17 @@
 
 ## Introduction
 
-<a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a>[Virgil Security](https://virgilsecurity.com) provides an SDK which lets you implement Pythia protocol. 
-Pythia is a technology that gives you a new, more secure mechanism that "breach-proofs" user passwords and lessens the security risks associated with weak passwords by providing cryptographic leverage for the defender (by eliminating offline password cracking attacks), detection for online attacks, and key rotation to recover from stolen password databases.
+<a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a>[Virgil Security](https://virgilsecurity.com) provides an SDK which allows you to communicate with Virgil Pythia Service and implement Pythia protocol for the following use cases: 
+- **Breach-proof password**. Pythia is a technology that gives you a new, more secure mechanism that "breach-proofs" user passwords and lessens the security risks associated with weak passwords by providing cryptographic leverage for the defender (by eliminating offline password cracking attacks), detection for online attacks, and key rotation to recover from stolen password databases.
+- **BrainKey**. User's Private Key which is based on user's password. BrainKey can be easily restored and is resistant to online and offline attacks.
+
+In both cases you get the mechanism which assures you that neither Virgil nor attackers know anything about user's password.
 
 ## SDK Features
 - communicate with Virgil Pythia Service
 - manage your Pythia application credentials
 - create, verify and update user's breach-proof password
+- generate user's BrainKey
 - use [Virgil Crypto Pythia library][_virgil_crypto_pythia]
 
 ## Install and configure SDK
@@ -43,7 +47,7 @@ To integrate Virgil SDK into your Java project using Maven, set up dependencies 
     <dependency>
         <groupId>com.virgilsecurity</groupId>
         <artifactId>pythia</artifactId>
-        <version>0.1.0</version>
+        <version>0.2.0</version>
     </dependency>
 </dependencies>
 ```
@@ -58,7 +62,7 @@ To integrate Virgil SDK into your Java project using Gradle, set up dependencies
 
 ```
 dependencies {
-    compile 'com.virgilsecurity:pythia:0.1.0'
+    compile 'com.virgilsecurity:pythia:0.2.0'
 }
 ```
 
@@ -76,8 +80,8 @@ Set up dependencies in your `build.gradle`:
 
 ```
 dependencies {
-    implementation 'com.virgilsecurity.sdk:crypto-android:5.0.2@aar'
-    implementation ('com.virgilsecurity:pythia:0.1.0') {
+    implementation 'com.virgilsecurity.sdk:crypto-android:5.0.3@aar'
+    implementation ('com.virgilsecurity:pythia:0.2.0') {
         exclude group: 'com.virgilsecurity.sdk', module: 'crypto'
     }
 }
@@ -106,6 +110,8 @@ Pythia pythia = new Pythia(context);
 
 
 ## Usage Examples
+
+### Breach-proof password
 
 Virgil Pythia SDK lets you easily perform all the necessary operations to create, verify and update user's breach-proof password without requiring any additional actions and use Virgil Crypto library.
 
@@ -149,7 +155,7 @@ Now we can start creating breach-proof passwords for users. Depending on the sit
 - `createBreachProofPassword` is used to create a user's breach-proof password on your Application Server.
 - `verifyBreachProofPassword` is used to verify a user's breach-proof password.
 
-### Create Breach-Proof Password
+#### Create Breach-Proof Password
 
 Use this flow to create a new breach-proof password for a user.
 
@@ -170,7 +176,7 @@ After performing `createBreachProofPassword` function you get previously mention
 
 Check that you updated all database records and delete the now unnecessary column where user passwords were previously stored.
 
-### Verify Breach-Proof Password
+#### Verify Breach-Proof Password
 
 Use this flow when a user already has his or her own breach-proof password in your database. You will have to pass his or her password into an `verifyBreachProofPassword` function:
 
@@ -190,7 +196,7 @@ if (!isValid) {
 
 The difference between the `verifyBreachProofPassword` and `createBreachProofPassword` functions is that the verification of Pythia Service is optional in `verifyBreachProofPassword` function, which allows you to achieve maximum performance when processing data. You can turn on a proof step in `verifyBreachProofPassword` function if you have any suspicions that a user or Pythia Service were compromised.
 
-### Update breach-proof passwords
+#### Update breach-proof passwords
 
 This step will allow you to use an `updateToken` in order to update users' breach-proof passwords in your database.
 
@@ -215,6 +221,40 @@ Here is an example of using the `updateBreachProofPassword` function:
 
 BreachProofPassword updatedPwd =
     pythia.updateBreachProofPassword("UT.1.2.UPDATE_TOKEN", pwd);
+```
+### BrainKey
+
+#### Generate BrainKey
+
+```java
+// 1. Specify your JWT provider
+
+// Get generated token from server-side
+final String authenticatedQueryToServerSide = "eyJraWQiOiI3MGI0NDdlMzIxZjNhMGZkIiwidHlwIjoiSldUIiwiYWxnIjoiVkVEUzUxMiIsImN0eSI6InZpcmdpbC1qd3Q7dj0xIn0.eyJleHAiOjE1MTg2OTg5MTcsImlzcyI6InZpcmdpbC1iZTAwZTEwZTRlMWY0YmY1OGY5YjRkYzg1ZDc5Yzc3YSIsInN1YiI6ImlkZW50aXR5LUFsaWNlIiwiaWF0IjoxNTE4NjEyNTE3fQ.MFEwDQYJYIZIAWUDBAIDBQAEQP4Yo3yjmt8WWJ5mqs3Yrqc_VzG6nBtrW2KIjP-kxiIJL_7Wv0pqty7PDbDoGhkX8CJa6UOdyn3rBWRvMK7p7Ak";
+
+// Setup AccessTokenProvider
+AccessTokenProvider accessTokenProvider = new CachingJwtProvider(new RenewJwtCallback() {
+
+    @Override
+    public Jwt renewJwt(TokenContext tokenContext) {
+        return new Jwt(authenticatedQueryToServerSide);
+    }
+});
+
+// 2. Setup BrainKey
+
+BrainKeyContext brainKeyContext = new BrainKeyContext.Builder()
+        .setAccessTokenProvider(accessTokenProvider)
+        .setPythiaCrypto(new VirgilPythiaCrypto())
+        .setPythiaClient(new VirgilPythiaClient())
+        .build();
+BrainKey brainKey = new BrainKey(brainKeyContext);
+
+VirgilKeyPair keyPair = brainKey.generateKeyPair("Your password");
+
+// 3. Publish user's on the Cards Service
+Card card = cardManager.publishCard(keyPair.getPrivateKey(), keyPair.getPublicKey(),
+        YOUR_IDENTITY);
 ```
 
 ## Docs

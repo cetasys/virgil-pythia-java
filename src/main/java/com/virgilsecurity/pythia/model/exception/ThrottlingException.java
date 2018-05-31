@@ -31,50 +31,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.virgilsecurity.pythia.client;
+package com.virgilsecurity.pythia.model.exception;
 
-import com.virgilsecurity.pythia.model.TransformResponse;
-import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
+import com.virgilsecurity.sdk.common.HttpError;
 
 /**
- * Interface to abstract from Pythia server interactions.
+ * This exception occurred if client sends too many requests to Pythia service.
  * 
- * @author Danylo Oliinyk
+ * @author Andrii Iakovenko
  *
  */
-public interface PythiaClient {
+public class ThrottlingException extends VirgilPythiaServiceException {
+
+  private static final long serialVersionUID = -4525437630458784428L;
 
   /**
-   * Make call to Pythia service to transform password.
+   * Create a new instance of {@link ThrottlingException}.
    * 
-   * @param salt
-   *          the salt.
-   * @param blindedPassword
-   *          the blinded password.
-   * @param version
-   *          the key version.
-   * @param includeProof
-   *          set this flag to {@code true} if you need proof data in request.
-   * @param token
-   *          the authorization token.
-   * @return the plain model representing response from Pythia server.
-   * @throws VirgilPythiaServiceException
-   *           if transformPassword is not successful.
+   * @param error
+   *          the error code.
+   * @param message
+   *          the detail message.
+   * @param httpError
+   *          the http error.
    */
-  TransformResponse transformPassword(byte[] salt, byte[] blindedPassword, Integer version,
-      boolean includeProof, String token) throws VirgilPythiaServiceException;
+  public ThrottlingException(int error, String message, HttpError httpError) {
+    super(error, message, httpError);
+  }
 
-  /**
-   * Generates seed using given blinded password and brainkey id.
-   * 
-   * @param blindedPassword
-   *          blinded password.
-   * @param brainKeyId
-   *          brainkey id.
-   * @param token
-   *          authorization token.
-   * @return Generated seed.
-   */
-  byte[] generateSeed(byte[] blindedPassword, String brainKeyId, String token)
-      throws VirgilPythiaServiceException;
 }
