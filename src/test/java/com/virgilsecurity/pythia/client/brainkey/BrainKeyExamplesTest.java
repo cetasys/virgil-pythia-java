@@ -30,6 +30,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package com.virgilsecurity.pythia.client.brainkey;
 
 import static org.junit.Assert.assertNotNull;
@@ -70,13 +71,15 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 /**
+ * Integration test for BrainKey example. This code used for example snippets.
+ *
  * @author Andrii Iakovenko
  *
  */
 public class BrainKeyExamplesTest extends ConfigurableTest {
+  private static String YOUR_IDENTITY;
 
   private CardManager cardManager;
-  private String YOUR_IDENTITY;
   private String authenticatedQueryToServerSide;
   private PythiaClient pythiaClient;
 
@@ -116,7 +119,11 @@ public class BrainKeyExamplesTest extends ConfigurableTest {
     // 1. Specify your JWT provider
 
     // Get generated token from server-side
-    final String authenticatedQueryToServerSide = "eyJraWQiOiI3MGI0NDdlMzIxZjNhMGZkIiwidHlwIjoiSldUIiwiYWxnIjoiVkVEUzUxMiIsImN0eSI6InZpcmdpbC1qd3Q7dj0xIn0.eyJleHAiOjE1MTg2OTg5MTcsImlzcyI6InZpcmdpbC1iZTAwZTEwZTRlMWY0YmY1OGY5YjRkYzg1ZDc5Yzc3YSIsInN1YiI6ImlkZW50aXR5LUFsaWNlIiwiaWF0IjoxNTE4NjEyNTE3fQ.MFEwDQYJYIZIAWUDBAIDBQAEQP4Yo3yjmt8WWJ5mqs3Yrqc_VzG6nBtrW2KIjP-kxiIJL_7Wv0pqty7PDbDoGhkX8CJa6UOdyn3rBWRvMK7p7Ak";
+    final String authenticatedQueryToServerSide = "eyJraWQiOiI3MGI0NDdlMzIxZjNhMGZkIiwidHlwIjoi"
+        + "SldUIiwiYWxnIjoiVkVEUzUxMiIsImN0eSI6InZpcmdpbC1qd3Q7dj0xIn0.eyJleHAiOjE1MTg2OTg5MTcs"
+        + "ImlzcyI6InZpcmdpbC1iZTAwZTEwZTRlMWY0YmY1OGY5YjRkYzg1ZDc5Yzc3YSIsInN1YiI6ImlkZW50aXR5"
+        + "LUFsaWNlIiwiaWF0IjoxNTE4NjEyNTE3fQ.MFEwDQYJYIZIAWUDBAIDBQAEQP4Yo3yjmt8WWJ5mqs3Yrqc_V"
+        + "zG6nBtrW2KIjP-kxiIJL_7Wv0pqty7PDbDoGhkX8CJa6UOdyn3rBWRvMK7p7Ak";
 
     // Setup AccessTokenProvider
     AccessTokenProvider accessTokenProvider = new CachingJwtProvider(new RenewJwtCallback() {

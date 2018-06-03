@@ -13,6 +13,7 @@ branches:
 branches:
   only:
     - master
+    - dev
 
 install: true
 before_script:
