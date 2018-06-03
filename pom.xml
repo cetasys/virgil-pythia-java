@@ -76,8 +76,6 @@
   </developers>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
     <version.virgil-sdk>5.0.3</version.virgil-sdk>
     <version.commons-lang>2.6</version.commons-lang>
     <version.junit>4.12</version.junit>
