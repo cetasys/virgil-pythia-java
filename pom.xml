@@ -65,7 +65,7 @@
   <developers>
     <developer>
       <name>Andrii Iakovenko</name>
-      <email>andrii-iakovenko@gmail.com</email>
+      <email>iakovenko.andrii@gmail.com</email>
       <organizationUrl>https://github.com/andrii-iakovenko</organizationUrl>
     </developer>
     <developer>
@@ -76,10 +76,11 @@
   </developers>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.virgil-sdk>5.0.3</version.virgil-sdk>
+    <version.virgil-sdk>5.0.8</version.virgil-sdk>
+    <version.commons-codec>1.12</version.commons-codec>
     <version.commons-lang>2.6</version.commons-lang>
     <version.junit>4.12</version.junit>
-    <version.mockito>2.13.0</version.mockito>
+    <version.mockito>2.24.5</version.mockito>
     <gpg.keyname>empty</gpg.keyname>
   </properties>
   <dependencyManagement>
@@ -99,6 +100,12 @@
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
         <version>${version.commons-lang}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${version.commons-codec}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -126,6 +133,10 @@
     </dependency>
     <!-- Tests -->
     <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
@@ -139,6 +150,15 @@
     </dependency>
   </dependencies>
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>

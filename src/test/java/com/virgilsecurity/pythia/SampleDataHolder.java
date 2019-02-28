@@ -33,6 +33,8 @@
 
 package com.virgilsecurity.pythia;
 
+import static org.junit.Assert.fail;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -40,7 +42,8 @@ import com.google.gson.JsonParser;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  * This class could store JSON sample data and provide common operations with a sample.
@@ -55,8 +58,7 @@ public class SampleDataHolder {
   /**
    * Create a new instance of {@link SampleDataHolder}.
    *
-   * @param path
-   *          the path to the sample resource.
+   * @param path the path to the sample resource.
    */
   public SampleDataHolder(String path) {
     sampleJson = (JsonObject) new JsonParser()
@@ -66,8 +68,7 @@ public class SampleDataHolder {
   /**
    * Get sample data as a string.
    * 
-   * @param key
-   *          the key.
+   * @param key the key.
    * @return a value by key.
    */
   public String get(String key) {
@@ -77,8 +78,7 @@ public class SampleDataHolder {
   /**
    * Get sample data as an array.
    * 
-   * @param key
-   *          the key.
+   * @param key the key.
    * @return an array by key.
    */
   public JsonArray getArray(String key) {
@@ -88,8 +88,7 @@ public class SampleDataHolder {
   /**
    * Get sample data as byte array.
    * 
-   * @param key
-   *          the key.
+   * @param key the key.
    * @return byte array by key.
    */
   public byte[] getBytes(String key) {
@@ -99,12 +98,16 @@ public class SampleDataHolder {
   /**
    * Get sample data as byte array decoded from HEX-string.
    * 
-   * @param key
-   *          the key.
+   * @param key the key.
    * @return byte array.
    */
   public byte[] getHexBytes(String key) {
-    return DatatypeConverter.parseHexBinary(this.sampleJson.get(key).getAsString());
+    try {
+      return Hex.decodeHex(this.sampleJson.get(key).getAsString());
+    } catch (DecoderException e) {
+      fail(e.getMessage());
+    }
+    return null;
   }
 
 }

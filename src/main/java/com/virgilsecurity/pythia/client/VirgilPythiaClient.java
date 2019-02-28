@@ -42,6 +42,7 @@ import com.virgilsecurity.pythia.model.request.TransformPasswordRequest;
 import com.virgilsecurity.sdk.common.ErrorResponse;
 import com.virgilsecurity.sdk.common.HttpError;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
+import com.virgilsecurity.sdk.utils.OsUtils;
 import com.virgilsecurity.sdk.utils.StringUtils;
 import com.virgilsecurity.sdk.utils.Validator;
 
@@ -51,6 +52,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,7 +66,10 @@ public final class VirgilPythiaClient implements PythiaClient {
 
   private static final Logger LOGGER = Logger.getLogger(VirgilPythiaClient.class.getName());
   private static final String BASE_URL = "https://api.virgilsecurity.com";
+  private static final String VIRGIL_AGENT_HEADER = "virgil-agent";
 
+  private String bppVirgilAgent;
+  private String brainkeyVirgilAgent;
   private URL baseUrl;
 
   /**
@@ -78,8 +83,7 @@ public final class VirgilPythiaClient implements PythiaClient {
   /**
    * Create a new instance of {@link VirgilPythiaClient}.
    *
-   * @param baseUrl
-   *          the service url to fire requests to.
+   * @param baseUrl the service url to fire requests to.
    */
   public VirgilPythiaClient(String baseUrl) {
     Validator.checkNullAgrument(baseUrl, "VirgilPythiaClient -> 'baseUrl' should not be null");
@@ -89,6 +93,7 @@ public final class VirgilPythiaClient implements PythiaClient {
       LOGGER.log(Level.SEVERE, "Base URL has wrong format", e);
       throw new IllegalArgumentException("VirgilPythiaClient -> 'baseUrl' has wrong format");
     }
+    buildVirgilAgent();
   }
 
   /*
@@ -106,6 +111,7 @@ public final class VirgilPythiaClient implements PythiaClient {
 
     try {
       HttpURLConnection urlConnection = createConnection("/pythia/v1/password", token);
+      urlConnection.setRequestProperty(VIRGIL_AGENT_HEADER, bppVirgilAgent);
       return execute(urlConnection, request, TransformResponse.class);
     } catch (VirgilPythiaServiceException e) {
       LOGGER.log(Level.SEVERE, "Pythia service returned an error", e);
@@ -130,6 +136,7 @@ public final class VirgilPythiaClient implements PythiaClient {
 
     try {
       HttpURLConnection urlConnection = createConnection("pythia/v1/brainkey", token);
+      urlConnection.setRequestProperty(VIRGIL_AGENT_HEADER, brainkeyVirgilAgent);
       return execute(urlConnection, request, GenerateSeedResponse.class).getSeed();
     } catch (VirgilPythiaServiceException e) {
       LOGGER.log(Level.SEVERE, "Pythia service returned an error", e);
@@ -144,13 +151,10 @@ public final class VirgilPythiaClient implements PythiaClient {
   /**
    * Create HTTP connection to Pythia service.
    * 
-   * @param spec
-   *          the {@code String} to parse as a URL.
-   * @param token
-   *          access token.
+   * @param spec  the {@code String} to parse as a URL.
+   * @param token access token.
    * @return the created connection.
-   * @throws IOException
-   *           if connection can't be created.
+   * @throws IOException if connection can't be created.
    */
   private HttpURLConnection createConnection(String spec, String token) throws IOException {
     // Create connection
@@ -212,4 +216,24 @@ public final class VirgilPythiaClient implements PythiaClient {
       urlConnection.disconnect();
     }
   }
+
+  private void buildVirgilAgent() {
+    String virgilAgentVersion = "0";
+    InputStream is = Thread.currentThread().getContextClassLoader()
+        .getResourceAsStream("virgil.properties");
+    if (is != null) {
+      Properties properties = new Properties();
+      try {
+        properties.load(is);
+      } catch (IOException e) {
+        LOGGER.log(Level.SEVERE, "Can't load Virgil properties", e);
+      }
+      virgilAgentVersion = properties.getProperty("virgil.agent.version", "0");
+    }
+
+    String osName = OsUtils.getOsAgentName();
+    this.bppVirgilAgent = String.format("bpp;jvm;%1$s;%2$s", osName, virgilAgentVersion);
+    this.brainkeyVirgilAgent = String.format("brainkey;jvm;%1$s;%2$s", osName, virgilAgentVersion);
+  }
+
 }
