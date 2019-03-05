@@ -86,6 +86,30 @@ public final class VirgilPythiaClient implements PythiaClient {
    * @param baseUrl the service url to fire requests to.
    */
   public VirgilPythiaClient(String baseUrl) {
+    this(baseUrl, "bpp", "brainkey", VirgilInfo.VERSION);
+  }
+
+  /**
+   * Create a new instance of {@link VirgilPythiaClient}.
+   *
+   * @param bppProduct      bpp Virgil Agent token.
+   * @param brainkeyProduct brainkey Virgil agent token.
+   * @param version         library version.
+   */
+  public VirgilPythiaClient(String bppProduct, String brainkeyProduct, String version) {
+    this(BASE_URL, bppProduct, brainkeyProduct, version);
+  }
+
+  /**
+   * Create a new instance of {@link VirgilPythiaClient}.
+   *
+   * @param baseUrl         the service url to fire requests to.
+   * @param bppProduct      bpp Virgil Agent token.
+   * @param brainkeyProduct brainkey Virgil agent token.
+   * @param version         library version.
+   */
+  public VirgilPythiaClient(String baseUrl, String bppProduct, String brainkeyProduct,
+      String version) {
     Validator.checkNullAgrument(baseUrl, "VirgilPythiaClient -> 'baseUrl' should not be null");
     try {
       this.baseUrl = new URL(baseUrl);
@@ -93,7 +117,7 @@ public final class VirgilPythiaClient implements PythiaClient {
       LOGGER.log(Level.SEVERE, "Base URL has wrong format", e);
       throw new IllegalArgumentException("VirgilPythiaClient -> 'baseUrl' has wrong format");
     }
-    buildVirgilAgent();
+    buildVirgilAgent(bppProduct, brainkeyProduct, version);
   }
 
   /*
@@ -217,12 +241,12 @@ public final class VirgilPythiaClient implements PythiaClient {
     }
   }
 
-  private void buildVirgilAgent() {
+  private void buildVirgilAgent(String bppProduct, String brainkeyProduct, String version) {
     String osName = OsUtils.getOsAgentName();
-    this.bppVirgilAgent = String.format("bpp;%1$s;%2$s;%3$s", VirgilInfo.FAMILY, osName,
-        VirgilInfo.VERSION);
-    this.brainkeyVirgilAgent = String.format("brainkey;%1$s;%2$s;%3$s", VirgilInfo.FAMILY, osName,
-        VirgilInfo.VERSION);
+    this.bppVirgilAgent = String.format("%1$s;%2$s;%3$s;%4$s", bppProduct, VirgilInfo.FAMILY,
+        osName, version);
+    this.brainkeyVirgilAgent = String.format("%1$s;%2$s;%3$s;%4$s", brainkeyProduct,
+        VirgilInfo.FAMILY, osName, version);
   }
 
 }
