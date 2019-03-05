@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Virgil Security, Inc.
+ * Copyright (c) 2015-2019, Virgil Security, Inc.
  *
  * Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
  *
@@ -33,6 +33,7 @@
 
 package com.virgilsecurity.pythia.client;
 
+import com.virgilsecurity.pythia.VirgilInfo;
 import com.virgilsecurity.pythia.model.GenerateSeedResponse;
 import com.virgilsecurity.pythia.model.TransformResponse;
 import com.virgilsecurity.pythia.model.exception.ThrottlingException;
@@ -42,6 +43,7 @@ import com.virgilsecurity.pythia.model.request.TransformPasswordRequest;
 import com.virgilsecurity.sdk.common.ErrorResponse;
 import com.virgilsecurity.sdk.common.HttpError;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
+import com.virgilsecurity.sdk.utils.OsUtils;
 import com.virgilsecurity.sdk.utils.StringUtils;
 import com.virgilsecurity.sdk.utils.Validator;
 
@@ -64,7 +66,10 @@ public final class VirgilPythiaClient implements PythiaClient {
 
   private static final Logger LOGGER = Logger.getLogger(VirgilPythiaClient.class.getName());
   private static final String BASE_URL = "https://api.virgilsecurity.com";
+  private static final String VIRGIL_AGENT_HEADER = "virgil-agent";
 
+  private String bppVirgilAgent;
+  private String brainkeyVirgilAgent;
   private URL baseUrl;
 
   /**
@@ -78,10 +83,33 @@ public final class VirgilPythiaClient implements PythiaClient {
   /**
    * Create a new instance of {@link VirgilPythiaClient}.
    *
-   * @param baseUrl
-   *          the service url to fire requests to.
+   * @param baseUrl the service url to fire requests to.
    */
   public VirgilPythiaClient(String baseUrl) {
+    this(baseUrl, "bpp", "brainkey", VirgilInfo.VERSION);
+  }
+
+  /**
+   * Create a new instance of {@link VirgilPythiaClient}.
+   *
+   * @param bppProduct      bpp Virgil Agent token.
+   * @param brainkeyProduct brainkey Virgil agent token.
+   * @param version         library version.
+   */
+  public VirgilPythiaClient(String bppProduct, String brainkeyProduct, String version) {
+    this(BASE_URL, bppProduct, brainkeyProduct, version);
+  }
+
+  /**
+   * Create a new instance of {@link VirgilPythiaClient}.
+   *
+   * @param baseUrl         the service url to fire requests to.
+   * @param bppProduct      bpp Virgil Agent token.
+   * @param brainkeyProduct brainkey Virgil agent token.
+   * @param version         library version.
+   */
+  public VirgilPythiaClient(String baseUrl, String bppProduct, String brainkeyProduct,
+      String version) {
     Validator.checkNullAgrument(baseUrl, "VirgilPythiaClient -> 'baseUrl' should not be null");
     try {
       this.baseUrl = new URL(baseUrl);
@@ -89,6 +117,7 @@ public final class VirgilPythiaClient implements PythiaClient {
       LOGGER.log(Level.SEVERE, "Base URL has wrong format", e);
       throw new IllegalArgumentException("VirgilPythiaClient -> 'baseUrl' has wrong format");
     }
+    buildVirgilAgent(bppProduct, brainkeyProduct, version);
   }
 
   /*
@@ -106,6 +135,7 @@ public final class VirgilPythiaClient implements PythiaClient {
 
     try {
       HttpURLConnection urlConnection = createConnection("/pythia/v1/password", token);
+      urlConnection.setRequestProperty(VIRGIL_AGENT_HEADER, bppVirgilAgent);
       return execute(urlConnection, request, TransformResponse.class);
     } catch (VirgilPythiaServiceException e) {
       LOGGER.log(Level.SEVERE, "Pythia service returned an error", e);
@@ -130,6 +160,7 @@ public final class VirgilPythiaClient implements PythiaClient {
 
     try {
       HttpURLConnection urlConnection = createConnection("pythia/v1/brainkey", token);
+      urlConnection.setRequestProperty(VIRGIL_AGENT_HEADER, brainkeyVirgilAgent);
       return execute(urlConnection, request, GenerateSeedResponse.class).getSeed();
     } catch (VirgilPythiaServiceException e) {
       LOGGER.log(Level.SEVERE, "Pythia service returned an error", e);
@@ -144,13 +175,10 @@ public final class VirgilPythiaClient implements PythiaClient {
   /**
    * Create HTTP connection to Pythia service.
    * 
-   * @param spec
-   *          the {@code String} to parse as a URL.
-   * @param token
-   *          access token.
+   * @param spec  the {@code String} to parse as a URL.
+   * @param token access token.
    * @return the created connection.
-   * @throws IOException
-   *           if connection can't be created.
+   * @throws IOException if connection can't be created.
    */
   private HttpURLConnection createConnection(String spec, String token) throws IOException {
     // Create connection
@@ -212,4 +240,13 @@ public final class VirgilPythiaClient implements PythiaClient {
       urlConnection.disconnect();
     }
   }
+
+  private void buildVirgilAgent(String bppProduct, String brainkeyProduct, String version) {
+    String osName = OsUtils.getOsAgentName();
+    this.bppVirgilAgent = String.format("%1$s;%2$s;%3$s;%4$s", bppProduct, VirgilInfo.FAMILY,
+        osName, version);
+    this.brainkeyVirgilAgent = String.format("%1$s;%2$s;%3$s;%4$s", brainkeyProduct,
+        VirgilInfo.FAMILY, osName, version);
+  }
+
 }

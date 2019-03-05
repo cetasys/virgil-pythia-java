@@ -31,62 +31,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.virgilsecurity.pythia.model;
+package com.virgilsecurity.pythia;
 
 /**
- * Represents Pythia-related info about some user.
- * 
- * @author Danylo Oliinyk
+ * @author Andrii Iakovenko
  *
  */
-public final class BreachProofPassword {
+public class VirgilInfo {
 
-  private final byte[] salt;
-  private final byte[] deblindedPassword;
-  private final int version;
+  public static final String FAMILY = "jvm";
+  public static final String VERSION = "${project.version}";
 
-  /**
-   * Create a new instance of {@link BreachProofPassword}.
-   *
-   * @param salt
-   *          random 32byte salt tied to the user.
-   * @param deblindedPassword
-   *          deblinded transformedPassword value. This value is not equal to password and is
-   *          zero-knowledge protected.
-   * @param version
-   *          the password version.
-   */
-  public BreachProofPassword(byte[] salt, byte[] deblindedPassword, int version) {
-    this.salt = salt;
-    this.deblindedPassword = deblindedPassword;
-    this.version = version;
-  }
-
-  /**
-   * Get the salt.
-   * 
-   * @return random 32byte salt tied to the user.
-   */
-  public byte[] getSalt() {
-    return salt;
-  }
-
-  /**
-   * Get deblinded transformedPassword value.
-   * 
-   * @return deblinded transformedPassword value. This value is not equal to password and is
-   *         zero-knowledge protected.
-   */
-  public byte[] getDeblindedPassword() {
-    return deblindedPassword;
-  }
-
-  /**
-   * Get password version.
-   * 
-   * @return the version.
-   */
-  public int getVersion() {
-    return version;
-  }
 }

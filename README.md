@@ -47,7 +47,7 @@ To integrate Virgil SDK into your Java project using Maven, set up dependencies 
     <dependency>
         <groupId>com.virgilsecurity</groupId>
         <artifactId>pythia</artifactId>
-        <version>0.2.0</version>
+        <version>0.2.1</version>
     </dependency>
 </dependencies>
 ```
@@ -62,7 +62,7 @@ To integrate Virgil SDK into your Java project using Gradle, set up dependencies
 
 ```
 dependencies {
-    compile 'com.virgilsecurity:pythia:0.2.0'
+    compile 'com.virgilsecurity:pythia:0.2.1'
 }
 ```
 
@@ -80,8 +80,8 @@ Set up dependencies in your `build.gradle`:
 
 ```
 dependencies {
-    implementation 'com.virgilsecurity.sdk:crypto-android:5.0.3@aar'
-    implementation ('com.virgilsecurity:pythia:0.2.0') {
+    implementation 'com.virgilsecurity.sdk:crypto-android:5.0.8@aar'
+    implementation ('com.virgilsecurity:pythia:0.2.1') {
         exclude group: 'com.virgilsecurity.sdk', module: 'crypto'
     }
 }
