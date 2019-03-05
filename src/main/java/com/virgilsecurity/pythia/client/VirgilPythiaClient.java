@@ -33,6 +33,7 @@
 
 package com.virgilsecurity.pythia.client;
 
+import com.virgilsecurity.pythia.VirgilInfo;
 import com.virgilsecurity.pythia.model.GenerateSeedResponse;
 import com.virgilsecurity.pythia.model.TransformResponse;
 import com.virgilsecurity.pythia.model.exception.ThrottlingException;
@@ -52,7 +53,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -218,22 +218,11 @@ public final class VirgilPythiaClient implements PythiaClient {
   }
 
   private void buildVirgilAgent() {
-    String virgilAgentVersion = "0";
-    InputStream is = Thread.currentThread().getContextClassLoader()
-        .getResourceAsStream("virgil.properties");
-    if (is != null) {
-      Properties properties = new Properties();
-      try {
-        properties.load(is);
-      } catch (IOException e) {
-        LOGGER.log(Level.SEVERE, "Can't load Virgil properties", e);
-      }
-      virgilAgentVersion = properties.getProperty("virgil.agent.version", "0");
-    }
-
     String osName = OsUtils.getOsAgentName();
-    this.bppVirgilAgent = String.format("bpp;jvm;%1$s;%2$s", osName, virgilAgentVersion);
-    this.brainkeyVirgilAgent = String.format("brainkey;jvm;%1$s;%2$s", osName, virgilAgentVersion);
+    this.bppVirgilAgent = String.format("bpp;%1$s;%2$s;%3$s", VirgilInfo.FAMILY, osName,
+        VirgilInfo.VERSION);
+    this.brainkeyVirgilAgent = String.format("brainkey;%1$s;%2$s;%3$s", VirgilInfo.FAMILY, osName,
+        VirgilInfo.VERSION);
   }
 
 }
