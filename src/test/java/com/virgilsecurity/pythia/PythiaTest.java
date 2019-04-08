@@ -54,12 +54,10 @@ import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -132,10 +130,10 @@ public class PythiaTest extends ConfigurableTest {
   public void createBreachProofPassword_3keys()
       throws CryptoException, VirgilPythiaServiceException, TransformVerificationException {
     // YTC-14
-    setup(getProofKeys3());
+    setup(getProofKeys2());
 
     BreachProofPassword bpp = this.pythia.createBreachProofPassword(this.password);
-    assertEquals(3, bpp.getVersion());
+    assertEquals(2, bpp.getVersion());
   }
 
   @Test
@@ -337,19 +335,19 @@ public class PythiaTest extends ConfigurableTest {
   public void updateBreachProofPassword_twoPythias() throws CryptoException,
       VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
     // YTC-17
-    setup(getProofKeys2());
+    setup(getProofKeys1());
 
     BreachProofPassword bpp1 = this.pythia.createBreachProofPassword(password);
     assertNotNull(bpp1);
-    assertEquals(2, bpp1.getVersion());
+    assertEquals(1, bpp1.getVersion());
 
     Thread.sleep(2000);
-    setup(getProofKeys3());
-    BreachProofPassword bpp2 = this.pythia.updateBreachProofPassword(getUpdateToken2to3(), bpp1);
+    setup(getProofKeys2());
+    BreachProofPassword bpp2 = this.pythia.updateBreachProofPassword(getUpdateToken1to2(), bpp1);
     assertNotNull(bpp2);
     assertArrayEquals(bpp1.getSalt(), bpp2.getSalt());
     assertFalse(Arrays.equals(bpp1.getDeblindedPassword(), bpp2.getDeblindedPassword()));
-    assertEquals(3, bpp2.getVersion());
+    assertEquals(2, bpp2.getVersion());
 
     Thread.sleep(2000);
     assertTrue(this.pythia.verifyBreachProofPassword(this.password, bpp1, false));
@@ -362,15 +360,15 @@ public class PythiaTest extends ConfigurableTest {
   public void updateBreachProofPassword_alreadyMigrated() throws CryptoException,
       VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
     // YTC-18
-    setup(getProofKeys3());
+    setup(getProofKeys2());
 
     BreachProofPassword bpp1 = this.pythia.createBreachProofPassword(password);
     assertNotNull(bpp1);
-    assertEquals(3, bpp1.getVersion());
+    assertEquals(2, bpp1.getVersion());
 
     Thread.sleep(2000);
     try {
-      this.pythia.updateBreachProofPassword(getUpdateToken2to3(), bpp1);
+      this.pythia.updateBreachProofPassword(getUpdateToken1to2(), bpp1);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Already migrated", e.getMessage());
@@ -387,9 +385,13 @@ public class PythiaTest extends ConfigurableTest {
     assertNotNull(bpp1);
     assertEquals(1, bpp1.getVersion());
 
+    String[] token1to2parts = getUpdateToken1to2().split("\\.");
+    // No matter 'Token 2 -> 3' will be not valid, we only need versions
+    String token2to3 = String.format("%s.%s.%s.%s", token1to2parts[0], "2", "3", token1to2parts[3]);
+
     Thread.sleep(2000);
     try {
-      this.pythia.updateBreachProofPassword(getUpdateToken2to3(), bpp1);
+      this.pythia.updateBreachProofPassword(token2to3, bpp1);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Wrong user version", e.getMessage());

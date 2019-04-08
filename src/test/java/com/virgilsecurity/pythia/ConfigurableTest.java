@@ -210,7 +210,7 @@ public class ConfigurableTest {
 
   /**
    * Get the proof keys trinity.
-   * 
+   *
    * @return the proof keys.
    */
   public List<String> getProofKeys3() {
@@ -228,11 +228,11 @@ public class ConfigurableTest {
    * 
    * @return the update token.
    */
-  public String getUpdateToken2to3() {
+  public String getUpdateToken1to2() {
     if (this.updateToken2to3 == null) {
-      this.updateToken2to3 = getPropertyByName("UPDATE_TOKEN_2_3");
+      this.updateToken2to3 = getPropertyByName("UPDATE_TOKEN_1_2");
       if (this.updateToken2to3 == null) {
-        fail("UPDATE_TOKEN_2_3 is not defined");
+        fail("UPDATE_TOKEN_1_2 is not defined");
       }
     }
     return this.updateToken2to3;
