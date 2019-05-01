@@ -62,6 +62,7 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
+
   <developers>
     <developer>
       <name>Andrii Iakovenko</name>
@@ -74,81 +75,69 @@
       <organizationUrl>https://github.com/BuddahLD</organizationUrl>
     </developer>
   </developers>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.virgil-sdk>5.0.9</version.virgil-sdk>
+    <version.virgil-sdk>5.1.0-SNAPSHOT</version.virgil-sdk>
     <version.commons-codec>1.12</version.commons-codec>
     <version.commons-lang>2.6</version.commons-lang>
     <version.junit>4.12</version.junit>
     <version.mockito>2.24.5</version.mockito>
+    <version.virgil-crypto>0.7.0-SNAPSHOT</version.virgil-crypto>
     <gpg.keyname>empty</gpg.keyname>
   </properties>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.virgilsecurity.sdk</groupId>
-        <artifactId>crypto</artifactId>
-        <version>${version.virgil-sdk}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.virgilsecurity.sdk</groupId>
-        <artifactId>sdk</artifactId>
-        <version>${version.virgil-sdk}</version>
-      </dependency>
-      <!-- Tests -->
-      <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>${version.commons-lang}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-        <version>${version.commons-codec}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${version.junit}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>${version.mockito}</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+
+  <repositories>
+    <repository>
+      <id>snapshots-repo</id>
+      <name>Snapshots repository</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+  </repositories>
+
   <dependencies>
+    <dependency>
+      <groupId>com.virgilsecurity.crypto</groupId>
+      <artifactId>pythia</artifactId>
+      <version>${version.virgil-crypto}</version>
+    </dependency>
     <dependency>
       <groupId>com.virgilsecurity.sdk</groupId>
       <artifactId>crypto</artifactId>
+      <version>${version.virgil-sdk}</version>
     </dependency>
     <dependency>
       <groupId>com.virgilsecurity.sdk</groupId>
       <artifactId>sdk</artifactId>
+      <version>${version.virgil-sdk}</version>
     </dependency>
     <!-- Tests -->
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-    </dependency>
-    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
+      <version>${version.commons-lang}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${version.commons-codec}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <version>${version.junit}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <version>${version.mockito}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <resources>
       <resource>

@@ -43,9 +43,11 @@ import com.google.gson.annotations.SerializedName;
  */
 public class GenerateSeedRequest {
 
+  @SuppressWarnings("FieldCanBeLocal")
   @SerializedName("blinded_password")
   private byte[] blindedPassword;
 
+  @SuppressWarnings("FieldCanBeLocal")
   @SerializedName("brainkey_id")
   private String brainkeyId;
 

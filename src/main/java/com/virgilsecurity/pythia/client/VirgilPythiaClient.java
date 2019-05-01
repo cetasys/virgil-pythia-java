@@ -248,5 +248,4 @@ public final class VirgilPythiaClient implements PythiaClient {
     this.brainkeyVirgilAgent = String.format("%1$s;%2$s;%3$s;%4$s", brainkeyProduct,
         VirgilInfo.FAMILY, osName, version);
   }
-
 }

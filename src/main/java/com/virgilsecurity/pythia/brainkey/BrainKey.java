@@ -33,42 +33,46 @@
 
 package com.virgilsecurity.pythia.brainkey;
 
+import com.virgilsecurity.pythia.client.PythiaClient;
 import com.virgilsecurity.pythia.crypto.BlindResult;
+import com.virgilsecurity.pythia.crypto.PythiaCrypto;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.jwt.TokenContext;
+import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 
 /**
  * Pythia BrainKey.
- * 
- * @author Andrii Iakovenko
  *
+ * @author Andrii Iakovenko
  */
 public class BrainKey {
 
-  private BrainKeyContext context;
+  private PythiaClient client;
+  private PythiaCrypto pythiaCrypto;
+  private AccessTokenProvider accessTokenProvider;
 
   /**
    * Create a new instance of {@link BrainKey}.
    *
-   * @param context
-   *          the context.
+   * @param context The context.
    */
   public BrainKey(BrainKeyContext context) {
-    this.context = context;
+    this.client = context.getPythiaClient();
+    this.pythiaCrypto = context.getPythiaCrypto();
+    this.accessTokenProvider = context.getAccessTokenProvider();
   }
 
   /**
    * Generates key pair based on given password.
-   * 
-   * @param password
-   *          password from which key pair will be generated.
+   *
+   * @param password password from which key pair will be generated.
+   *
    * @return generated {@link VirgilKeyPair}.
-   * @throws CryptoException
-   *           if crypto operation failed.
-   * @throws VirgilPythiaServiceException
-   *           if Pythia service returned an error.
+   *
+   * @throws CryptoException              if crypto operation failed.
+   * @throws VirgilPythiaServiceException if Pythia service returned an error.
    */
   public VirgilKeyPair generateKeyPair(String password)
       throws CryptoException, VirgilPythiaServiceException {
@@ -77,31 +81,50 @@ public class BrainKey {
 
   /**
    * Generates key pair based on given password and brainkeyId.
-   * 
-   * @param password
-   *          password from which key pair will be generated.
-   * @param brainKeyId
-   *          brainKey identifier (in case one wants to generate several key pairs from 1 password).
+   *
+   * @param password   password from which key pair will be generated.
+   * @param brainKeyId brainKey identifier (in case one wants to generate several key pairs from 1 password).
+   *
    * @return generated {@link VirgilKeyPair}.
-   * @throws CryptoException
-   *           if crypto operation failed.
-   * @throws VirgilPythiaServiceException
-   *           if Pythia service returned an error.
+   *
+   * @throws CryptoException              if crypto operation failed.
+   * @throws VirgilPythiaServiceException if Pythia service returned an error.
    */
   public VirgilKeyPair generateKeyPair(String password, String brainKeyId)
       throws CryptoException, VirgilPythiaServiceException {
-    String token = this.context.getAccessTokenProvider()
-        .getToken(new TokenContext("seed", false, "pythia")).stringRepresentation();
-
-    BlindResult blindedResult = this.context.getPythiaCrypto().blind(password);
-    byte[] seed = this.context.getPythiaClient().generateSeed(blindedResult.getBlindedPassword(),
-        brainKeyId, token);
-
-    byte[] deblindedPassword = this.context.getPythiaCrypto().deblind(seed,
-        blindedResult.getBlindingSecret());
-    VirgilKeyPair keyPair = this.context.getPythiaCrypto()
-        .generateKeyPair(this.context.getKeyPairType(), deblindedPassword);
-    return keyPair;
+    String token = accessTokenProvider.getToken(new TokenContext("seed",
+                                                                 false,
+                                                                 "pythia")).stringRepresentation();
+    BlindResult blindedResult = pythiaCrypto.blind(password);
+    byte[] seed = client.generateSeed(blindedResult.getBlindedPassword(), brainKeyId, token);
+    byte[] deblindedPassword = pythiaCrypto.deblind(seed, blindedResult.getBlindingSecret());
+    return pythiaCrypto.generateKeyPair(deblindedPassword);
   }
 
+  /**
+   * Gets client.
+   *
+   * @return the client
+   */
+  public PythiaClient getClient() {
+    return client;
+  }
+
+  /**
+   * Gets pythia crypto.
+   *
+   * @return the pythia crypto
+   */
+  public PythiaCrypto getPythiaCrypto() {
+    return pythiaCrypto;
+  }
+
+  /**
+   * Gets access token provider.
+   *
+   * @return the access token provider
+   */
+  public AccessTokenProvider getAccessTokenProvider() {
+    return accessTokenProvider;
+  }
 }

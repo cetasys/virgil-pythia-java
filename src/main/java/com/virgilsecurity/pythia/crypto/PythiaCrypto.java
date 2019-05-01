@@ -33,7 +33,7 @@
 
 package com.virgilsecurity.pythia.crypto;
 
-import com.virgilsecurity.sdk.crypto.KeysType;
+import com.virgilsecurity.crypto.pythia.PythiaException;
 import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 
@@ -47,58 +47,51 @@ public interface PythiaCrypto {
 
   /**
    * Turns password into a pseudo-random string.
-   * 
-   * @param password
-   *          Random end user's password.
-   * @return {@link BlindResult} which contains pair of blinded password and blinding secret.
+   *
+   * @param password Random end user's password.
+   *
+   * @return {@link BlindResult} Which contains pair of blinded password and blinding secret.
    */
   BlindResult blind(String password);
 
   /**
    * Unmasks transformedPassword value with previously returned blindingSecret from
    * {@linkplain #blind(String)}.
-   * 
-   * @param transformedPassword
-   *          the blindedPassword, protected using server secret.
-   * @param blindingSecret
-   *          the secret random used to blind user's password.
-   * @return protected deblinded password.
+   *
+   * @param transformedPassword The blindedPassword, protected using server secret.
+   * @param blindingSecret The secret random used to blind user's password.
+   *
+   * @return Protected deblinded password.
    */
   byte[] deblind(byte[] transformedPassword, byte[] blindingSecret);
 
   /**
    * This operation allows client to verify that transform result is correct, assuming the client
    * has previously stored tweak.
-   * 
-   * @param transformedPassword
-   *          the blindedPassword, protected using server secret.
-   * @param blindedPassword
-   *          a blinded password returned from {@linkplain #blind(String)}
-   * @param tweak
-   *          the random 32byte salt.
-   * @param transformationPublicKey
-   *          the public key corresponding to transformationPrivateKey value.
-   * @param proofC
-   *          the first part of proof that transformedPassword was created using
-   *          transformationPrivateKey.
-   * @param proofU
-   *          the second part of proof that transformedPassword was created using
-   *          transformationPrivateKey.
-   * @return {@code true} if verification success.
+   *
+   * @param transformedPassword The blindedPassword, protected using server secret.
+   * @param blindedPassword A blinded password returned from {@linkplain #blind(String)}.
+   * @param tweak The random 32byte salt.
+   * @param transformationPublicKey The public key corresponding to transformationPrivateKey value.
+   * @param proofC The first part of proof that transformedPassword was created using
+   *               transformationPrivateKey.
+   * @param proofU The second part of proof that transformedPassword was created using
+   *               transformationPrivateKey.
+   *
+   * @return {@code true} if verification is successful, {@code false} otherwise.
    */
   boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak,
-      byte[] transformationPublicKey, byte[] proofC, byte[] proofU);
+              byte[] transformationPublicKey, byte[] proofC, byte[] proofU) throws PythiaException;
 
   /**
    * Updates previously stored deblindedPassword with passwordUpdateToken. After this call,
    * transform called with new arguments will return corresponding values.
    * 
-   * @param deblindedPassword
-   *          a value corresponding to a password, protected by Pythia service with transform
-   *          operation.
-   * @param updateToken
-   *          an update token.
-   * @return deblinded protected password updated with token.
+   * @param deblindedPassword A value corresponding to a password, protected by Pythia service
+   *                          with transform operation.
+   * @param updateToken An update token.
+   *
+   * @return Deblinded protected password updated with token.
    */
   byte[] updateDeblinded(byte[] deblindedPassword, byte[] updateToken);
 
@@ -111,15 +104,13 @@ public interface PythiaCrypto {
 
   /**
    * Generates key pair of given type using random seed.
-   * 
-   * @param type
-   *          type of key pair.
-   * @param seed
-   *          random seed.
-   * @return generated key pair.
-   * @throws CryptoException
-   *           if crypto operation failed.
+   *
+   * @param seed Random seed.
+   *
+   * @return Generated key pair.
+   *
+   * @throws CryptoException If crypto operation failed.
    */
-  VirgilKeyPair generateKeyPair(KeysType type, byte[] seed) throws CryptoException;
+  VirgilKeyPair generateKeyPair(byte[] seed) throws CryptoException;
 
 }

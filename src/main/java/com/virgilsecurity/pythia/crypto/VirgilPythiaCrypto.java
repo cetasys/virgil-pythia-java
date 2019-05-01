@@ -33,15 +33,14 @@
 
 package com.virgilsecurity.pythia.crypto;
 
-import com.virgilsecurity.crypto.VirgilPythia;
-import com.virgilsecurity.crypto.VirgilPythiaBlindResult;
-import com.virgilsecurity.sdk.crypto.KeysType;
+import java.util.Random;
+
+import com.virgilsecurity.crypto.pythia.Pythia;
+import com.virgilsecurity.crypto.pythia.PythiaBlindResult;
 import com.virgilsecurity.sdk.crypto.VirgilCrypto;
 import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
-
-import java.util.Random;
 
 /**
  * Virgil implementation of all crypto operation needed by Pythia.
@@ -52,7 +51,6 @@ import java.util.Random;
 public class VirgilPythiaCrypto implements PythiaCrypto {
 
   private VirgilCrypto virgilCrypto;
-  private VirgilPythia virgilPythia;
   private Random random;
 
   /**
@@ -61,7 +59,6 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   public VirgilPythiaCrypto() {
     this.virgilCrypto = new VirgilCrypto();
-    this.virgilPythia = new VirgilPythia();
     this.random = new Random();
   }
 
@@ -72,9 +69,8 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   @Override
   public BlindResult blind(String password) {
-    VirgilPythiaBlindResult blindResult = this.virgilPythia
-        .blind(ConvertionUtils.toBytes(password));
-    return new BlindResult(blindResult.blindedPassword(), blindResult.blindingSecret());
+    PythiaBlindResult blindResult = Pythia.blind(ConvertionUtils.toBytes(password));
+    return new BlindResult(blindResult.blindedPassword, blindResult.blindingSecret);
   }
 
   /*
@@ -84,7 +80,7 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   @Override
   public byte[] deblind(byte[] transformedPassword, byte[] blindingSecret) {
-    return this.virgilPythia.deblind(transformedPassword, blindingSecret);
+    return Pythia.deblind(transformedPassword, blindingSecret);
   }
 
   /*
@@ -96,8 +92,13 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
   @Override
   public boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak,
       byte[] transformationPublicKey, byte[] proofC, byte[] proofU) {
-    return this.virgilPythia.verify(transformedPassword, blindedPassword, tweak,
-        transformationPublicKey, proofC, proofU);
+    try {
+      Pythia.verify(transformedPassword, blindedPassword, tweak,
+                    transformationPublicKey, proofC, proofU);
+      return true;
+    } catch (Throwable throwable) {
+      return false; // TODO change when fixed in crypto
+    }
   }
 
   /*
@@ -107,7 +108,7 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   @Override
   public byte[] updateDeblinded(byte[] deblindedPassword, byte[] updateToken) {
-    return this.virgilPythia.updateDeblindedWithToken(deblindedPassword, updateToken);
+    return Pythia.updateDeblindedWithToken(deblindedPassword, updateToken);
   }
 
   /*
@@ -130,11 +131,7 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    * KeysType, byte[])
    */
   @Override
-  public VirgilKeyPair generateKeyPair(KeysType type, byte[] seed) throws CryptoException {
-    com.virgilsecurity.crypto.VirgilKeyPair keyPair = com.virgilsecurity.crypto.VirgilKeyPair
-        .generateFromKeyMaterial(VirgilCrypto.toVirgilKeyPairType(type), seed);
-
-    return this.virgilCrypto.wrapKeyPair(keyPair.privateKey(), keyPair.publicKey());
+  public VirgilKeyPair generateKeyPair(byte[] seed) throws CryptoException {
+    return this.virgilCrypto.generateKeyPair(seed);
   }
-
 }

@@ -138,7 +138,7 @@ public class ConfigurableTest {
     if (this.apiPrivateKey == null) {
       try {
         this.apiPrivateKey = this.crypto
-            .importPrivateKey(ConvertionUtils.base64ToBytes(getApiPrivateKeyStr()));
+            .importPrivateKey(ConvertionUtils.base64ToBytes(getApiPrivateKeyStr())).getPrivateKey();
       } catch (CryptoException e) {
         fail("API Private Key has invalid format");
       }

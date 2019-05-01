@@ -39,21 +39,20 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import com.virgilsecurity.crypto.VirgilPythia;
-import com.virgilsecurity.crypto.VirgilPythiaTransformResult;
-import com.virgilsecurity.crypto.VirgilPythiaTransformationKeyPair;
-import com.virgilsecurity.pythia.SampleDataHolder;
-import com.virgilsecurity.sdk.crypto.KeysType;
-import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
-import com.virgilsecurity.sdk.crypto.VirgilPrivateKey;
-import com.virgilsecurity.sdk.crypto.VirgilPublicKey;
-import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import com.virgilsecurity.crypto.pythia.Pythia;
+import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
+import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
+import com.virgilsecurity.pythia.SampleDataHolder;
+import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
+import com.virgilsecurity.sdk.crypto.VirgilPrivateKey;
+import com.virgilsecurity.sdk.crypto.VirgilPublicKey;
+import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
@@ -68,13 +67,11 @@ import org.junit.Test;
 public class VirgilPythiaCryptoTest {
 
   private PythiaCrypto pythiaCrypto;
-  private VirgilPythia pythia;
   private SampleDataHolder sample;
 
   @Before
   public void setup() {
     this.pythiaCrypto = new VirgilPythiaCrypto();
-    this.pythia = new VirgilPythia();
 
     this.sample = new SampleDataHolder("com/virgilsecurity/pythia/crypto/pythia-crypto.json");
   }
@@ -109,11 +106,15 @@ public class VirgilPythiaCryptoTest {
 
     BlindResult blindResult = this.pythiaCrypto.blind(password);
 
-    VirgilPythiaTransformationKeyPair transformationKeyPair = this.pythia
-        .computeTransformationKeyPair(transformationKeyId, pythiaSecret, pythiaScopeSecret);
-    VirgilPythiaTransformResult transformResult = pythia.transform(blindResult.getBlindedPassword(),
-        tweek, transformationKeyPair.privateKey());
-    byte[] deblindResult = this.pythiaCrypto.deblind(transformResult.transformedPassword(),
+    PythiaComputeTransformationKeyPairResult transformationKeyPair =
+        Pythia.computeTransformationKeyPair(transformationKeyId,
+                                            pythiaSecret,
+                                            pythiaScopeSecret);
+    PythiaTransformResult transformResult =
+        Pythia.transform(blindResult.getBlindedPassword(),
+                         tweek,
+                         transformationKeyPair.transformationPrivateKey);
+    byte[] deblindResult = this.pythiaCrypto.deblind(transformResult.transformedPassword,
         blindResult.getBlindingSecret());
     assertArrayEquals(deblindedPassword, deblindResult);
   }
@@ -144,21 +145,22 @@ public class VirgilPythiaCryptoTest {
   public void generateKeyPair() throws CryptoException {
     byte[] seed = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
 
-    VirgilKeyPair keyPair = this.pythiaCrypto.generateKeyPair(KeysType.Default, seed);
+    VirgilKeyPair keyPair = this.pythiaCrypto.generateKeyPair(seed);
     assertNotNull(keyPair);
 
     VirgilPrivateKey privateKey = keyPair.getPrivateKey();
     assertNotNull(privateKey);
     assertNotNull(privateKey.getIdentifier());
-    assertNotNull(privateKey.getRawKey());
+    assertNotNull(privateKey.getPrivateKey().exportPrivateKey());
 
     VirgilPublicKey publicKey = keyPair.getPublicKey();
     assertNotNull(publicKey);
     assertNotNull(publicKey.getIdentifier());
-    assertNotNull(publicKey.getRawKey());
+    assertNotNull(publicKey.getPublicKey().exportPublicKey());
 
     assertArrayEquals(privateKey.getIdentifier(), publicKey.getIdentifier());
-    assertFalse(Arrays.equals(privateKey.getRawKey(), publicKey.getRawKey()));
+    assertFalse(Arrays.equals(privateKey.getPrivateKey().exportPrivateKey(),
+                              publicKey.getPublicKey().exportPublicKey()));
   }
 
 }
