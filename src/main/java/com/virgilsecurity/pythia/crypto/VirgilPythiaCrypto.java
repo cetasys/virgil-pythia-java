@@ -50,8 +50,9 @@ import com.virgilsecurity.sdk.utils.ConvertionUtils;
  */
 public class VirgilPythiaCrypto implements PythiaCrypto {
 
+  private static final int RANDOM_DATA_SIZE = 32;
+
   private VirgilCrypto virgilCrypto;
-  private Random random;
 
   /**
    * Create a new instance of {@link VirgilPythiaCrypto}.
@@ -59,7 +60,8 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   public VirgilPythiaCrypto() {
     this.virgilCrypto = new VirgilCrypto();
-    this.random = new Random();
+
+    Pythia.configure();
   }
 
   /*
@@ -93,8 +95,13 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
   public boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak,
       byte[] transformationPublicKey, byte[] proofC, byte[] proofU) {
     try {
-      Pythia.verify(transformedPassword, blindedPassword, tweak,
-                    transformationPublicKey, proofC, proofU);
+      Pythia.verify(transformedPassword,
+                    blindedPassword,
+                    tweak,
+                    transformationPublicKey,
+                    proofC,
+                    proofU);
+
       return true;
     } catch (Throwable throwable) {
       return false; // TODO change when fixed in crypto
@@ -118,9 +125,7 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   @Override
   public byte[] generateSalt() {
-    byte[] rndBytes = new byte[32];
-    random.nextBytes(rndBytes);
-    return rndBytes;
+    return virgilCrypto.generateRandomData(RANDOM_DATA_SIZE);
   }
 
   /*
@@ -132,6 +137,10 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   @Override
   public VirgilKeyPair generateKeyPair(byte[] seed) throws CryptoException {
-    return this.virgilCrypto.generateKeyPair(seed);
+    return virgilCrypto.generateKeyPair(seed);
+  }
+
+  @Override protected void finalize() {
+    Pythia.cleanup();
   }
 }
