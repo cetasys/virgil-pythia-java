@@ -148,6 +148,7 @@ public class VirgilCryptoPythiaTest {
     this.pythiaScopeSecret = getBytes("kPythiaScopeSecret");
 
     // YTC-1
+    Pythia.configure();
   }
 
   @Test
