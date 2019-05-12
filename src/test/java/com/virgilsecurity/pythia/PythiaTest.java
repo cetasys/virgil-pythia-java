@@ -321,13 +321,13 @@ public class PythiaTest extends ConfigurableTest {
         transformResult.getTransformedTweak(), transformationKeyPair1.getTransformationPrivateKey(),
         transformationKeyPair1.getTransformationPublicKey());
 
-    //    assertTrue(com.virgilsecurity.crypto.pythia.Pythia.verify(
-    //        transformResult.transformedPassword,
-    //        blindResult.getBlindedPassword(),
-    //        salt,
-    //        transformationKeyPair1.transformationPublicKey,
-    //        proveResult.proofValueC,
-    //        proveResult.proofValueU)); // TODO uncomment when fixed in crypto
+        assertTrue(com.virgilsecurity.crypto.pythia.Pythia.verify(
+            transformResult.getTransformedPassword(),
+            blindResult.getBlindedPassword(),
+            salt,
+            transformationKeyPair1.getTransformationPublicKey(),
+            proveResult.getProofValueC(),
+            proveResult.getProofValueU()));
 
     byte[] passwordUpdateToken = com.virgilsecurity.crypto.pythia.Pythia.getPasswordUpdateToken(
         transformationKeyPair1.getTransformationPrivateKey(),

@@ -35,6 +35,7 @@ package com.virgilsecurity.pythia.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.gson.JsonObject;
@@ -130,13 +131,13 @@ public class VirgilCryptoPythiaTest {
         blindResult.getBlindedPassword(), transformResult.getTransformedTweak(),
         transformationKeyPair.getTransformationPrivateKey(),
         transformationKeyPair.getTransformationPublicKey());
-    //    boolean verifyResult = Pythia.verify(transformResult.transformedPassword,
-    //                                         blindResult.blindedPassword,
-    //                                         tweek,
-    //                                         transformationKeyPair.transformationPublicKey,
-    //                                         proveResult.proofValueC,
-    //                                         proveResult.proofValueU);
-    //    assertTrue(verifyResult); // TODO update when fixed in crypto
+        boolean verifyResult = Pythia.verify(transformResult.getTransformedPassword(),
+                                             blindResult.getBlindedPassword(),
+                                             tweek,
+                                             transformationKeyPair.getTransformationPublicKey(),
+                                             proveResult.getProofValueC(),
+                                             proveResult.getProofValueU());
+        assertTrue(verifyResult);
   }
 
   @Before

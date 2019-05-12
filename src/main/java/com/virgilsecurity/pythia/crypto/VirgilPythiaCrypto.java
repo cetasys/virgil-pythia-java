@@ -33,14 +33,14 @@
 
 package com.virgilsecurity.pythia.crypto;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaBlindResult;
 import com.virgilsecurity.sdk.crypto.VirgilCrypto;
 import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Virgil implementation of all crypto operation needed by Pythia.
@@ -96,14 +96,12 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
   @Override
   public boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak,
       byte[] transformationPublicKey, byte[] proofC, byte[] proofU) {
-    try {
-      Pythia.verify(transformedPassword, blindedPassword, tweak, transformationPublicKey, proofC,
-          proofU);
-
-      return true;
-    } catch (Throwable throwable) {
-      return false; // TODO change when fixed in crypto
-    }
+    return Pythia.verify(transformedPassword,
+                         blindedPassword,
+                         tweak,
+                         transformationPublicKey,
+                         proofC,
+                         proofU);
   }
 
   /*
