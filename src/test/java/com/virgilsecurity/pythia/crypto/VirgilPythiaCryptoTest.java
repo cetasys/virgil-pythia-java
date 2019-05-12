@@ -39,12 +39,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
 import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
@@ -53,6 +47,15 @@ import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
 import com.virgilsecurity.sdk.crypto.VirgilPrivateKey;
 import com.virgilsecurity.sdk.crypto.VirgilPublicKey;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
@@ -106,15 +109,11 @@ public class VirgilPythiaCryptoTest {
 
     BlindResult blindResult = this.pythiaCrypto.blind(password);
 
-    PythiaComputeTransformationKeyPairResult transformationKeyPair =
-        Pythia.computeTransformationKeyPair(transformationKeyId,
-                                            pythiaSecret,
-                                            pythiaScopeSecret);
-    PythiaTransformResult transformResult =
-        Pythia.transform(blindResult.getBlindedPassword(),
-                         tweek,
-                         transformationKeyPair.transformationPrivateKey);
-    byte[] deblindResult = this.pythiaCrypto.deblind(transformResult.transformedPassword,
+    PythiaComputeTransformationKeyPairResult transformationKeyPair = Pythia
+        .computeTransformationKeyPair(transformationKeyId, pythiaSecret, pythiaScopeSecret);
+    PythiaTransformResult transformResult = Pythia.transform(blindResult.getBlindedPassword(),
+        tweek, transformationKeyPair.getTransformationPrivateKey());
+    byte[] deblindResult = this.pythiaCrypto.deblind(transformResult.getTransformedPassword(),
         blindResult.getBlindingSecret());
     assertArrayEquals(deblindedPassword, deblindResult);
   }
@@ -160,7 +159,27 @@ public class VirgilPythiaCryptoTest {
 
     assertArrayEquals(privateKey.getIdentifier(), publicKey.getIdentifier());
     assertFalse(Arrays.equals(privateKey.getPrivateKey().exportPrivateKey(),
-                              publicKey.getPublicKey().exportPublicKey()));
+        publicKey.getPublicKey().exportPublicKey()));
+  }
+
+  @Test
+  public void blind_concurrent() throws InterruptedException {
+    final String password = this.sample.get("kPassword");
+
+    ExecutorService es = Executors.newCachedThreadPool();
+    for (int i = 0; i < 100; i++) {
+      es.execute(new Runnable() {
+
+        @Override
+        public void run() {
+          VirgilPythiaCrypto crypto = new VirgilPythiaCrypto();
+          crypto.blind(password);
+          System.gc();
+        }
+      });
+    }
+    es.shutdown();
+    es.awaitTermination(1, TimeUnit.MINUTES);
   }
 
 }

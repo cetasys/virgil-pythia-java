@@ -83,7 +83,8 @@ public class BrainKey {
    * Generates key pair based on given password and brainkeyId.
    *
    * @param password   password from which key pair will be generated.
-   * @param brainKeyId brainKey identifier (in case one wants to generate several key pairs from 1 password).
+   * @param brainKeyId brainKey identifier (in case one wants to generate several key pairs from 1
+   *                   password).
    *
    * @return generated {@link VirgilKeyPair}.
    *
@@ -92,9 +93,8 @@ public class BrainKey {
    */
   public VirgilKeyPair generateKeyPair(String password, String brainKeyId)
       throws CryptoException, VirgilPythiaServiceException {
-    String token = accessTokenProvider.getToken(new TokenContext("seed",
-                                                                 false,
-                                                                 "pythia")).stringRepresentation();
+    String token = accessTokenProvider.getToken(new TokenContext("seed", false, "pythia"))
+        .stringRepresentation();
     BlindResult blindedResult = pythiaCrypto.blind(password);
     byte[] seed = client.generateSeed(blindedResult.getBlindedPassword(), brainKeyId, token);
     byte[] deblindedPassword = pythiaCrypto.deblind(seed, blindedResult.getBlindingSecret());

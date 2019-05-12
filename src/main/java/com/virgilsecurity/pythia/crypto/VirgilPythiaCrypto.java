@@ -33,14 +33,14 @@
 
 package com.virgilsecurity.pythia.crypto;
 
-import java.util.Random;
-
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaBlindResult;
 import com.virgilsecurity.sdk.crypto.VirgilCrypto;
 import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Virgil implementation of all crypto operation needed by Pythia.
@@ -51,6 +51,7 @@ import com.virgilsecurity.sdk.utils.ConvertionUtils;
 public class VirgilPythiaCrypto implements PythiaCrypto {
 
   private static final int RANDOM_DATA_SIZE = 32;
+  private static final AtomicLong INSTANCE_COUNT = new AtomicLong(0);
 
   private VirgilCrypto virgilCrypto;
 
@@ -59,8 +60,9 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    *
    */
   public VirgilPythiaCrypto() {
-    this.virgilCrypto = new VirgilCrypto();
+    INSTANCE_COUNT.incrementAndGet();
 
+    this.virgilCrypto = new VirgilCrypto();
     Pythia.configure();
   }
 
@@ -72,7 +74,7 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
   @Override
   public BlindResult blind(String password) {
     PythiaBlindResult blindResult = Pythia.blind(ConvertionUtils.toBytes(password));
-    return new BlindResult(blindResult.blindedPassword, blindResult.blindingSecret);
+    return new BlindResult(blindResult.getBlindedPassword(), blindResult.getBlindingSecret());
   }
 
   /*
@@ -95,12 +97,8 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
   public boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak,
       byte[] transformationPublicKey, byte[] proofC, byte[] proofU) {
     try {
-      Pythia.verify(transformedPassword,
-                    blindedPassword,
-                    tweak,
-                    transformationPublicKey,
-                    proofC,
-                    proofU);
+      Pythia.verify(transformedPassword, blindedPassword, tweak, transformationPublicKey, proofC,
+          proofU);
 
       return true;
     } catch (Throwable throwable) {
@@ -140,7 +138,11 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
     return virgilCrypto.generateKeyPair(seed);
   }
 
-  @Override protected void finalize() {
-    Pythia.cleanup();
+  @Override
+  protected void finalize() {
+    long count = INSTANCE_COUNT.decrementAndGet();
+    if (count == 0) {
+      Pythia.cleanup();
+    }
   }
 }

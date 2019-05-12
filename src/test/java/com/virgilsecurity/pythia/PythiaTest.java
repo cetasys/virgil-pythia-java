@@ -40,11 +40,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
 import com.virgilsecurity.crypto.pythia.PythiaProveResult;
 import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
@@ -58,6 +53,11 @@ import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -298,53 +298,47 @@ public class PythiaTest extends ConfigurableTest {
     byte[] salt = ConvertionUtils.toBytes(username);
 
     PythiaComputeTransformationKeyPairResult transformationKeyPair1 =
-        com.virgilsecurity.crypto.pythia.Pythia.computeTransformationKeyPair(
-            ConvertionUtils.toBytes(domain1),
-            ConvertionUtils.toBytes(msk1),
-            ConvertionUtils.toBytes(sss1));
+        com.virgilsecurity.crypto.pythia.Pythia
+            .computeTransformationKeyPair(ConvertionUtils.toBytes(domain1),
+                ConvertionUtils.toBytes(msk1), ConvertionUtils.toBytes(sss1));
 
     PythiaComputeTransformationKeyPairResult transformationKeyPair2 =
-        com.virgilsecurity.crypto.pythia.Pythia.computeTransformationKeyPair(
-            ConvertionUtils.toBytes(domain2),
-            ConvertionUtils.toBytes(msk2),
-            ConvertionUtils.toBytes(sss2));
+        com.virgilsecurity.crypto.pythia.Pythia
+            .computeTransformationKeyPair(ConvertionUtils.toBytes(domain2),
+                ConvertionUtils.toBytes(msk2), ConvertionUtils.toBytes(sss2));
 
-      BlindResult blindResult = this.pythiaCrypto.blind(password);
-    PythiaTransformResult transformResult =
-        com.virgilsecurity.crypto.pythia.Pythia.transform(
-            blindResult.getBlindedPassword(),
-            salt,
-            transformationKeyPair1.transformationPrivateKey);
+    BlindResult blindResult = this.pythiaCrypto.blind(password);
+    PythiaTransformResult transformResult = com.virgilsecurity.crypto.pythia.Pythia.transform(
+        blindResult.getBlindedPassword(), salt,
+        transformationKeyPair1.getTransformationPrivateKey());
 
-    byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResult.transformedPassword,
-          blindResult.getBlindingSecret());
-      assertArrayEquals(ConvertionUtils.hexToBytes(deblinded1), deblindedPassword);
+    byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResult.getTransformedPassword(),
+        blindResult.getBlindingSecret());
+    assertArrayEquals(ConvertionUtils.hexToBytes(deblinded1), deblindedPassword);
 
     PythiaProveResult proveResult = com.virgilsecurity.crypto.pythia.Pythia.prove(
-        transformResult.transformedPassword,
-        blindResult.getBlindedPassword(),
-        transformResult.transformedTweak,
-        transformationKeyPair1.transformationPrivateKey,
-        transformationKeyPair1.transformationPublicKey);
+        transformResult.getTransformedPassword(), blindResult.getBlindedPassword(),
+        transformResult.getTransformedTweak(), transformationKeyPair1.getTransformationPrivateKey(),
+        transformationKeyPair1.getTransformationPublicKey());
 
-//    assertTrue(com.virgilsecurity.crypto.pythia.Pythia.verify(
-//        transformResult.transformedPassword,
-//        blindResult.getBlindedPassword(),
-//        salt,
-//        transformationKeyPair1.transformationPublicKey,
-//        proveResult.proofValueC,
-//        proveResult.proofValueU)); // TODO uncomment when fixed in crypto
+    //    assertTrue(com.virgilsecurity.crypto.pythia.Pythia.verify(
+    //        transformResult.transformedPassword,
+    //        blindResult.getBlindedPassword(),
+    //        salt,
+    //        transformationKeyPair1.transformationPublicKey,
+    //        proveResult.proofValueC,
+    //        proveResult.proofValueU)); // TODO uncomment when fixed in crypto
 
-      byte[] passwordUpdateToken = com.virgilsecurity.crypto.pythia.Pythia.getPasswordUpdateToken(
-          transformationKeyPair1.transformationPrivateKey,
-          transformationKeyPair2.transformationPrivateKey);
+    byte[] passwordUpdateToken = com.virgilsecurity.crypto.pythia.Pythia.getPasswordUpdateToken(
+        transformationKeyPair1.getTransformationPrivateKey(),
+        transformationKeyPair2.getTransformationPrivateKey());
 
-      BreachProofPassword breachProofPassword = new BreachProofPassword(salt, deblindedPassword, 1);
-      String updateToken = "UT.1.2." + Base64.encode(passwordUpdateToken);
-      BreachProofPassword updatedBreachProofPassword = this.pythia
-          .updateBreachProofPassword(updateToken, breachProofPassword);
-      assertArrayEquals(ConvertionUtils.hexToBytes(deblinded2),
-          updatedBreachProofPassword.getDeblindedPassword());
+    BreachProofPassword breachProofPassword = new BreachProofPassword(salt, deblindedPassword, 1);
+    String updateToken = "UT.1.2." + Base64.encode(passwordUpdateToken);
+    BreachProofPassword updatedBreachProofPassword = this.pythia
+        .updateBreachProofPassword(updateToken, breachProofPassword);
+    assertArrayEquals(ConvertionUtils.hexToBytes(deblinded2),
+        updatedBreachProofPassword.getDeblindedPassword());
   }
 
   @Test

@@ -37,12 +37,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.virgilsecurity.crypto.pythia.Pythia;
@@ -51,6 +45,12 @@ import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult
 import com.virgilsecurity.crypto.pythia.PythiaProveResult;
 import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
 
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +58,7 @@ import org.junit.Test;
 /**
  * VirgilCryptoPythia class.
  */
-public class VirgilCryptoPythia {
+public class VirgilCryptoPythiaTest {
 
   private JsonObject sampleJson;
   private byte[] pythiaSecret;
@@ -74,29 +74,26 @@ public class VirgilCryptoPythia {
 
     Set<PythiaBlindResult> blindResults = new HashSet<>();
     for (int i = 0; i < 10; i++) {
-      PythiaComputeTransformationKeyPairResult transformationKeyPair =
-          Pythia.computeTransformationKeyPair(transformationKeyId,
-                                              this.pythiaSecret,
-                                              this.pythiaScopeSecret);
+      PythiaComputeTransformationKeyPairResult transformationKeyPair = Pythia
+          .computeTransformationKeyPair(transformationKeyId, this.pythiaSecret,
+              this.pythiaScopeSecret);
       PythiaBlindResult blindResult = Pythia.blind(password);
 
       // blindResult should be different on each iteration
       for (PythiaBlindResult res : blindResults) {
-        if (ArrayUtils.isEquals(res.blindedPassword, blindResult.blindedPassword)
-            && ArrayUtils.isEquals(res.blindingSecret, blindResult.blindingSecret)) {
+        if (ArrayUtils.isEquals(res.getBlindedPassword(), blindResult.getBlindedPassword())
+            && ArrayUtils.isEquals(res.getBlindingSecret(), blindResult.getBlindingSecret())) {
           fail();
         }
       }
       blindResults.add(blindResult);
 
-      PythiaTransformResult transformResult =
-          Pythia.transform(blindResult.blindedPassword,
-                           tweek,
-                           transformationKeyPair.transformationPrivateKey);
+      PythiaTransformResult transformResult = Pythia.transform(blindResult.getBlindedPassword(),
+          tweek, transformationKeyPair.getTransformationPrivateKey());
       assertNotNull(transformResult);
 
-      byte[] deblindResult = Pythia.deblind(transformResult.transformedPassword,
-                                            blindResult.blindingSecret);
+      byte[] deblindResult = Pythia.deblind(transformResult.getTransformedPassword(),
+          blindResult.getBlindingSecret());
       assertArrayEquals(deblindedPassword, deblindResult);
     }
   }
@@ -105,16 +102,15 @@ public class VirgilCryptoPythia {
   public void computeTransformationKeyPair() {
     byte[] transformationKeyId = getBytes("kTransformationKeyID");
 
-    PythiaComputeTransformationKeyPairResult transformationKeyPair =
-        Pythia.computeTransformationKeyPair(transformationKeyId,
-                                            this.pythiaSecret,
-                                            this.pythiaScopeSecret);
+    PythiaComputeTransformationKeyPairResult transformationKeyPair = Pythia
+        .computeTransformationKeyPair(transformationKeyId, this.pythiaSecret,
+            this.pythiaScopeSecret);
 
     assertNotNull(transformationKeyPair);
     assertArrayEquals(getHexBytes("kTransformationPrivateKey"),
-                      transformationKeyPair.transformationPrivateKey);
+        transformationKeyPair.getTransformationPrivateKey());
     assertArrayEquals(getHexBytes("kTransformationPublicKey"),
-                      transformationKeyPair.transformationPublicKey);
+        transformationKeyPair.getTransformationPublicKey());
   }
 
   @Test
@@ -124,34 +120,29 @@ public class VirgilCryptoPythia {
     byte[] password = getBytes("kPassword");
     byte[] tweek = getBytes("kTweek");
 
-    PythiaComputeTransformationKeyPairResult transformationKeyPair =
-        Pythia.computeTransformationKeyPair(transformationKeyId,
-                                            this.pythiaSecret,
-                                            this.pythiaScopeSecret);
+    PythiaComputeTransformationKeyPairResult transformationKeyPair = Pythia
+        .computeTransformationKeyPair(transformationKeyId, this.pythiaSecret,
+            this.pythiaScopeSecret);
     PythiaBlindResult blindResult = Pythia.blind(password);
-    PythiaTransformResult transformResult =
-        Pythia.transform(blindResult.blindedPassword,
-                         tweek,
-                         transformationKeyPair.transformationPrivateKey);
-    PythiaProveResult proveResult = Pythia.prove(transformResult.transformedPassword,
-                                                 blindResult.blindedPassword,
-                                                 transformResult.transformedTweak,
-                                                 transformationKeyPair.transformationPrivateKey,
-                                                 transformationKeyPair.transformationPublicKey);
-//    boolean verifyResult = Pythia.verify(transformResult.transformedPassword,
-//                                         blindResult.blindedPassword,
-//                                         tweek,
-//                                         transformationKeyPair.transformationPublicKey,
-//                                         proveResult.proofValueC,
-//                                         proveResult.proofValueU);
-//    assertTrue(verifyResult); // TODO update when fixed in crypto
+    PythiaTransformResult transformResult = Pythia.transform(blindResult.getBlindedPassword(),
+        tweek, transformationKeyPair.getTransformationPrivateKey());
+    PythiaProveResult proveResult = Pythia.prove(transformResult.getTransformedPassword(),
+        blindResult.getBlindedPassword(), transformResult.getTransformedTweak(),
+        transformationKeyPair.getTransformationPrivateKey(),
+        transformationKeyPair.getTransformationPublicKey());
+    //    boolean verifyResult = Pythia.verify(transformResult.transformedPassword,
+    //                                         blindResult.blindedPassword,
+    //                                         tweek,
+    //                                         transformationKeyPair.transformationPublicKey,
+    //                                         proveResult.proofValueC,
+    //                                         proveResult.proofValueU);
+    //    assertTrue(verifyResult); // TODO update when fixed in crypto
   }
 
   @Before
   public void setup() {
-    sampleJson = (JsonObject) new JsonParser().parse(new InputStreamReader(Objects.requireNonNull(
-        this.getClass()
-            .getClassLoader()
+    sampleJson = (JsonObject) new JsonParser()
+        .parse(new InputStreamReader(Objects.requireNonNull(this.getClass().getClassLoader()
             .getResourceAsStream("com/virgilsecurity/pythia/crypto/pythia-crypto.json"))));
     this.pythiaSecret = getBytes("kPythiaSecret");
     this.pythiaScopeSecret = getBytes("kPythiaScopeSecret");
@@ -170,40 +161,34 @@ public class VirgilCryptoPythia {
     final byte[] updateToken = getHexBytes("kUpdateToken");
     final byte[] newDeblinded = getHexBytes("kNewDeblinded");
 
-    PythiaComputeTransformationKeyPairResult transformationKeyPair =
-        Pythia.computeTransformationKeyPair(transformationKeyId,
-                                            this.pythiaSecret,
-                                            this.pythiaScopeSecret);
+    PythiaComputeTransformationKeyPairResult transformationKeyPair = Pythia
+        .computeTransformationKeyPair(transformationKeyId, this.pythiaSecret,
+            this.pythiaScopeSecret);
     PythiaBlindResult blindResult = Pythia.blind(password);
-    PythiaTransformResult transformResult =
-        Pythia.transform(blindResult.blindedPassword,
-                         tweek,
-                         transformationKeyPair.transformationPrivateKey);
-    final byte[] deblindResult = Pythia.deblind(transformResult.transformedPassword,
-                                                blindResult.blindingSecret);
+    PythiaTransformResult transformResult = Pythia.transform(blindResult.getBlindedPassword(),
+        tweek, transformationKeyPair.getTransformationPrivateKey());
+    final byte[] deblindResult = Pythia.deblind(transformResult.getTransformedPassword(),
+        blindResult.getBlindingSecret());
 
-    PythiaComputeTransformationKeyPairResult newTransformationKeyPair =
-        Pythia.computeTransformationKeyPair(transformationKeyId,
-                                            getBytes("kNewPythiaSecret"),
-                                            getBytes("kNewPythiaScopeSecret"));
+    PythiaComputeTransformationKeyPairResult newTransformationKeyPair = Pythia
+        .computeTransformationKeyPair(transformationKeyId, getBytes("kNewPythiaSecret"),
+            getBytes("kNewPythiaScopeSecret"));
     assertArrayEquals(newTransformationPrivateKey,
-                      newTransformationKeyPair.transformationPrivateKey);
-    assertArrayEquals(newTransformationPublicKey, newTransformationKeyPair.transformationPublicKey);
+        newTransformationKeyPair.getTransformationPrivateKey());
+    assertArrayEquals(newTransformationPublicKey,
+        newTransformationKeyPair.getTransformationPublicKey());
 
     byte[] passwordUpdateTokenResult = Pythia.getPasswordUpdateToken(
-        transformationKeyPair.transformationPrivateKey,
-        newTransformationKeyPair.transformationPrivateKey);
+        transformationKeyPair.getTransformationPrivateKey(),
+        newTransformationKeyPair.getTransformationPrivateKey());
     assertArrayEquals(updateToken, passwordUpdateTokenResult);
 
-    byte[] updatedDeblindPasswordResult =
-        Pythia.updateDeblindedWithToken(deblindResult,
-                                        passwordUpdateTokenResult);
-    PythiaTransformResult newTransformResult =
-        Pythia.transform(blindResult.blindedPassword,
-                         tweek,
-                         newTransformationKeyPair.transformationPrivateKey);
-    byte[] newDeblindResult = Pythia.deblind(newTransformResult.transformedPassword,
-                                             blindResult.blindingSecret);
+    byte[] updatedDeblindPasswordResult = Pythia.updateDeblindedWithToken(deblindResult,
+        passwordUpdateTokenResult);
+    PythiaTransformResult newTransformResult = Pythia.transform(blindResult.getBlindedPassword(),
+        tweek, newTransformationKeyPair.getTransformationPrivateKey());
+    byte[] newDeblindResult = Pythia.deblind(newTransformResult.getTransformedPassword(),
+        blindResult.getBlindingSecret());
     assertArrayEquals(newDeblinded, updatedDeblindPasswordResult);
     assertArrayEquals(newDeblinded, newDeblindResult);
   }
@@ -216,8 +201,7 @@ public class VirgilCryptoPythia {
     String hexString = this.sampleJson.get(fromPath).getAsString();
 
     if (hexString.length() % 2 == 1) {
-      throw new IllegalArgumentException(
-          "Invalid hexadecimal String supplied.");
+      throw new IllegalArgumentException("Invalid hexadecimal String supplied.");
     }
 
     byte[] bytes = new byte[hexString.length() / 2];
@@ -236,8 +220,7 @@ public class VirgilCryptoPythia {
   private int toDigit(char hexChar) {
     int digit = Character.digit(hexChar, 16);
     if (digit == -1) {
-      throw new IllegalArgumentException(
-          "Invalid Hexadecimal Character: " + hexChar);
+      throw new IllegalArgumentException("Invalid Hexadecimal Character: " + hexChar);
     }
     return digit;
   }

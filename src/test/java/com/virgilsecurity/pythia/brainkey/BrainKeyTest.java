@@ -37,11 +37,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
 import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
@@ -63,6 +58,11 @@ import com.virgilsecurity.sdk.jwt.accessProviders.GeneratorJwtProvider;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.StringUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -167,9 +167,9 @@ public class BrainKeyTest extends ConfigurableTest {
         PythiaComputeTransformationKeyPairResult transformationKeyPair = Pythia
             .computeTransformationKeyPair(transformationKeyId, pythiaSecret, pythiaScopeSecret);
         PythiaTransformResult transformResult = Pythia.transform(blindedPassword, tweek,
-                                                                 transformationKeyPair.transformationPrivateKey);
+            transformationKeyPair.getTransformationPrivateKey());
 
-        return transformResult.transformedPassword;
+        return transformResult.getTransformedPassword();
       }
     };
 
