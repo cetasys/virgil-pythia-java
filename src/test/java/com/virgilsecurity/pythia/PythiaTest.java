@@ -40,6 +40,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
 import com.virgilsecurity.crypto.pythia.PythiaProveResult;
 import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
@@ -70,7 +71,7 @@ import org.junit.Test;
  */
 public class PythiaTest extends ConfigurableTest {
 
-  private Pythia pythia;
+  private com.virgilsecurity.pythia.Pythia pythia;
   private PythiaCrypto pythiaCrypto;
   private String password;
   private SampleDataHolder sample;
@@ -90,7 +91,7 @@ public class PythiaTest extends ConfigurableTest {
         .setProofKeys(proofKeys).setPythiaCrypto(pythiaCrypto)
         .setPythiaServiceUrl(getPythiaServiceUrl()).build();
 
-    this.pythia = new Pythia(context);
+    this.pythia = new com.virgilsecurity.pythia.Pythia(context);
     this.pythiaCrypto = new VirgilPythiaCrypto();
     this.password = "some password";
 
@@ -297,15 +298,13 @@ public class PythiaTest extends ConfigurableTest {
         + "76aaf47961413f2695ec985b25de76a8c5d5caa13520ef600b2df69e8574729026a4b5d80461348fb67d05";
     byte[] salt = ConvertionUtils.toBytes(username);
 
-    PythiaComputeTransformationKeyPairResult transformationKeyPair1 =
-        com.virgilsecurity.crypto.pythia.Pythia
-            .computeTransformationKeyPair(ConvertionUtils.toBytes(domain1),
-                ConvertionUtils.toBytes(msk1), ConvertionUtils.toBytes(sss1));
+    PythiaComputeTransformationKeyPairResult transformationKeyPair1 = Pythia
+        .computeTransformationKeyPair(ConvertionUtils.toBytes(domain1),
+            ConvertionUtils.toBytes(msk1), ConvertionUtils.toBytes(sss1));
 
-    PythiaComputeTransformationKeyPairResult transformationKeyPair2 =
-        com.virgilsecurity.crypto.pythia.Pythia
-            .computeTransformationKeyPair(ConvertionUtils.toBytes(domain2),
-                ConvertionUtils.toBytes(msk2), ConvertionUtils.toBytes(sss2));
+    PythiaComputeTransformationKeyPairResult transformationKeyPair2 = Pythia
+        .computeTransformationKeyPair(ConvertionUtils.toBytes(domain2),
+            ConvertionUtils.toBytes(msk2), ConvertionUtils.toBytes(sss2));
 
     BlindResult blindResult = this.pythiaCrypto.blind(password);
     PythiaTransformResult transformResult = com.virgilsecurity.crypto.pythia.Pythia.transform(
@@ -321,13 +320,10 @@ public class PythiaTest extends ConfigurableTest {
         transformResult.getTransformedTweak(), transformationKeyPair1.getTransformationPrivateKey(),
         transformationKeyPair1.getTransformationPublicKey());
 
-        assertTrue(com.virgilsecurity.crypto.pythia.Pythia.verify(
-            transformResult.getTransformedPassword(),
-            blindResult.getBlindedPassword(),
-            salt,
-            transformationKeyPair1.getTransformationPublicKey(),
-            proveResult.getProofValueC(),
-            proveResult.getProofValueU()));
+    assertTrue(com.virgilsecurity.crypto.pythia.Pythia.verify(
+        transformResult.getTransformedPassword(), blindResult.getBlindedPassword(), salt,
+        transformationKeyPair1.getTransformationPublicKey(), proveResult.getProofValueC(),
+        proveResult.getProofValueU()));
 
     byte[] passwordUpdateToken = com.virgilsecurity.crypto.pythia.Pythia.getPasswordUpdateToken(
         transformationKeyPair1.getTransformationPrivateKey(),

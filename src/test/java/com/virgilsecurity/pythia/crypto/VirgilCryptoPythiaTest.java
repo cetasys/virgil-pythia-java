@@ -131,13 +131,10 @@ public class VirgilCryptoPythiaTest {
         blindResult.getBlindedPassword(), transformResult.getTransformedTweak(),
         transformationKeyPair.getTransformationPrivateKey(),
         transformationKeyPair.getTransformationPublicKey());
-        boolean verifyResult = Pythia.verify(transformResult.getTransformedPassword(),
-                                             blindResult.getBlindedPassword(),
-                                             tweek,
-                                             transformationKeyPair.getTransformationPublicKey(),
-                                             proveResult.getProofValueC(),
-                                             proveResult.getProofValueU());
-        assertTrue(verifyResult);
+    boolean verifyResult = Pythia.verify(transformResult.getTransformedPassword(),
+        blindResult.getBlindedPassword(), tweek, transformationKeyPair.getTransformationPublicKey(),
+        proveResult.getProofValueC(), proveResult.getProofValueU());
+    assertTrue(verifyResult);
   }
 
   @Before
