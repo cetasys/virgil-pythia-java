@@ -51,7 +51,6 @@ public final class TransformResponse {
 
   /**
    * Create a new instance of {@link TransformResponse}.
-   *
    */
   public TransformResponse() {
   }

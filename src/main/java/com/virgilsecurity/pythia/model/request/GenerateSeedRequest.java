@@ -52,8 +52,7 @@ public class GenerateSeedRequest {
   /**
    * Create a new instance of {@link GenerateSeedRequest}.
    *
-   * @param blindedPassword
-   *          a password obfuscated into a pseudo-random string.
+   * @param blindedPassword a password obfuscated into a pseudo-random string.
    */
   public GenerateSeedRequest(byte[] blindedPassword) {
     this.blindedPassword = blindedPassword;
@@ -62,10 +61,8 @@ public class GenerateSeedRequest {
   /**
    * Create a new instance of {@link GenerateSeedRequest}.
    *
-   * @param blindedPassword
-   *          a password obfuscated into a pseudo-random string.
-   * @param brainkeyId
-   *          Brainkey ID value.
+   * @param blindedPassword a password obfuscated into a pseudo-random string.
+   * @param brainkeyId      Brainkey ID value.
    */
   public GenerateSeedRequest(byte[] blindedPassword, String brainkeyId) {
     this(blindedPassword);

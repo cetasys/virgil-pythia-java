@@ -65,7 +65,7 @@ public class ConfigurableTest {
   private String proofKeys1;
   private String proofKeys2;
   private String proofKeys3;
-  private String updateToken2to3;
+  private String updateToken1to2;
 
   /**
    * Create a new instance of {@link ConfigurableTest}.
@@ -138,7 +138,7 @@ public class ConfigurableTest {
     if (this.apiPrivateKey == null) {
       try {
         this.apiPrivateKey = this.crypto
-            .importPrivateKey(ConvertionUtils.base64ToBytes(getApiPrivateKeyStr()));
+            .importPrivateKey(ConvertionUtils.base64ToBytes(getApiPrivateKeyStr())).getPrivateKey();
       } catch (CryptoException e) {
         fail("API Private Key has invalid format");
       }
@@ -210,7 +210,7 @@ public class ConfigurableTest {
 
   /**
    * Get the proof keys trinity.
-   * 
+   *
    * @return the proof keys.
    */
   public List<String> getProofKeys3() {
@@ -228,14 +228,14 @@ public class ConfigurableTest {
    * 
    * @return the update token.
    */
-  public String getUpdateToken2to3() {
-    if (this.updateToken2to3 == null) {
-      this.updateToken2to3 = getPropertyByName("UPDATE_TOKEN_2_3");
-      if (this.updateToken2to3 == null) {
-        fail("UPDATE_TOKEN_2_3 is not defined");
+  public String getUpdateToken1to2() {
+    if (this.updateToken1to2 == null) {
+      this.updateToken1to2 = getPropertyByName("UPDATE_TOKEN_1_2");
+      if (this.updateToken1to2 == null) {
+        fail("UPDATE_TOKEN_1_2 is not defined");
       }
     }
-    return this.updateToken2to3;
+    return this.updateToken1to2;
   }
 
   /**

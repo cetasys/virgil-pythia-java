@@ -40,10 +40,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.virgilsecurity.crypto.VirgilPythia;
-import com.virgilsecurity.crypto.VirgilPythiaProveResult;
-import com.virgilsecurity.crypto.VirgilPythiaTransformResult;
-import com.virgilsecurity.crypto.VirgilPythiaTransformationKeyPair;
+import com.virgilsecurity.crypto.pythia.Pythia;
+import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
+import com.virgilsecurity.crypto.pythia.PythiaProveResult;
+import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
 import com.virgilsecurity.pythia.crypto.BlindResult;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
 import com.virgilsecurity.pythia.crypto.VirgilPythiaCrypto;
@@ -71,7 +71,7 @@ import org.junit.Test;
  */
 public class PythiaTest extends ConfigurableTest {
 
-  private Pythia pythia;
+  private com.virgilsecurity.pythia.Pythia pythia;
   private PythiaCrypto pythiaCrypto;
   private String password;
   private SampleDataHolder sample;
@@ -91,7 +91,7 @@ public class PythiaTest extends ConfigurableTest {
         .setProofKeys(proofKeys).setPythiaCrypto(pythiaCrypto)
         .setPythiaServiceUrl(getPythiaServiceUrl()).build();
 
-    this.pythia = new Pythia(context);
+    this.pythia = new com.virgilsecurity.pythia.Pythia(context);
     this.pythiaCrypto = new VirgilPythiaCrypto();
     this.password = "some password";
 
@@ -132,10 +132,10 @@ public class PythiaTest extends ConfigurableTest {
   public void createBreachProofPassword_3keys()
       throws CryptoException, VirgilPythiaServiceException, TransformVerificationException {
     // YTC-14
-    setup(getProofKeys3());
+    setup(getProofKeys2());
 
     BreachProofPassword bpp = this.pythia.createBreachProofPassword(this.password);
-    assertEquals(3, bpp.getVersion());
+    assertEquals(2, bpp.getVersion());
   }
 
   @Test
@@ -298,58 +298,62 @@ public class PythiaTest extends ConfigurableTest {
         + "76aaf47961413f2695ec985b25de76a8c5d5caa13520ef600b2df69e8574729026a4b5d80461348fb67d05";
     byte[] salt = ConvertionUtils.toBytes(username);
 
-    try (VirgilPythia virgilPythia = new VirgilPythia()) {
-      VirgilPythiaTransformationKeyPair transformationKeyPair1 = virgilPythia
-          .computeTransformationKeyPair(ConvertionUtils.toBytes(domain1),
-              ConvertionUtils.toBytes(msk1), ConvertionUtils.toBytes(sss1));
-      VirgilPythiaTransformationKeyPair transformationKeyPair2 = virgilPythia
-          .computeTransformationKeyPair(ConvertionUtils.toBytes(domain2),
-              ConvertionUtils.toBytes(msk2), ConvertionUtils.toBytes(sss2));
+    PythiaComputeTransformationKeyPairResult transformationKeyPair1 = Pythia
+        .computeTransformationKeyPair(ConvertionUtils.toBytes(domain1),
+            ConvertionUtils.toBytes(msk1), ConvertionUtils.toBytes(sss1));
 
-      BlindResult blindResult = this.pythiaCrypto.blind(password);
-      VirgilPythiaTransformResult transformResult = virgilPythia
-          .transform(blindResult.getBlindedPassword(), salt, transformationKeyPair1.privateKey());
-      byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResult.transformedPassword(),
-          blindResult.getBlindingSecret());
-      assertArrayEquals(ConvertionUtils.hexToBytes(deblinded1), deblindedPassword);
+    PythiaComputeTransformationKeyPairResult transformationKeyPair2 = Pythia
+        .computeTransformationKeyPair(ConvertionUtils.toBytes(domain2),
+            ConvertionUtils.toBytes(msk2), ConvertionUtils.toBytes(sss2));
 
-      VirgilPythiaProveResult proveResult = virgilPythia.prove(
-          transformResult.transformedPassword(), blindResult.getBlindedPassword(),
-          transformResult.transformedTweak(), transformationKeyPair1);
+    BlindResult blindResult = this.pythiaCrypto.blind(password);
+    PythiaTransformResult transformResult = com.virgilsecurity.crypto.pythia.Pythia.transform(
+        blindResult.getBlindedPassword(), salt,
+        transformationKeyPair1.getTransformationPrivateKey());
 
-      assertTrue(virgilPythia.verify(transformResult.transformedPassword(),
-          blindResult.getBlindedPassword(), salt, transformationKeyPair1.publicKey(),
-          proveResult.proofValueC(), proveResult.proofValueU()));
+    byte[] deblindedPassword = this.pythiaCrypto.deblind(transformResult.getTransformedPassword(),
+        blindResult.getBlindingSecret());
+    assertArrayEquals(ConvertionUtils.hexToBytes(deblinded1), deblindedPassword);
 
-      byte[] passwordUpdateToken = virgilPythia.getPasswordUpdateToken(
-          transformationKeyPair1.privateKey(), transformationKeyPair2.privateKey());
+    PythiaProveResult proveResult = com.virgilsecurity.crypto.pythia.Pythia.prove(
+        transformResult.getTransformedPassword(), blindResult.getBlindedPassword(),
+        transformResult.getTransformedTweak(), transformationKeyPair1.getTransformationPrivateKey(),
+        transformationKeyPair1.getTransformationPublicKey());
 
-      BreachProofPassword breachProofPassword = new BreachProofPassword(salt, deblindedPassword, 1);
-      String updateToken = "UT.1.2." + Base64.encode(passwordUpdateToken);
-      BreachProofPassword updatedBreachProofPassword = this.pythia
-          .updateBreachProofPassword(updateToken, breachProofPassword);
-      assertArrayEquals(ConvertionUtils.hexToBytes(deblinded2),
-          updatedBreachProofPassword.getDeblindedPassword());
-    }
+    assertTrue(com.virgilsecurity.crypto.pythia.Pythia.verify(
+        transformResult.getTransformedPassword(), blindResult.getBlindedPassword(), salt,
+        transformationKeyPair1.getTransformationPublicKey(), proveResult.getProofValueC(),
+        proveResult.getProofValueU()));
+
+    byte[] passwordUpdateToken = com.virgilsecurity.crypto.pythia.Pythia.getPasswordUpdateToken(
+        transformationKeyPair1.getTransformationPrivateKey(),
+        transformationKeyPair2.getTransformationPrivateKey());
+
+    BreachProofPassword breachProofPassword = new BreachProofPassword(salt, deblindedPassword, 1);
+    String updateToken = "UT.1.2." + Base64.encode(passwordUpdateToken);
+    BreachProofPassword updatedBreachProofPassword = this.pythia
+        .updateBreachProofPassword(updateToken, breachProofPassword);
+    assertArrayEquals(ConvertionUtils.hexToBytes(deblinded2),
+        updatedBreachProofPassword.getDeblindedPassword());
   }
 
   @Test
   public void updateBreachProofPassword_twoPythias() throws CryptoException,
       VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
     // YTC-17
-    setup(getProofKeys2());
+    setup(getProofKeys1());
 
     BreachProofPassword bpp1 = this.pythia.createBreachProofPassword(password);
     assertNotNull(bpp1);
-    assertEquals(2, bpp1.getVersion());
+    assertEquals(1, bpp1.getVersion());
 
     Thread.sleep(2000);
-    setup(getProofKeys3());
-    BreachProofPassword bpp2 = this.pythia.updateBreachProofPassword(getUpdateToken2to3(), bpp1);
+    setup(getProofKeys2());
+    BreachProofPassword bpp2 = this.pythia.updateBreachProofPassword(getUpdateToken1to2(), bpp1);
     assertNotNull(bpp2);
     assertArrayEquals(bpp1.getSalt(), bpp2.getSalt());
     assertFalse(Arrays.equals(bpp1.getDeblindedPassword(), bpp2.getDeblindedPassword()));
-    assertEquals(3, bpp2.getVersion());
+    assertEquals(2, bpp2.getVersion());
 
     Thread.sleep(2000);
     assertTrue(this.pythia.verifyBreachProofPassword(this.password, bpp1, false));
@@ -362,15 +366,15 @@ public class PythiaTest extends ConfigurableTest {
   public void updateBreachProofPassword_alreadyMigrated() throws CryptoException,
       VirgilPythiaServiceException, TransformVerificationException, InterruptedException {
     // YTC-18
-    setup(getProofKeys3());
+    setup(getProofKeys2());
 
     BreachProofPassword bpp1 = this.pythia.createBreachProofPassword(password);
     assertNotNull(bpp1);
-    assertEquals(3, bpp1.getVersion());
+    assertEquals(2, bpp1.getVersion());
 
     Thread.sleep(2000);
     try {
-      this.pythia.updateBreachProofPassword(getUpdateToken2to3(), bpp1);
+      this.pythia.updateBreachProofPassword(getUpdateToken1to2(), bpp1);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Already migrated", e.getMessage());
@@ -387,9 +391,13 @@ public class PythiaTest extends ConfigurableTest {
     assertNotNull(bpp1);
     assertEquals(1, bpp1.getVersion());
 
+    String[] token1to2parts = getUpdateToken1to2().split("\\.");
+    // No matter 'Token 2 -> 3' will be not valid, we only need versions
+    String token2to3 = String.format("%s.%s.%s.%s", token1to2parts[0], "2", "3", token1to2parts[3]);
+
     Thread.sleep(2000);
     try {
-      this.pythia.updateBreachProofPassword(getUpdateToken2to3(), bpp1);
+      this.pythia.updateBreachProofPassword(token2to3, bpp1);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Wrong user version", e.getMessage());

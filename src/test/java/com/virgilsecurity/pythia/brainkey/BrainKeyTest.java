@@ -37,13 +37,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-import com.virgilsecurity.crypto.VirgilPythia;
-import com.virgilsecurity.crypto.VirgilPythiaTransformResult;
-import com.virgilsecurity.crypto.VirgilPythiaTransformationKeyPair;
+import com.virgilsecurity.crypto.pythia.Pythia;
+import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
+import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
 import com.virgilsecurity.pythia.ConfigurableTest;
 import com.virgilsecurity.pythia.SampleDataHolder;
-import com.virgilsecurity.pythia.brainkey.BrainKey;
-import com.virgilsecurity.pythia.brainkey.BrainKeyContext;
 import com.virgilsecurity.pythia.client.PythiaClient;
 import com.virgilsecurity.pythia.client.VirgilPythiaClient;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
@@ -79,7 +77,6 @@ public class BrainKeyTest extends ConfigurableTest {
   private static final String TEXT = "Lorem Ipsum is simply dummy text";
 
   private VirgilCrypto virgilCrypto;
-  private VirgilPythia virgilPythia;
   private PythiaCrypto pythiaCrypto;
   private PythiaClient pythiaClient;
   private BrainKey brainKey;
@@ -90,7 +87,6 @@ public class BrainKeyTest extends ConfigurableTest {
   @Before
   public void setup() {
     this.virgilCrypto = new VirgilCrypto();
-    this.virgilPythia = new VirgilPythia();
     this.pythiaCrypto = new VirgilPythiaCrypto();
 
     String baseUrl = getPythiaServiceUrl();
@@ -168,12 +164,12 @@ public class BrainKeyTest extends ConfigurableTest {
         byte[] tweek = ("userId" + (brainKeyId == null ? "" : brainKeyId))
             .getBytes(StandardCharsets.UTF_8);
 
-        VirgilPythiaTransformationKeyPair transformationKeyPair = virgilPythia
+        PythiaComputeTransformationKeyPairResult transformationKeyPair = Pythia
             .computeTransformationKeyPair(transformationKeyId, pythiaSecret, pythiaScopeSecret);
-        VirgilPythiaTransformResult transformResult = virgilPythia.transform(blindedPassword, tweek,
-            transformationKeyPair.privateKey());
+        PythiaTransformResult transformResult = Pythia.transform(blindedPassword, tweek,
+            transformationKeyPair.getTransformationPrivateKey());
 
-        return transformResult.transformedPassword();
+        return transformResult.getTransformedPassword();
       }
     };
 

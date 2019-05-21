@@ -160,7 +160,7 @@ public class PythiaContext {
       VirgilPrivateKey apiPrivateKey = null;
       try {
         byte[] apiKeyData = Base64.decode(this.apiKey);
-        apiPrivateKey = crypto.importPrivateKey(apiKeyData);
+        apiPrivateKey = crypto.importPrivateKey(apiKeyData).getPrivateKey();
       } catch (Exception e) {
         throw new IllegalArgumentException("API key has invalid format", e);
       }

@@ -33,15 +33,14 @@
 
 package com.virgilsecurity.pythia.crypto;
 
-import com.virgilsecurity.crypto.VirgilPythia;
-import com.virgilsecurity.crypto.VirgilPythiaBlindResult;
-import com.virgilsecurity.sdk.crypto.KeysType;
+import com.virgilsecurity.crypto.pythia.Pythia;
+import com.virgilsecurity.crypto.pythia.PythiaBlindResult;
 import com.virgilsecurity.sdk.crypto.VirgilCrypto;
 import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
 
-import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Virgil implementation of all crypto operation needed by Pythia.
@@ -51,18 +50,20 @@ import java.util.Random;
  */
 public class VirgilPythiaCrypto implements PythiaCrypto {
 
+  private static final int RANDOM_DATA_SIZE = 32;
+  private static final AtomicLong INSTANCE_COUNT = new AtomicLong(0);
+
   private VirgilCrypto virgilCrypto;
-  private VirgilPythia virgilPythia;
-  private Random random;
 
   /**
    * Create a new instance of {@link VirgilPythiaCrypto}.
    *
    */
   public VirgilPythiaCrypto() {
+    INSTANCE_COUNT.incrementAndGet();
+
     this.virgilCrypto = new VirgilCrypto();
-    this.virgilPythia = new VirgilPythia();
-    this.random = new Random();
+    Pythia.configure();
   }
 
   /*
@@ -72,9 +73,8 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   @Override
   public BlindResult blind(String password) {
-    VirgilPythiaBlindResult blindResult = this.virgilPythia
-        .blind(ConvertionUtils.toBytes(password));
-    return new BlindResult(blindResult.blindedPassword(), blindResult.blindingSecret());
+    PythiaBlindResult blindResult = Pythia.blind(ConvertionUtils.toBytes(password));
+    return new BlindResult(blindResult.getBlindedPassword(), blindResult.getBlindingSecret());
   }
 
   /*
@@ -84,7 +84,7 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   @Override
   public byte[] deblind(byte[] transformedPassword, byte[] blindingSecret) {
-    return this.virgilPythia.deblind(transformedPassword, blindingSecret);
+    return Pythia.deblind(transformedPassword, blindingSecret);
   }
 
   /*
@@ -96,8 +96,12 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
   @Override
   public boolean verify(byte[] transformedPassword, byte[] blindedPassword, byte[] tweak,
       byte[] transformationPublicKey, byte[] proofC, byte[] proofU) {
-    return this.virgilPythia.verify(transformedPassword, blindedPassword, tweak,
-        transformationPublicKey, proofC, proofU);
+    return Pythia.verify(transformedPassword,
+                         blindedPassword,
+                         tweak,
+                         transformationPublicKey,
+                         proofC,
+                         proofU);
   }
 
   /*
@@ -107,7 +111,7 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   @Override
   public byte[] updateDeblinded(byte[] deblindedPassword, byte[] updateToken) {
-    return this.virgilPythia.updateDeblindedWithToken(deblindedPassword, updateToken);
+    return Pythia.updateDeblindedWithToken(deblindedPassword, updateToken);
   }
 
   /*
@@ -117,9 +121,7 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    */
   @Override
   public byte[] generateSalt() {
-    byte[] rndBytes = new byte[32];
-    random.nextBytes(rndBytes);
-    return rndBytes;
+    return virgilCrypto.generateRandomData(RANDOM_DATA_SIZE);
   }
 
   /*
@@ -130,11 +132,15 @@ public class VirgilPythiaCrypto implements PythiaCrypto {
    * KeysType, byte[])
    */
   @Override
-  public VirgilKeyPair generateKeyPair(KeysType type, byte[] seed) throws CryptoException {
-    com.virgilsecurity.crypto.VirgilKeyPair keyPair = com.virgilsecurity.crypto.VirgilKeyPair
-        .generateFromKeyMaterial(VirgilCrypto.toVirgilKeyPairType(type), seed);
-
-    return this.virgilCrypto.wrapKeyPair(keyPair.privateKey(), keyPair.publicKey());
+  public VirgilKeyPair generateKeyPair(byte[] seed) throws CryptoException {
+    return virgilCrypto.generateKeyPair(seed);
   }
 
+  @Override
+  protected void finalize() {
+    long count = INSTANCE_COUNT.decrementAndGet();
+    if (count == 0) {
+      Pythia.cleanup();
+    }
+  }
 }

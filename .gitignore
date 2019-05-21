@@ -173,3 +173,8 @@ fabric.properties
 
 # Checkstyle
 .checkstyle
+
+# Project-specific
+testsDev.sh
+testsStg.sh
+testsProd.sh

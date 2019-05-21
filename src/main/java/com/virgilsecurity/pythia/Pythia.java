@@ -100,8 +100,8 @@ public class Pythia {
     if (parts.length != 4 || !parts[0].equals("UT")) {
       throw new IllegalArgumentException("Update token has invalid format");
     }
-    int prevVersion = 0;
-    int nextVersion = 0;
+    int prevVersion;
+    int nextVersion;
     byte[] updateTokenData;
     try {
       prevVersion = Integer.parseInt(parts[1]);

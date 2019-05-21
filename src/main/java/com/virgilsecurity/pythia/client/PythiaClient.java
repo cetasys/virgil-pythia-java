@@ -47,32 +47,29 @@ public interface PythiaClient {
   /**
    * Make call to Pythia service to transform password.
    * 
-   * @param salt
-   *          the salt.
-   * @param blindedPassword
-   *          the blinded password.
-   * @param version
-   *          the key version.
-   * @param includeProof
-   *          set this flag to {@code true} if you need proof data in request.
-   * @param token
-   *          the authorization token.
-   * @return the plain model representing response from Pythia server.
-   * @throws VirgilPythiaServiceException
-   *           if transformPassword is not successful.
+   * @param salt The salt.
+   * @param blindedPassword The blinded password.
+   * @param version The key version.
+   * @param includeProof Set this flag to {@code true} if you need proof data in request.
+   * @param token The authorization token.
+   *
+   * @return The plain model representing response from Pythia server.
+   *
+   * @throws VirgilPythiaServiceException If transformPassword is not successful.
    */
-  TransformResponse transformPassword(byte[] salt, byte[] blindedPassword, Integer version,
-      boolean includeProof, String token) throws VirgilPythiaServiceException;
+  TransformResponse transformPassword(byte[] salt,
+                                      byte[] blindedPassword,
+                                      Integer version,
+                                      boolean includeProof,
+                                      String token) throws VirgilPythiaServiceException;
 
   /**
    * Generates seed using given blinded password and brainkey id.
    * 
-   * @param blindedPassword
-   *          blinded password.
-   * @param brainKeyId
-   *          brainkey id.
-   * @param token
-   *          authorization token.
+   * @param blindedPassword Blinded password.
+   * @param brainKeyId Brainkey id.
+   * @param token Authorization token.
+   *
    * @return Generated seed.
    */
   byte[] generateSeed(byte[] blindedPassword, String brainKeyId, String token)
