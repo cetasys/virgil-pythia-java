@@ -37,6 +37,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.virgilsecurity.crypto.pythia.Pythia;
@@ -150,16 +151,14 @@ public class VirgilPythiaCryptoTest {
     VirgilPrivateKey privateKey = keyPair.getPrivateKey();
     assertNotNull(privateKey);
     assertNotNull(privateKey.getIdentifier());
-    assertNotNull(privateKey.getPrivateKey().exportPrivateKey());
+    assertTrue(privateKey.getPrivateKey().isValid());
 
     VirgilPublicKey publicKey = keyPair.getPublicKey();
     assertNotNull(publicKey);
     assertNotNull(publicKey.getIdentifier());
-    assertNotNull(publicKey.getPublicKey().exportPublicKey());
+    assertTrue(publicKey.getPublicKey().isValid());
 
     assertArrayEquals(privateKey.getIdentifier(), publicKey.getIdentifier());
-    assertFalse(Arrays.equals(privateKey.getPrivateKey().exportPrivateKey(),
-        publicKey.getPublicKey().exportPublicKey()));
   }
 
   @Test
