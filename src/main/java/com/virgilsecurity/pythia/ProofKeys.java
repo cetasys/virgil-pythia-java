@@ -33,9 +33,9 @@
 
 package com.virgilsecurity.pythia;
 
+import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.pythia.model.exception.ProofKeyNotFoundException;
 import com.virgilsecurity.pythia.model.exception.ProofKeyParseException;
-import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -118,7 +118,7 @@ public class ProofKeys {
     if (parts.length == 3 && "PK".equals(parts[0])) {
       try {
         int version = Integer.parseInt(parts[1]);
-        byte[] data = Base64.decode(parts[2]);
+        byte[] data = Base64.decode(parts[2].getBytes());
         if (data.length == 0) {
           throw new ProofKeyParseException();
         }

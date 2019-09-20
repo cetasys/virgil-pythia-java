@@ -33,6 +33,7 @@
 
 package com.virgilsecurity.pythia;
 
+import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.pythia.client.PythiaClient;
 import com.virgilsecurity.pythia.crypto.BlindResult;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
@@ -44,7 +45,6 @@ import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.jwt.TokenContext;
 import com.virgilsecurity.sdk.jwt.contract.AccessToken;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
-import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
 import java.util.Arrays;
@@ -106,7 +106,7 @@ public class Pythia {
     try {
       prevVersion = Integer.parseInt(parts[1]);
       nextVersion = Integer.parseInt(parts[2]);
-      updateTokenData = Base64.decode(parts[3]);
+      updateTokenData = Base64.decode(parts[3].getBytes());
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException("Update token has invalid format");
     }
@@ -148,7 +148,7 @@ public class Pythia {
 
     ProofKey currentProofKey = this.proofKeys.getCurrentKey();
 
-    TokenContext tokenContext = new TokenContext("pythia-java", "transform", false, "pythia");
+    TokenContext tokenContext = new TokenContext("pythia-java", "pythia", "transform", false);
     AccessToken accessToken = accessTokenProvider.getToken(tokenContext);
     TransformResponse transformResponse = this.pythiaClient.transformPassword(salt, blindedPassword,
         currentProofKey.getVersion(), true, accessToken.stringRepresentation());
@@ -187,7 +187,7 @@ public class Pythia {
   public boolean verifyBreachProofPassword(String password, BreachProofPassword breachProofPassword,
       boolean prove)
       throws CryptoException, TransformVerificationException, VirgilPythiaServiceException {
-    TokenContext tokenContext = new TokenContext("pythia-java", "transform", false, "pythia");
+    TokenContext tokenContext = new TokenContext("pythia-java", "pythia", "transform", false);
     AccessToken accessToken = accessTokenProvider.getToken(tokenContext);
     BlindResult blinded = pythiaCrypto.blind(password);
     byte[] blindedPassword = blinded.getBlindedPassword();

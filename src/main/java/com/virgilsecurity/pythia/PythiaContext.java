@@ -33,6 +33,7 @@
 
 package com.virgilsecurity.pythia;
 
+import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.pythia.client.PythiaClient;
 import com.virgilsecurity.pythia.client.VirgilPythiaClient;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
@@ -47,7 +48,6 @@ import com.virgilsecurity.sdk.jwt.TokenContext;
 import com.virgilsecurity.sdk.jwt.accessProviders.CachingJwtProvider;
 import com.virgilsecurity.sdk.jwt.accessProviders.CachingJwtProvider.RenewJwtCallback;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
-import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
 import java.util.List;
@@ -159,7 +159,7 @@ public class PythiaContext {
 
       VirgilPrivateKey apiPrivateKey = null;
       try {
-        byte[] apiKeyData = Base64.decode(this.apiKey);
+        byte[] apiKeyData = Base64.decode(this.apiKey.getBytes());
         apiPrivateKey = crypto.importPrivateKey(apiKeyData).getPrivateKey();
       } catch (Exception e) {
         throw new IllegalArgumentException("API key has invalid format", e);

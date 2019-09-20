@@ -93,7 +93,7 @@ public class BrainKey {
    */
   public VirgilKeyPair generateKeyPair(String password, String brainKeyId)
       throws CryptoException, VirgilPythiaServiceException {
-    String token = accessTokenProvider.getToken(new TokenContext("seed", false, "pythia"))
+    String token = accessTokenProvider.getToken(new TokenContext("pythia", "seed", false))
         .stringRepresentation();
     BlindResult blindedResult = pythiaCrypto.blind(password);
     byte[] seed = client.generateSeed(blindedResult.getBlindedPassword(), brainKeyId, token);

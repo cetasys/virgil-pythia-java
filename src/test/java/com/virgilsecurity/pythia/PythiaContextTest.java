@@ -37,12 +37,12 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.pythia.PythiaContext.Builder;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
 import com.virgilsecurity.pythia.crypto.VirgilPythiaCrypto;
 import com.virgilsecurity.sdk.crypto.VirgilCrypto;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
-import com.virgilsecurity.sdk.utils.Base64;
 
 import java.util.Arrays;
 import java.util.List;
@@ -134,8 +134,8 @@ public class PythiaContextTest {
     assertNotNull(context.getAccessTokenProvider());
     assertNotNull(context.getProofKeys());
     assertEquals(2, context.getProofKeys().getCurrentKey().getVersion());
-    assertArrayEquals(Base64.decode("a2V5IDIgZGF0YQ=="),
-        context.getProofKeys().getCurrentKey().getData());
+    assertArrayEquals(Base64.decode("a2V5IDIgZGF0YQ==".getBytes()),
+                      context.getProofKeys().getCurrentKey().getData());
     assertNotNull(context.getPythiaClient());
     assertNotNull(context.getPythiaCrypto());
   }

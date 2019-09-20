@@ -37,6 +37,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
 import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
@@ -56,7 +57,6 @@ import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.jwt.JwtGenerator;
 import com.virgilsecurity.sdk.jwt.accessProviders.GeneratorJwtProvider;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
-import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -182,20 +182,20 @@ public class BrainKeyTest extends ConfigurableTest {
     BrainKey mockedBrainKey = new BrainKey(context);
 
     VirgilKeyPair keyPair1 = mockedBrainKey.generateKeyPair(sample.get("kPassword1"));
-    assertArrayEquals(Base64.decode(sample.get("kKeyId1")),
-        keyPair1.getPrivateKey().getIdentifier());
+    assertArrayEquals(Base64.decode(sample.get("kKeyId1").getBytes()),
+                      keyPair1.getPrivateKey().getIdentifier());
 
     VirgilKeyPair keyPair2 = mockedBrainKey.generateKeyPair(sample.get("kPassword1"));
-    assertArrayEquals(Base64.decode(sample.get("kKeyId1")),
+    assertArrayEquals(Base64.decode(sample.get("kKeyId1").getBytes()),
         keyPair2.getPrivateKey().getIdentifier());
 
     VirgilKeyPair keyPair3 = mockedBrainKey.generateKeyPair(sample.get("kPassword2"));
-    assertArrayEquals(Base64.decode(sample.get("kKeyId2")),
+    assertArrayEquals(Base64.decode(sample.get("kKeyId2").getBytes()),
         keyPair3.getPrivateKey().getIdentifier());
 
     VirgilKeyPair keyPair4 = mockedBrainKey.generateKeyPair(sample.get("kPassword1"),
         sample.get("kBrainKeyId"));
-    assertArrayEquals(Base64.decode(sample.get("kKeyId3")),
+    assertArrayEquals(Base64.decode(sample.get("kKeyId3").getBytes()),
         keyPair4.getPrivateKey().getIdentifier());
   }
 

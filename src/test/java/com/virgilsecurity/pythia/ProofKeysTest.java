@@ -39,9 +39,9 @@ import static org.junit.Assert.fail;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.pythia.model.exception.ProofKeyNotFoundException;
 import com.virgilsecurity.pythia.model.exception.ProofKeyParseException;
-import com.virgilsecurity.sdk.utils.Base64;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -181,7 +181,7 @@ public class ProofKeysTest {
 
   private void verifyKey(ProofKey key, String dataStr, int version) {
     assertNotNull(key);
-    assertEquals(dataStr, Base64.encode(key.getData()));
+    assertEquals(dataStr, new String(Base64.encode(key.getData())));
     assertEquals(version, key.getVersion());
   }
 

@@ -101,7 +101,7 @@ public class VirgilPythiaClientTest extends ConfigurableTest {
     int version = 1;
     boolean includeProof = true;
     String token = this.accessTokenProvider
-        .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+        .getToken(new TokenContext("pythia-java", "pythia", "transform", false))
         .stringRepresentation();
 
     BlindResult blindResult = this.pythiaCrypto.blind(password);
@@ -134,7 +134,7 @@ public class VirgilPythiaClientTest extends ConfigurableTest {
     int version = 1;
     boolean includeProof = true;
     String token = this.accessTokenProvider
-        .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+        .getToken(new TokenContext("pythia-java", "pythia", "transform", false))
         .stringRepresentation();
 
     BlindResult blindResult = this.pythiaCrypto.blind(password);
@@ -189,7 +189,7 @@ public class VirgilPythiaClientTest extends ConfigurableTest {
     int version = 1;
     boolean includeProof = false;
     String token = this.accessTokenProvider
-        .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+        .getToken(new TokenContext("pythia-java", "pythia", "transform", false))
         .stringRepresentation();
 
     BlindResult blindResult = this.pythiaCrypto.blind(password);
@@ -213,7 +213,7 @@ public class VirgilPythiaClientTest extends ConfigurableTest {
     int version = 1;
     boolean includeProof = false;
     String token = this.accessTokenProvider
-        .getToken(new TokenContext("pythia-java", "transform", false, "pythia"))
+        .getToken(new TokenContext("pythia-java", "pythia", "transform", false))
         .stringRepresentation();
 
     BlindResult blindResult1 = this.pythiaCrypto.blind("some password");
@@ -241,7 +241,7 @@ public class VirgilPythiaClientTest extends ConfigurableTest {
 
   @Test
   public void generateSeed_nullBrainKeyId() throws CryptoException, VirgilPythiaServiceException {
-    String token = this.accessTokenProvider.getToken(new TokenContext("seed", false, "pythia"))
+    String token = this.accessTokenProvider.getToken(new TokenContext("pythia", "seed", false))
         .stringRepresentation();
 
     BlindResult blindResult = this.pythiaCrypto.blind("some password");

@@ -35,7 +35,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.virgilsecurity</groupId>
   <artifactId>pythia</artifactId>
-  <version>0.3.1</version>
+  <version>0.3.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Virgil Pythia Java SDK</name>
   <description>
@@ -78,12 +78,12 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.virgil-sdk>5.1.2</version.virgil-sdk>
+    <version.virgil-sdk>6.0-SNAPSHOT</version.virgil-sdk>
     <version.commons-codec>1.12</version.commons-codec>
     <version.commons-lang>2.6</version.commons-lang>
     <version.junit>4.12</version.junit>
     <version.mockito>3.0.0</version.mockito>
-    <version.virgil-crypto>0.8.0</version.virgil-crypto>
+    <version.virgil-crypto>0.10.2</version.virgil-crypto>
     <gpg.keyname>empty</gpg.keyname>
   </properties>
 

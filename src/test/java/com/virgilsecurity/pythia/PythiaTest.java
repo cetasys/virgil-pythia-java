@@ -40,6 +40,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
 import com.virgilsecurity.crypto.pythia.PythiaProveResult;
@@ -52,7 +53,6 @@ import com.virgilsecurity.pythia.model.exception.ThrottlingException;
 import com.virgilsecurity.pythia.model.exception.TransformVerificationException;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
-import com.virgilsecurity.sdk.utils.Base64;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
 
 import java.util.Arrays;
@@ -330,7 +330,7 @@ public class PythiaTest extends ConfigurableTest {
         transformationKeyPair2.getTransformationPrivateKey());
 
     BreachProofPassword breachProofPassword = new BreachProofPassword(salt, deblindedPassword, 1);
-    String updateToken = "UT.1.2." + Base64.encode(passwordUpdateToken);
+    String updateToken = "UT.1.2." + new String(Base64.encode(passwordUpdateToken));
     BreachProofPassword updatedBreachProofPassword = this.pythia
         .updateBreachProofPassword(updateToken, breachProofPassword);
     assertArrayEquals(ConvertionUtils.hexToBytes(deblinded2),
