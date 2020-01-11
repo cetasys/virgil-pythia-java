@@ -56,7 +56,6 @@ dependencies {
 
     // Test
     testImplementation "junit:junit:$versions.junitOld"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$versions.junit"
     testImplementation "commons-lang:commons-lang:$versions.commonsLang"
     testImplementation "commons-codec:commons-codec:$versions.commonsCodec"
     testImplementation "org.mockito:mockito-core:$versions.mockito"

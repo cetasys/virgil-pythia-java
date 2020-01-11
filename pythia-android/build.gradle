@@ -72,7 +72,7 @@ group 'com.virgilsecurity'
 dependencies {
     // Inner dependencies
     api (project(':pythia')) {
-        exclude group: 'com.virgilsecurity.crypto', module: 'ratchet'
+        exclude group: 'com.virgilsecurity.crypto', module: 'pythia'
 
         exclude group: 'com.virgilsecurity.sdk', module: 'sdk'
         exclude group: 'com.virgilsecurity.sdk', module: 'crypto'
@@ -83,7 +83,7 @@ dependencies {
     api "com.virgilsecurity.sdk:crypto-android:$versions.virgilSdk"
 
     // Virgil Crypto
-    api "com.virgilsecurity.crypto:ratchet-android:$versions.virgilCrypto"
+    api "com.virgilsecurity.crypto:pythia-android:$versions.virgilCrypto"
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlinVersion"

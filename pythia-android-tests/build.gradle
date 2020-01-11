@@ -74,12 +74,11 @@ dependencies {
     // Internal
     androidTestImplementation project(':pythia-android')
 
-    // Kotlin
-    androidTestImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlinVersion"
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-
     // Test
     testImplementation "junit:junit:$versions.junitOld"
     androidTestImplementation "com.android.support.test:runner:$versions.testsRunner"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$versions.espresso"
+    androidTestImplementation "commons-lang:commons-lang:$versions.commonsLang"
+    androidTestImplementation "commons-codec:commons-codec:$versions.commonsCodec"
+    androidTestImplementation "com.google.code.gson:gson:$versions.gson"
 }
