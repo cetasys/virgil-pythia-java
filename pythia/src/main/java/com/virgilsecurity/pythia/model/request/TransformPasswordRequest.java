@@ -34,7 +34,7 @@
 package com.virgilsecurity.pythia.model.request;
 
 import com.google.gson.annotations.SerializedName;
-import com.virgilsecurity.sdk.utils.Validator;
+import com.virgilsecurity.common.util.Validator;
 
 /**
  * This class represents a request to Virgil Pythia service to transform password.

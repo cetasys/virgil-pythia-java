@@ -33,19 +33,19 @@
 
 package com.virgilsecurity.pythia.client;
 
-import com.virgilsecurity.pythia.VirgilInfo;
+import com.virgilsecurity.common.util.Validator;
 import com.virgilsecurity.pythia.model.GenerateSeedResponse;
 import com.virgilsecurity.pythia.model.TransformResponse;
 import com.virgilsecurity.pythia.model.exception.ThrottlingException;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.pythia.model.request.GenerateSeedRequest;
 import com.virgilsecurity.pythia.model.request.TransformPasswordRequest;
+import com.virgilsecurity.sdk.VirgilInfo;
 import com.virgilsecurity.sdk.common.ErrorResponse;
 import com.virgilsecurity.sdk.common.HttpError;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
 import com.virgilsecurity.sdk.utils.OsUtils;
 import com.virgilsecurity.sdk.utils.StringUtils;
-import com.virgilsecurity.sdk.utils.Validator;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

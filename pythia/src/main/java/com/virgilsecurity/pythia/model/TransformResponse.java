@@ -34,7 +34,7 @@
 package com.virgilsecurity.pythia.model;
 
 import com.google.gson.annotations.SerializedName;
-import com.virgilsecurity.sdk.utils.Validator;
+import com.virgilsecurity.common.util.Validator;
 
 /**
  * Plain model representing response from Pythia server.
@@ -63,7 +63,7 @@ public final class TransformResponse {
    */
   public TransformResponse(byte[] transformedPassword) {
     Validator.checkNullAgrument(transformedPassword,
-        "TransformResponse -> 'transformedPassword' should not be null");
+                                "TransformResponse -> 'transformedPassword' should not be null");
 
     this.transformedPassword = transformedPassword;
   }

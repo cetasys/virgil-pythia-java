@@ -35,7 +35,7 @@ package com.virgilsecurity.pythia.brainkey;
 
 import com.virgilsecurity.pythia.client.PythiaClient;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
-import com.virgilsecurity.sdk.crypto.KeyType;
+import com.virgilsecurity.sdk.crypto.KeyPairType;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 
 /**
@@ -52,7 +52,7 @@ public class BrainKeyContext {
 
   private AccessTokenProvider accessTokenProvider;
 
-  private KeyType keyPairType;
+  private KeyPairType keyPairType;
 
   /**
    * Create a new instance of {@link BrainKeyContext}.
@@ -67,7 +67,7 @@ public class BrainKeyContext {
    *          the key type.
    */
   private BrainKeyContext(PythiaCrypto pythiaCrypto, PythiaClient pythiaClient,
-      AccessTokenProvider accessTokenProvider, KeyType keyPairType) {
+      AccessTokenProvider accessTokenProvider, KeyPairType keyPairType) {
     super();
     this.pythiaClient = pythiaClient;
     this.pythiaCrypto = pythiaCrypto;
@@ -85,14 +85,14 @@ public class BrainKeyContext {
     private PythiaCrypto pythiaCrypto;
     private PythiaClient pythiaClient;
     private AccessTokenProvider accessTokenProvider;
-    private KeyType keyPairType;
+    private KeyPairType keyPairType;
 
     /**
      * Create a new instance of {@link BrainKeyContext.Builder}.
      *
      */
     public Builder() {
-      keyPairType = KeyType.ED25519;
+      keyPairType = KeyPairType.ED25519;
     }
 
     /**
@@ -164,7 +164,7 @@ public class BrainKeyContext {
      *          the key type to set
      * @return this builder instance.
      */
-    public Builder setKeyPairType(KeyType keyPairType) {
+    public Builder setKeyPairType(KeyPairType keyPairType) {
       this.keyPairType = keyPairType;
       return this;
     }
@@ -203,8 +203,7 @@ public class BrainKeyContext {
    * 
    * @return the keyPairType
    */
-  public KeyType getKeyPairType() {
+  public KeyPairType getKeyPairType() {
     return keyPairType;
   }
-
 }
