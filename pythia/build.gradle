@@ -44,7 +44,6 @@ group 'com.virgilsecurity'
 
 dependencies {
     // Virgil SDK
-    api "com.virgilsecurity.sdk:crypto:$versions.virgilSdk"
     api "com.virgilsecurity.sdk:sdk:$versions.virgilSdk"
 
     // Virgil Crypto
@@ -55,11 +54,13 @@ dependencies {
     implementation "com.github.kittinunf.fuel:fuel:$versions.fuel"
 
     // Test
-    testImplementation "junit:junit:$versions.junitOld"
+    testImplementation "org.junit.jupiter:junit-jupiter:$versions.junit"
     testImplementation "commons-lang:commons-lang:$versions.commonsLang"
     testImplementation "commons-codec:commons-codec:$versions.commonsCodec"
     testImplementation "org.mockito:mockito-core:$versions.mockito"
     testImplementation "org.mockito:mockito-junit-jupiter:$versions.mockito"
+
+    testImplementation "com.virgilsecurity:test-common:0.1"
 }
 
 test {

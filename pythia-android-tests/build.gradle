@@ -75,10 +75,11 @@ dependencies {
     androidTestImplementation project(':pythia-android')
 
     // Test
-    testImplementation "junit:junit:$versions.junitOld"
+    testImplementation "junit:junit:$versions.junitAndroid"
     androidTestImplementation "com.android.support.test:runner:$versions.testsRunner"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$versions.espresso"
     androidTestImplementation "commons-lang:commons-lang:$versions.commonsLang"
     androidTestImplementation "commons-codec:commons-codec:$versions.commonsCodec"
     androidTestImplementation "com.google.code.gson:gson:$versions.gson"
+
+    androidTestImplementation "com.virgilsecurity:test-common:0.1"
 }

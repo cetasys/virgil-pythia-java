@@ -33,7 +33,7 @@
 
 package com.virgilsecurity.android.pythia;
 
-import com.virgilsecurity.crypto.foundation.Base64;
+import com.virgilsecurity.common.util.Base64;
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
 import com.virgilsecurity.crypto.pythia.PythiaProveResult;

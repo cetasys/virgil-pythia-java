@@ -33,10 +33,6 @@
 
 package com.virgilsecurity.pythia;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.pythia.PythiaContext.Builder;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
@@ -44,11 +40,16 @@ import com.virgilsecurity.pythia.crypto.VirgilPythiaCrypto;
 import com.virgilsecurity.sdk.crypto.VirgilCrypto;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Unit test for {@link PythiaContext}.
@@ -71,7 +72,7 @@ public class PythiaContextTest {
    * @throws CryptoException
    *           if something bad happened.
    */
-  @Before
+  @BeforeEach
   public void setup() throws CryptoException {
     this.pythiaCrypto = new VirgilPythiaCrypto();
     this.crypto = new VirgilCrypto();
@@ -83,38 +84,50 @@ public class PythiaContextTest {
         "PK.2.a2V5IDIgZGF0YQ==");
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void build_noOptions() {
     Builder builder = new Builder();
-    builder.build();
+
+    assertThrows(IllegalArgumentException.class, () -> {
+      builder.build();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void build_noAppId() {
     Builder builder = new Builder();
-    builder.setApiPublicKeyIdentifier(apiPublicKeyIdentifier).setApiKey(apiKey)
-        .setProofKeys(proofKeys).setCrypto(this.crypto).setPythiaCrypto(this.pythiaCrypto).build();
+
+    assertThrows(IllegalArgumentException.class, () -> {
+      builder.setApiPublicKeyIdentifier(apiPublicKeyIdentifier).setApiKey(apiKey)
+              .setProofKeys(proofKeys).setCrypto(this.crypto).setPythiaCrypto(this.pythiaCrypto).build();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void build_noApiPublicKeyIdentifier() {
     Builder builder = new Builder();
-    builder.setAppId(appId).setApiKey(apiKey).setProofKeys(proofKeys).setCrypto(this.crypto)
-        .setPythiaCrypto(this.pythiaCrypto).build();
+    assertThrows(IllegalArgumentException.class, () -> {
+      builder.setAppId(appId).setApiKey(apiKey).setProofKeys(proofKeys).setCrypto(this.crypto)
+              .setPythiaCrypto(this.pythiaCrypto).build();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void build_noApiKey() {
     Builder builder = new Builder();
-    builder.setAppId(appId).setApiPublicKeyIdentifier(apiPublicKeyIdentifier)
-        .setProofKeys(proofKeys).setCrypto(this.crypto).setPythiaCrypto(this.pythiaCrypto).build();
+    assertThrows(IllegalArgumentException.class, () -> {
+      builder.setAppId(appId).setApiPublicKeyIdentifier(apiPublicKeyIdentifier)
+              .setProofKeys(proofKeys).setCrypto(this.crypto).setPythiaCrypto(this.pythiaCrypto).build();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void build_noPythiaCrypto() {
     Builder builder = new Builder();
-    builder.setAppId(appId).setApiPublicKeyIdentifier(apiPublicKeyIdentifier).setApiKey(apiKey)
-        .setProofKeys(proofKeys).build();
+    assertThrows(IllegalArgumentException.class, () -> {
+      builder.setAppId(appId).setApiPublicKeyIdentifier(apiPublicKeyIdentifier).setApiKey(apiKey)
+              .setProofKeys(proofKeys).build();
+    });
   }
 
   @Test

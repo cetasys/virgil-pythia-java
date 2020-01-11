@@ -33,13 +33,6 @@
 
 package com.virgilsecurity.pythia.crypto;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
 import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
@@ -48,6 +41,10 @@ import com.virgilsecurity.sdk.crypto.VirgilKeyPair;
 import com.virgilsecurity.sdk.crypto.VirgilPrivateKey;
 import com.virgilsecurity.sdk.crypto.VirgilPublicKey;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -58,9 +55,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Unit tests for {@link VirgilPythiaCrypto}.
@@ -73,7 +73,7 @@ public class VirgilPythiaCryptoTest {
   private PythiaCrypto pythiaCrypto;
   private SampleDataHolder sample;
 
-  @Before
+  @BeforeEach
   public void setup() {
     this.pythiaCrypto = new VirgilPythiaCrypto();
 

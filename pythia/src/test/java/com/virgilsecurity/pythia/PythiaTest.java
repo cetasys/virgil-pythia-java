@@ -33,13 +33,6 @@
 
 package com.virgilsecurity.pythia;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
@@ -55,13 +48,21 @@ import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Integration tests for {@link Pythia}.
@@ -76,7 +77,7 @@ public class PythiaTest extends ConfigurableTest {
   private String password;
   private SampleDataHolder sample;
 
-  @Before
+  @BeforeEach
   public void setup() {
     sample = new SampleDataHolder("com/virgilsecurity/pythia/pythia-sdk.json");
   }
@@ -423,7 +424,7 @@ public class PythiaTest extends ConfigurableTest {
     }
   }
 
-  @Test(expected = ThrottlingException.class)
+  @Test
   public void throttling() throws CryptoException, VirgilPythiaServiceException,
       TransformVerificationException, InterruptedException {
     setup(getProofKeys1());
@@ -431,7 +432,9 @@ public class PythiaTest extends ConfigurableTest {
     BreachProofPassword breachProofPassword = this.pythia.createBreachProofPassword(password);
     assertNotNull(breachProofPassword);
 
-    this.pythia.verifyBreachProofPassword(this.password, breachProofPassword, false);
+    assertThrows(ThrottlingException.class, () -> {
+      this.pythia.verifyBreachProofPassword(this.password, breachProofPassword, false);
+    });
   }
 
 }

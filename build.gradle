@@ -60,12 +60,14 @@ buildscript {
             // Tests
             testsRunner       : '1.0.2',
             espresso          : '3.0.2',
-            junit             : '5.5.2',
+            junit             : '5.5.0',
             junitPlugin       : '1.0.0',
-            junitOld          : '4.13',
             commonsCodec      : '1.12',
             commonsLang       : '2.6',
             mockito           : '3.0.0',
+
+            // Android Tests
+            junitAndroid      : '4.13',
     ]
 
     repositories {

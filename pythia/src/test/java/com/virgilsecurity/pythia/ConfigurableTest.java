@@ -33,19 +33,20 @@
 
 package com.virgilsecurity.pythia;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import com.virgilsecurity.sdk.crypto.VirgilCrypto;
 import com.virgilsecurity.sdk.crypto.VirgilPrivateKey;
 import com.virgilsecurity.sdk.crypto.VirgilPublicKey;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
-import com.virgilsecurity.sdk.utils.StringUtils;
+import com.virgilsecurity.testcommon.property.EnvPropertyReader;
+import com.virgilsecurity.testcommon.utils.PropertyUtils;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Base class for tests which uses environment-specific parameters.
@@ -55,23 +56,40 @@ import java.util.List;
  */
 public class ConfigurableTest {
 
+  private static final String ENVIRONMENT_SYS_VAR = "environment";
+  private static final String ACCOUNT_ID = "ACCOUNT_ID";
+  private static final String APP_ID = "APP_ID";
+  private static final String API_PRIVATE_KEY = "API_PRIVATE_KEY";
+  private static final String API_PUBLIC_KEY = "API_PUBLIC_KEY";
+  private static final String API_PUBLIC_KEY_ID = "API_PUBLIC_KEY_ID";
+  private static final String PROOF_KEYS1 = "PROOF_KEYS1";
+  private static final String PROOF_KEYS2 = "PROOF_KEYS2";
+  private static final String PROOF_KEYS3 = "PROOF_KEYS3";
+  private static final String PYTHIA_SERVICE_ADDRESS = "PYTHIA_SERVICE_URL";
+  private static final String UPDATE_TOKEN_1_2 = "UPDATE_TOKEN_1_2";
+  private static final String UPDATE_TOKEN_2_3 = "UPDATE_TOKEN_2_3";
+  private final EnvPropertyReader propertyReader;
   private VirgilCrypto crypto;
-  private String accountId;
-  private String appId;
-  private String apiPrivateKeyStr;
   private VirgilPrivateKey apiPrivateKey;
   private VirgilPublicKey apiPublicKey;
-  private String apiPublicKeyId;
-  private String proofKeys1;
-  private String proofKeys2;
-  private String proofKeys3;
-  private String updateToken1to2;
 
   /**
    * Create a new instance of {@link ConfigurableTest}.
    *
    */
   public ConfigurableTest() {
+    String environment = PropertyUtils.getSystemProperty(ENVIRONMENT_SYS_VAR);
+
+    if (environment != null) {
+      this.propertyReader = new EnvPropertyReader.Builder()
+              .environment(EnvPropertyReader.Environment.fromType(environment))
+              .isDefaultSubmodule(true)
+              .build();
+    } else {
+      this.propertyReader = new EnvPropertyReader.Builder()
+              .isDefaultSubmodule(true)
+              .build();
+    }
     this.crypto = new VirgilCrypto();
   }
 
@@ -81,7 +99,7 @@ public class ConfigurableTest {
    * @return Pythia service base URL.
    */
   public String getPythiaServiceUrl() {
-    return getPropertyByName("PYTHIA_SERVICE_URL");
+    return this.propertyReader.getProperty(PYTHIA_SERVICE_ADDRESS);
   }
 
   /**
@@ -90,13 +108,7 @@ public class ConfigurableTest {
    * @return the account identifier.
    */
   public String getAccountId() {
-    if (this.accountId == null) {
-      this.accountId = getPropertyByName("ACCOUNT_ID");
-      if (this.accountId == null) {
-        fail("Account ID is not defined");
-      }
-    }
-    return this.accountId;
+    return this.propertyReader.getProperty(ACCOUNT_ID);
   }
 
   /**
@@ -105,13 +117,7 @@ public class ConfigurableTest {
    * @return the application identifier.
    */
   public String getAppId() {
-    if (this.appId == null) {
-      this.appId = getPropertyByName("APP_ID");
-      if (this.appId == null) {
-        fail("App ID is not defined");
-      }
-    }
-    return this.appId;
+    return this.propertyReader.getProperty(APP_ID);
   }
 
   /**
@@ -120,13 +126,7 @@ public class ConfigurableTest {
    * @return API Private Key as Base64-encoded string.
    */
   public String getApiPrivateKeyStr() {
-    if (this.apiPrivateKeyStr == null) {
-      this.apiPrivateKeyStr = getPropertyByName("API_PRIVATE_KEY");
-      if (this.apiPrivateKeyStr == null) {
-        fail("API Private Key is not defined");
-      }
-    }
-    return this.apiPrivateKeyStr;
+    return this.propertyReader.getProperty(API_PRIVATE_KEY);
   }
 
   /**
@@ -155,7 +155,7 @@ public class ConfigurableTest {
     if (this.apiPublicKey == null) {
       try {
         this.apiPublicKey = this.crypto
-            .importPublicKey(ConvertionUtils.base64ToBytes(getPropertyByName("API_PUBLIC_KEY")));
+            .importPublicKey(ConvertionUtils.base64ToBytes(this.propertyReader.getProperty(API_PUBLIC_KEY)));
       } catch (CryptoException e) {
         fail("API Public Key is not defined");
       }
@@ -169,13 +169,7 @@ public class ConfigurableTest {
    * @return API Private Key identifier.
    */
   public String getApiPublicKeyId() {
-    if (this.apiPublicKeyId == null) {
-      this.apiPublicKeyId = getPropertyByName("API_PUBLIC_KEY_ID");
-      if (this.apiPublicKeyId == null) {
-        fail("API Public Key ID is not defined");
-      }
-    }
-    return this.apiPublicKeyId;
+    return this.propertyReader.getProperty(API_PUBLIC_KEY_ID);
   }
 
   /**
@@ -184,13 +178,7 @@ public class ConfigurableTest {
    * @return the proof key.
    */
   public List<String> getProofKeys1() {
-    if (this.proofKeys1 == null) {
-      this.proofKeys1 = getPropertyByName("PROOF_KEYS1");
-      if (this.proofKeys1 == null) {
-        fail("PROOF_KEYS1 is not defined");
-      }
-    }
-    return Arrays.asList(this.proofKeys1);
+    return Arrays.asList(this.propertyReader.getProperty(PROOF_KEYS1).split(","));
   }
 
   /**
@@ -199,13 +187,7 @@ public class ConfigurableTest {
    * @return the proof keys.
    */
   public List<String> getProofKeys2() {
-    if (this.proofKeys2 == null) {
-      this.proofKeys2 = getPropertyByName("PROOF_KEYS2");
-      if (this.proofKeys2 == null) {
-        fail("PROOF_KEYS2 is not defined");
-      }
-    }
-    return Arrays.asList(this.proofKeys2.split(","));
+    return Arrays.asList(this.propertyReader.getProperty(PROOF_KEYS2).split(","));
   }
 
   /**
@@ -214,46 +196,25 @@ public class ConfigurableTest {
    * @return the proof keys.
    */
   public List<String> getProofKeys3() {
-    if (this.proofKeys3 == null) {
-      this.proofKeys3 = getPropertyByName("PROOF_KEYS3");
-      if (this.proofKeys3 == null) {
-        fail("PROOF_KEYS3 is not defined");
-      }
-    }
-    return Arrays.asList(this.proofKeys3.split(","));
+    return Arrays.asList(this.propertyReader.getProperty(PROOF_KEYS3).split(","));
   }
 
   /**
-   * Get update token from version 2 to version3.
+   * Get update token from version 1 to version 2.
    * 
    * @return the update token.
    */
   public String getUpdateToken1to2() {
-    if (this.updateToken1to2 == null) {
-      this.updateToken1to2 = getPropertyByName("UPDATE_TOKEN_1_2");
-      if (this.updateToken1to2 == null) {
-        fail("UPDATE_TOKEN_1_2 is not defined");
-      }
-    }
-    return this.updateToken1to2;
+    return this.propertyReader.getProperty(UPDATE_TOKEN_1_2);
   }
 
   /**
-   * Get property value by property name.
-   * 
-   * @param propertyName
-   *          the property name.
-   * @return the property value of {@code null} if property is not set.
+   * Get update token from version 2 to version3.
+   *
+   * @return the update token.
    */
-  public String getPropertyByName(String propertyName) {
-    String result = System.getProperty(propertyName);
-    if (StringUtils.isBlank(result)) {
-      result = System.getenv(propertyName);
-    }
-    if (StringUtils.isBlank(result)) {
-      return null;
-    }
-    return result;
+  public String getUpdateToken2to3() {
+    return this.propertyReader.getProperty(UPDATE_TOKEN_2_3);
   }
 
   /**
@@ -265,8 +226,8 @@ public class ConfigurableTest {
    *          the array to be verified.
    */
   public void assertNotEmpty(String arrayDescription, byte[] array) {
-    assertNotNull(String.format("%s should not be null", arrayDescription), array);
-    assertTrue(String.format("%s should not be empty", arrayDescription), array.length > 0);
+    assertNotNull(array, String.format("%s should not be null", arrayDescription));
+    assertTrue(array.length > 0, String.format("%s should not be empty", arrayDescription));
   }
 
 }

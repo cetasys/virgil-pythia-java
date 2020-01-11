@@ -33,11 +33,6 @@
 
 package com.virgilsecurity.pythia.crypto;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.virgilsecurity.crypto.pythia.Pythia;
@@ -46,15 +41,20 @@ import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult
 import com.virgilsecurity.crypto.pythia.PythiaProveResult;
 import com.virgilsecurity.crypto.pythia.PythiaTransformResult;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * VirgilCryptoPythia class.
@@ -64,6 +64,18 @@ public class VirgilCryptoPythiaTest {
   private JsonObject sampleJson;
   private byte[] pythiaSecret;
   private byte[] pythiaScopeSecret;
+
+  @BeforeEach
+  public void setup() {
+    sampleJson = (JsonObject) new JsonParser()
+            .parse(new InputStreamReader(Objects.requireNonNull(this.getClass().getClassLoader()
+                    .getResourceAsStream("com/virgilsecurity/pythia/crypto/pythia-crypto.json"))));
+    this.pythiaSecret = getBytes("kPythiaSecret");
+    this.pythiaScopeSecret = getBytes("kPythiaScopeSecret");
+
+    // YTC-1
+    Pythia.configure();
+  }
 
   @Test
   public void blind() {
@@ -135,18 +147,6 @@ public class VirgilCryptoPythiaTest {
         blindResult.getBlindedPassword(), tweek, transformationKeyPair.getTransformationPublicKey(),
         proveResult.getProofValueC(), proveResult.getProofValueU());
     assertTrue(verifyResult);
-  }
-
-  @Before
-  public void setup() {
-    sampleJson = (JsonObject) new JsonParser()
-        .parse(new InputStreamReader(Objects.requireNonNull(this.getClass().getClassLoader()
-            .getResourceAsStream("com/virgilsecurity/pythia/crypto/pythia-crypto.json"))));
-    this.pythiaSecret = getBytes("kPythiaSecret");
-    this.pythiaScopeSecret = getBytes("kPythiaScopeSecret");
-
-    // YTC-1
-    Pythia.configure();
   }
 
   @Test

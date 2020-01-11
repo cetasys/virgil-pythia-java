@@ -33,13 +33,6 @@
 
 package com.virgilsecurity.pythia.client;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import com.virgilsecurity.pythia.ConfigurableTest;
 import com.virgilsecurity.pythia.ProofKeys;
 import com.virgilsecurity.pythia.crypto.BlindResult;
@@ -56,12 +49,19 @@ import com.virgilsecurity.sdk.jwt.accessProviders.GeneratorJwtProvider;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration tests for {@link VirgilPythiaClient}.
@@ -76,7 +76,7 @@ public class VirgilPythiaClientTest extends ConfigurableTest {
   private AccessTokenProvider accessTokenProvider;
   private String identity;
 
-  @Before
+  @BeforeEach
   public void setup() {
     String baseUrl = getPythiaServiceUrl();
     if (StringUtils.isBlank(baseUrl)) {

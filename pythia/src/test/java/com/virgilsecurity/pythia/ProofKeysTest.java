@@ -33,23 +33,24 @@
 
 package com.virgilsecurity.pythia;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.pythia.model.exception.ProofKeyNotFoundException;
 import com.virgilsecurity.pythia.model.exception.ProofKeyParseException;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Unit tests for {@link ProofKeys}.
@@ -61,29 +62,35 @@ public class ProofKeysTest {
 
   private SampleDataHolder sample;
 
-  @Before
+  @BeforeEach
   public void setup() {
     sample = new SampleDataHolder("com/virgilsecurity/pythia/pythia-sdk.json");
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void instantiate_null() {
-    new ProofKeys(null);
+    assertThrows(IllegalArgumentException.class, () -> {
+      new ProofKeys(null);
+    });
   }
 
   @SuppressWarnings("unchecked")
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void instantiate_empty() {
     // YTC-7
-    new ProofKeys(Collections.EMPTY_LIST);
+    assertThrows(IllegalArgumentException.class, () -> {
+      new ProofKeys(Collections.EMPTY_LIST);
+    });
   }
 
-  @Test(expected = ProofKeyParseException.class)
+  @Test
   public void instantiate_trash() {
     // YTC-8
     String invalidProofKey = this.sample.get("kInvalidProofKey");
 
-    new ProofKeys(Arrays.asList(invalidProofKey));
+    assertThrows(ProofKeyParseException.class, () -> {
+      new ProofKeys(Arrays.asList(invalidProofKey));
+    });
   }
 
   @Test
@@ -164,19 +171,25 @@ public class ProofKeysTest {
     }
   }
 
-  @Test(expected = ProofKeyParseException.class)
+  @Test
   public void instantiate_invalidKeyPrefix() {
-    new ProofKeys(Arrays.asList("PV.1.a2V5IDEgZGF0YQ=="));
+    assertThrows(ProofKeyParseException.class, () -> {
+      new ProofKeys(Arrays.asList("PV.1.a2V5IDEgZGF0YQ=="));
+    });
   }
 
-  @Test(expected = ProofKeyParseException.class)
+  @Test
   public void instantiate_invalidKeyVersion() {
-    new ProofKeys(Arrays.asList("PK.v1.a2V5IDEgZGF0YQ=="));
+    assertThrows(ProofKeyParseException.class, () -> {
+      new ProofKeys(Arrays.asList("PK.v1.a2V5IDEgZGF0YQ=="));
+    });
   }
 
-  @Test(expected = ProofKeyParseException.class)
+  @Test
   public void instantiate_invalidKeyData() {
-    new ProofKeys(Arrays.asList("PK.1. "));
+    assertThrows(ProofKeyParseException.class, () -> {
+      new ProofKeys(Arrays.asList("PK.1. "));
+    });
   }
 
   private void verifyKey(ProofKey key, String dataStr, int version) {

@@ -33,16 +33,16 @@
 
 package com.virgilsecurity.pythia;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import com.virgilsecurity.pythia.crypto.VirgilPythiaCrypto;
 import com.virgilsecurity.pythia.model.BreachProofPassword;
 import com.virgilsecurity.pythia.model.exception.TransformVerificationException;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.sdk.crypto.exceptions.CryptoException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration test which covers documentation snippets.

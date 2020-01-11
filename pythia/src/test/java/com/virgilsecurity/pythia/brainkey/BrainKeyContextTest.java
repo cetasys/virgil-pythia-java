@@ -33,15 +33,16 @@
 
 package com.virgilsecurity.pythia.brainkey;
 
-import com.virgilsecurity.pythia.brainkey.BrainKeyContext;
 import com.virgilsecurity.pythia.client.PythiaClient;
 import com.virgilsecurity.pythia.crypto.PythiaCrypto;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Unit test for {@link BrainKeyContext}.
@@ -49,7 +50,7 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author Andrii Iakovenko
  *
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BrainKeyContextTest {
 
   @Mock
@@ -68,34 +69,44 @@ public class BrainKeyContextTest {
         .build();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void create_noCrypto() {
-    new BrainKeyContext.Builder().setPythiaClient(this.pythiaClient)
-        .setAccessTokenProvider(this.accessTokenProvider).build();
+    assertThrows(IllegalArgumentException.class, () -> {
+      new BrainKeyContext.Builder().setPythiaClient(this.pythiaClient)
+              .setAccessTokenProvider(this.accessTokenProvider).build();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void create_noClient() {
-    new BrainKeyContext.Builder().setPythiaCrypto(this.pythiaCrypto)
-        .setAccessTokenProvider(this.accessTokenProvider).build();
+    assertThrows(IllegalArgumentException.class, () -> {
+      new BrainKeyContext.Builder().setPythiaCrypto(this.pythiaCrypto)
+              .setAccessTokenProvider(this.accessTokenProvider).build();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void create_noTokenProvider() {
-    new BrainKeyContext.Builder().setPythiaCrypto(this.pythiaCrypto)
-        .setPythiaClient(this.pythiaClient).build();
+    assertThrows(IllegalArgumentException.class, () -> {
+      new BrainKeyContext.Builder().setPythiaCrypto(this.pythiaCrypto)
+              .setPythiaClient(this.pythiaClient).build();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void create_nullKeyType() {
-    new BrainKeyContext.Builder().setPythiaCrypto(this.pythiaCrypto)
-        .setPythiaClient(this.pythiaClient).setAccessTokenProvider(this.accessTokenProvider)
-        .setKeyPairType(null).build();
+    assertThrows(IllegalArgumentException.class, () -> {
+      new BrainKeyContext.Builder().setPythiaCrypto(this.pythiaCrypto)
+              .setPythiaClient(this.pythiaClient).setAccessTokenProvider(this.accessTokenProvider)
+              .setKeyPairType(null).build();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void create_empty() {
-    new BrainKeyContext.Builder().build();
+    assertThrows(IllegalArgumentException.class, () -> {
+      new BrainKeyContext.Builder().build();
+    });
   }
 
 }

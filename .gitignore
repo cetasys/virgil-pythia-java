@@ -178,3 +178,5 @@ fabric.properties
 testsDev.sh
 testsStg.sh
 testsProd.sh
+env.json
+publish.properties

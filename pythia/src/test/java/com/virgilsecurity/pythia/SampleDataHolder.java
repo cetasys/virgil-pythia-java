@@ -33,17 +33,17 @@
 
 package com.virgilsecurity.pythia;
 
-import static org.junit.Assert.fail;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.junit.jupiter.api.Assertions;
+
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 
 /**
  * This class could store JSON sample data and provide common operations with a sample.
@@ -105,7 +105,7 @@ public class SampleDataHolder {
     try {
       return Hex.decodeHex(this.sampleJson.get(key).getAsString());
     } catch (DecoderException e) {
-      fail(e.getMessage());
+      Assertions.fail(e.getMessage());
     }
     return null;
   }

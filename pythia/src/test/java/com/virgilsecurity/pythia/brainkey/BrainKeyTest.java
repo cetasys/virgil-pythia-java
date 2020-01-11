@@ -33,10 +33,6 @@
 
 package com.virgilsecurity.pythia.brainkey;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
 import com.virgilsecurity.crypto.foundation.Base64;
 import com.virgilsecurity.crypto.pythia.Pythia;
 import com.virgilsecurity.crypto.pythia.PythiaComputeTransformationKeyPairResult;
@@ -59,13 +55,17 @@ import com.virgilsecurity.sdk.jwt.accessProviders.GeneratorJwtProvider;
 import com.virgilsecurity.sdk.jwt.contract.AccessTokenProvider;
 import com.virgilsecurity.sdk.utils.StringUtils;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Integration test for {@link BrainKey}.
@@ -84,7 +84,7 @@ public class BrainKeyTest extends ConfigurableTest {
 
   private SampleDataHolder sample;
 
-  @Before
+  @BeforeEach
   public void setup() {
     this.virgilCrypto = new VirgilCrypto();
     this.pythiaCrypto = new VirgilPythiaCrypto();
