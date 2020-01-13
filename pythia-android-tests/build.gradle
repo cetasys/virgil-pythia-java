@@ -48,6 +48,8 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    useLibrary 'android.test.runner'
 }
 
 dependencies {
@@ -55,9 +57,10 @@ dependencies {
     androidTestImplementation project(':pythia-android')
 
     // Test
-    androidTestImplementation "junit:junit:$versions.junitAndroid"
+    testImplementation "junit:junit:$versions.junitAndroid"
     androidTestImplementation "androidx.test:runner:$versions.testsRunner"
     androidTestImplementation "androidx.test:rules:$versions.testsRunner"
+
     androidTestImplementation "commons-lang:commons-lang:$versions.commonsLang"
     androidTestImplementation "commons-codec:commons-codec:$versions.commonsCodec"
     androidTestImplementation "com.google.code.gson:gson:$versions.gson"
