@@ -35,38 +35,18 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
-static def getEnvironmentValue(String name) {
-    if (System.getenv(name) != null) {
-        def value = System.getenv(name)
-        return "\"$value\""
-    } else if (System.getProperty(name) != null) {
-        def value = System.getProperty(name)
-        return "\"$value\""
-    } else {
-        System.out.println("Please, provide argument: " + name)
-    }
-}
-
-def APP_ID = hasProperty('APP_ID') ? "\"${project.property("APP_ID")}\"" : getEnvironmentValue('APP_ID')
-def API_PRIVATE_KEY = hasProperty('API_PRIVATE_KEY') ? "\"${project.property("API_PRIVATE_KEY")}\"" : getEnvironmentValue('API_PRIVATE_KEY')
-def API_PUBLIC_KEY_ID = hasProperty('API_PUBLIC_KEY_ID') ? "\"${project.property("API_PUBLIC_KEY_ID")}\"" : getEnvironmentValue('API_PUBLIC_KEY_ID')
-def SERVICE_URL = hasProperty('SERVICE_URL') ? "\"${project.property("SERVICE_URL")}\"" : getEnvironmentValue('SERVICE_URL')
-
 android {
     compileSdkVersion 28
+
     defaultConfig {
-        applicationId "com.virgilsecurity.ratchet_android_tests"
         minSdkVersion 21
         targetSdkVersion 28
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-    buildTypes {
-        buildTypes.each {
-            it.buildConfigField "String", "APP_ID", "$APP_ID"
-            it.buildConfigField "String", "API_PRIVATE_KEY", "$API_PRIVATE_KEY"
-            it.buildConfigField "String", "API_PUBLIC_KEY_ID", "$API_PUBLIC_KEY_ID"
-            it.buildConfigField "String", "SERVICE_URL", "$SERVICE_URL"
-        }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -75,11 +55,24 @@ dependencies {
     androidTestImplementation project(':pythia-android')
 
     // Test
-    testImplementation "junit:junit:$versions.junitAndroid"
-    androidTestImplementation "com.android.support.test:runner:$versions.testsRunner"
+    androidTestImplementation "junit:junit:$versions.junitAndroid"
+    androidTestImplementation "androidx.test:runner:$versions.testsRunner"
+    androidTestImplementation "androidx.test:rules:$versions.testsRunner"
     androidTestImplementation "commons-lang:commons-lang:$versions.commonsLang"
     androidTestImplementation "commons-codec:commons-codec:$versions.commonsCodec"
     androidTestImplementation "com.google.code.gson:gson:$versions.gson"
 
     androidTestImplementation "com.virgilsecurity:test-common:0.1"
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    dependsOn(copyEnvFile)
+}
+
+task copyEnvFile(type: Copy) {
+    def resourcesFolder = new File(project.projectDir.absolutePath + '/src/androidTest/resources/testProperties')
+    if (!resourcesFolder.exists()) resourcesFolder.mkdirs()
+
+    from rootProject.projectDir.absolutePath + '/env.json'
+    into resourcesFolder.absolutePath
 }

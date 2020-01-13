@@ -59,9 +59,9 @@ public class ConfigurableTest {
   private static final String ENVIRONMENT_SYS_VAR = "environment";
   private static final String ACCOUNT_ID = "ACCOUNT_ID";
   private static final String APP_ID = "APP_ID";
-  private static final String API_PRIVATE_KEY = "API_PRIVATE_KEY";
-  private static final String API_PUBLIC_KEY = "API_PUBLIC_KEY";
-  private static final String API_PUBLIC_KEY_ID = "API_PUBLIC_KEY_ID";
+  private static final String APP_PRIVATE_KEY = "APP_PRIVATE_KEY";
+  private static final String APP_PUBLIC_KEY = "APP_PUBLIC_KEY";
+  private static final String APP_PUBLIC_KEY_ID = "APP_PUBLIC_KEY_ID";
   private static final String PROOF_KEYS1 = "PROOF_KEYS1";
   private static final String PROOF_KEYS2 = "PROOF_KEYS2";
   private static final String PROOF_KEYS3 = "PROOF_KEYS3";
@@ -83,11 +83,9 @@ public class ConfigurableTest {
     if (environment != null) {
       this.propertyReader = new EnvPropertyReader.Builder()
               .environment(EnvPropertyReader.Environment.fromType(environment))
-              .isDefaultSubmodule(true)
               .build();
     } else {
       this.propertyReader = new EnvPropertyReader.Builder()
-              .isDefaultSubmodule(true)
               .build();
     }
     this.crypto = new VirgilCrypto();
@@ -126,7 +124,7 @@ public class ConfigurableTest {
    * @return API Private Key as Base64-encoded string.
    */
   public String getApiPrivateKeyStr() {
-    return this.propertyReader.getProperty(API_PRIVATE_KEY);
+    return this.propertyReader.getProperty(APP_PRIVATE_KEY);
   }
 
   /**
@@ -155,7 +153,7 @@ public class ConfigurableTest {
     if (this.apiPublicKey == null) {
       try {
         this.apiPublicKey = this.crypto
-            .importPublicKey(ConvertionUtils.base64ToBytes(this.propertyReader.getProperty(API_PUBLIC_KEY)));
+            .importPublicKey(ConvertionUtils.base64ToBytes(this.propertyReader.getProperty(APP_PUBLIC_KEY)));
       } catch (CryptoException e) {
         fail("API Public Key is not defined");
       }
@@ -169,7 +167,7 @@ public class ConfigurableTest {
    * @return API Private Key identifier.
    */
   public String getApiPublicKeyId() {
-    return this.propertyReader.getProperty(API_PUBLIC_KEY_ID);
+    return this.propertyReader.getProperty(APP_PUBLIC_KEY_ID);
   }
 
   /**

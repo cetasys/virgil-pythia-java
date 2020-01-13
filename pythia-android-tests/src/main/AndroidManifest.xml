@@ -32,4 +32,4 @@
   ~ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<manifest package="com.virgilsecurity.android.ratchet" />
+<manifest package="com.virgilsecurity.android.pythia" />

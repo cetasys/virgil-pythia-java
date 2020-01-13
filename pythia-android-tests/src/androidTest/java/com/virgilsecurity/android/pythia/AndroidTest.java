@@ -31,67 +31,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
-    ext.versions = [
-            // Kotlin
-            kotlinVersion     : '1.3.61',
-            coroutines        : '1.3.2',
+package com.virgilsecurity.android.pythia;
 
-            // Gradle
-            gradle            : '3.5.3',
+import org.junit.Test;
 
-            // Virgil
-            virgilSdk         : '6.1.0',
-            virgilCrypto      : '0.12.0',
+import static org.junit.Assert.assertEquals;
 
-            // Serializer
-            gson              : '2.8.6',
+/**
+ * AndroidTest
+ */
+public class AndroidTest {
 
-            // Network
-            fuel              : '1.15.1',
-
-            // Android
-            android           : '4.1.1.4',
-
-            // Publish
-            mavenPublishPlugin: '3.6.2',
-            dokka             : '0.9.17',
-
-            // Tests
-            testsRunner       : '1.2.0',
-            espresso          : '3.0.2',
-            junit             : '5.5.0',
-            junitPlugin       : '1.0.0',
-            commonsCodec      : '1.12',
-            commonsLang       : '2.6',
-            mockito           : '3.0.0',
-
-            // Android Tests
-            junitAndroid      : '4.13',
-    ]
-
-    repositories {
-        google()
-        jcenter()
-        mavenCentral()
+    @Test
+    public void some_test() {
+        System.out.println("Some info....!!!");
+        assertEquals(4, 2 + 2);
     }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlinVersion"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$versions.dokka"
-        classpath "com.android.tools.build:gradle:$versions.gradle"
-        classpath "digital.wup:android-maven-publish:$versions.mavenPublishPlugin"
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        jcenter()
-        mavenCentral()
-        mavenLocal()
-    }
-}
-
-subprojects {
-    version = '0.2.0'
 }
