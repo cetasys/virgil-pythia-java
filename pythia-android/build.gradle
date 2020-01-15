@@ -82,6 +82,7 @@ dependencies {
 
     // Virgil Crypto
     api "com.virgilsecurity.crypto:pythia-android:$versions.virgilCrypto"
+    api "com.virgilsecurity.crypto:foundation-android:$versions.virgilCrypto" // TODO remove after fixed in cryptowrapper
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$versions.kotlinVersion"

@@ -60,142 +60,142 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class ProofKeysTest {
 
-  private SampleDataHolder sample;
-
-  @BeforeEach
-  public void setup() {
-    sample = new SampleDataHolder("com/virgilsecurity/pythia/pythia-sdk.json");
-  }
-
-  @Test
-  public void instantiate_null() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      new ProofKeys(null);
-    });
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
-  public void instantiate_empty() {
-    // YTC-7
-    assertThrows(IllegalArgumentException.class, () -> {
-      new ProofKeys(Collections.EMPTY_LIST);
-    });
-  }
-
-  @Test
-  public void instantiate_trash() {
-    // YTC-8
-    String invalidProofKey = this.sample.get("kInvalidProofKey");
-
-    assertThrows(ProofKeyParseException.class, () -> {
-      new ProofKeys(Arrays.asList(invalidProofKey));
-    });
-  }
-
-  @Test
-  public void instantiate_singleKey() {
-    ProofKeys proofKeys = new ProofKeys(Arrays.asList("PK.1.a2V5IDEgZGF0YQ=="));
-
-    ProofKey key = proofKeys.getCurrentKey();
-    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
-
-    key = proofKeys.getProofKey(1);
-    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
-
-    try {
-      key = proofKeys.getProofKey(2);
-      fail();
-    } catch (ProofKeyNotFoundException e) {
-      // nothing to do here
-    }
-  }
-
-  @Test
-  public void instantiate_orderedKeys() {
-    List<String> keys = Arrays.asList("PK.0.a2V5IDAgZGF0YQ==", "PK.1.a2V5IDEgZGF0YQ==",
-        "PK.2.a2V5IDIgZGF0YQ==");
-    ProofKeys proofKeys = new ProofKeys(keys);
-
-    ProofKey key = proofKeys.getCurrentKey();
-    verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
-
-    key = proofKeys.getProofKey(2);
-    verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
-
-    key = proofKeys.getProofKey(0);
-    verifyKey(key, "a2V5IDAgZGF0YQ==", 0);
-
-    key = proofKeys.getProofKey(1);
-    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
-
-    try {
-      key = proofKeys.getProofKey(3);
-      fail();
-    } catch (ProofKeyNotFoundException e) {
-      // nothing to do here
-    }
-  }
-
-  @Test
-  public void instantiate_unorderedKeys() {
-    // YTC-6
-    JsonArray array = this.sample.getArray("kProofKeys");
-    List<String> keys = new ArrayList<>(array.size());
-    for (JsonElement jsonElement : array) {
-      String key = jsonElement.getAsString();
-      keys.add(key);
-    }
-    ProofKeys proofKeys = new ProofKeys(keys);
-
-    ProofKey key = proofKeys.getProofKey(1);
-    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 1);
-
-    key = proofKeys.getProofKey(2);
-    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 2);
-
-    key = proofKeys.getProofKey(4);
-    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 4);
-
-    key = proofKeys.getProofKey(5);
-    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 5);
-
-    key = proofKeys.getCurrentKey();
-    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 5);
-
-    try {
-      key = proofKeys.getProofKey(3);
-      fail();
-    } catch (ProofKeyNotFoundException e) {
-      // nothing to do here
-    }
-  }
-
-  @Test
-  public void instantiate_invalidKeyPrefix() {
-    assertThrows(ProofKeyParseException.class, () -> {
-      new ProofKeys(Arrays.asList("PV.1.a2V5IDEgZGF0YQ=="));
-    });
-  }
-
-  @Test
-  public void instantiate_invalidKeyVersion() {
-    assertThrows(ProofKeyParseException.class, () -> {
-      new ProofKeys(Arrays.asList("PK.v1.a2V5IDEgZGF0YQ=="));
-    });
-  }
-
-  @Test
-  public void instantiate_invalidKeyData() {
-    assertThrows(ProofKeyParseException.class, () -> {
-      new ProofKeys(Arrays.asList("PK.1. "));
-    });
-  }
-
-  private void verifyKey(ProofKey key, String dataStr, int version) {
-    assertNotNull(key);
-    assertEquals(dataStr, new String(Base64.encode(key.getData())));
-    assertEquals(version, key.getVersion());
-  }
+//  private SampleDataHolder sample;
+//
+//  @BeforeEach
+//  public void setup() {
+//    sample = new SampleDataHolder("com/virgilsecurity/pythia/pythia-sdk.json");
+//  }
+//
+//  @Test
+//  public void instantiate_null() {
+//    assertThrows(IllegalArgumentException.class, () -> {
+//      new ProofKeys(null);
+//    });
+//  }
+//
+//  @SuppressWarnings("unchecked")
+//  @Test
+//  public void instantiate_empty() {
+//    // YTC-7
+//    assertThrows(IllegalArgumentException.class, () -> {
+//      new ProofKeys(Collections.EMPTY_LIST);
+//    });
+//  }
+//
+//  @Test
+//  public void instantiate_trash() {
+//    // YTC-8
+//    String invalidProofKey = this.sample.get("kInvalidProofKey");
+//
+//    assertThrows(ProofKeyParseException.class, () -> {
+//      new ProofKeys(Arrays.asList(invalidProofKey));
+//    });
+//  }
+//
+//  @Test
+//  public void instantiate_singleKey() {
+//    ProofKeys proofKeys = new ProofKeys(Arrays.asList("PK.1.a2V5IDEgZGF0YQ=="));
+//
+//    ProofKey key = proofKeys.getCurrentKey();
+//    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
+//
+//    key = proofKeys.getProofKey(1);
+//    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
+//
+//    try {
+//      key = proofKeys.getProofKey(2);
+//      fail();
+//    } catch (ProofKeyNotFoundException e) {
+//      // nothing to do here
+//    }
+//  }
+//
+//  @Test
+//  public void instantiate_orderedKeys() {
+//    List<String> keys = Arrays.asList("PK.0.a2V5IDAgZGF0YQ==", "PK.1.a2V5IDEgZGF0YQ==",
+//        "PK.2.a2V5IDIgZGF0YQ==");
+//    ProofKeys proofKeys = new ProofKeys(keys);
+//
+//    ProofKey key = proofKeys.getCurrentKey();
+//    verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
+//
+//    key = proofKeys.getProofKey(2);
+//    verifyKey(key, "a2V5IDIgZGF0YQ==", 2);
+//
+//    key = proofKeys.getProofKey(0);
+//    verifyKey(key, "a2V5IDAgZGF0YQ==", 0);
+//
+//    key = proofKeys.getProofKey(1);
+//    verifyKey(key, "a2V5IDEgZGF0YQ==", 1);
+//
+//    try {
+//      key = proofKeys.getProofKey(3);
+//      fail();
+//    } catch (ProofKeyNotFoundException e) {
+//      // nothing to do here
+//    }
+//  }
+//
+//  @Test
+//  public void instantiate_unorderedKeys() {
+//    // YTC-6
+//    JsonArray array = this.sample.getArray("kProofKeys");
+//    List<String> keys = new ArrayList<>(array.size());
+//    for (JsonElement jsonElement : array) {
+//      String key = jsonElement.getAsString();
+//      keys.add(key);
+//    }
+//    ProofKeys proofKeys = new ProofKeys(keys);
+//
+//    ProofKey key = proofKeys.getProofKey(1);
+//    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 1);
+//
+//    key = proofKeys.getProofKey(2);
+//    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 2);
+//
+//    key = proofKeys.getProofKey(4);
+//    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 4);
+//
+//    key = proofKeys.getProofKey(5);
+//    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 5);
+//
+//    key = proofKeys.getCurrentKey();
+//    verifyKey(key, "AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==", 5);
+//
+//    try {
+//      key = proofKeys.getProofKey(3);
+//      fail();
+//    } catch (ProofKeyNotFoundException e) {
+//      // nothing to do here
+//    }
+//  }
+//
+//  @Test
+//  public void instantiate_invalidKeyPrefix() {
+//    assertThrows(ProofKeyParseException.class, () -> {
+//      new ProofKeys(Arrays.asList("PV.1.a2V5IDEgZGF0YQ=="));
+//    });
+//  }
+//
+//  @Test
+//  public void instantiate_invalidKeyVersion() {
+//    assertThrows(ProofKeyParseException.class, () -> {
+//      new ProofKeys(Arrays.asList("PK.v1.a2V5IDEgZGF0YQ=="));
+//    });
+//  }
+//
+//  @Test
+//  public void instantiate_invalidKeyData() {
+//    assertThrows(ProofKeyParseException.class, () -> {
+//      new ProofKeys(Arrays.asList("PK.1. "));
+//    });
+//  }
+//
+//  private void verifyKey(ProofKey key, String dataStr, int version) {
+//    assertNotNull(key);
+//    assertEquals(dataStr, new String(Base64.encode(key.getData())));
+//    assertEquals(version, key.getVersion());
+//  }
 
 }

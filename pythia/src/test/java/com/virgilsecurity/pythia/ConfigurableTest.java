@@ -57,25 +57,25 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ConfigurableTest {
 
   private static final String ENVIRONMENT_SYS_VAR = "environment";
-  private static final String ACCOUNT_ID = "ACCOUNT_ID";
+//  private static final String ACCOUNT_ID = "ACCOUNT_ID";
   private static final String APP_ID = "APP_ID";
   private static final String APP_PRIVATE_KEY = "APP_PRIVATE_KEY";
-  private static final String APP_PUBLIC_KEY = "APP_PUBLIC_KEY";
+//  private static final String APP_PUBLIC_KEY = "APP_PUBLIC_KEY";
   private static final String APP_PUBLIC_KEY_ID = "APP_PUBLIC_KEY_ID";
-  private static final String PROOF_KEYS1 = "PROOF_KEYS1";
-  private static final String PROOF_KEYS2 = "PROOF_KEYS2";
-  private static final String PROOF_KEYS3 = "PROOF_KEYS3";
+//  private static final String PROOF_KEYS1 = "PROOF_KEYS1";
+//  private static final String PROOF_KEYS2 = "PROOF_KEYS2";
+//  private static final String PROOF_KEYS3 = "PROOF_KEYS3";
   private static final String PYTHIA_SERVICE_ADDRESS = "PYTHIA_SERVICE_URL";
-  private static final String UPDATE_TOKEN_1_2 = "UPDATE_TOKEN_1_2";
-  private static final String UPDATE_TOKEN_2_3 = "UPDATE_TOKEN_2_3";
+//  private static final String UPDATE_TOKEN_1_2 = "UPDATE_TOKEN_1_2";
+//  private static final String UPDATE_TOKEN_2_3 = "UPDATE_TOKEN_2_3";
   private final EnvPropertyReader propertyReader;
+
   private VirgilCrypto crypto;
   private VirgilPrivateKey apiPrivateKey;
-  private VirgilPublicKey apiPublicKey;
+//  private VirgilPublicKey apiPublicKey;
 
   /**
    * Create a new instance of {@link ConfigurableTest}.
-   *
    */
   public ConfigurableTest() {
     String environment = PropertyUtils.getSystemProperty(ENVIRONMENT_SYS_VAR);
@@ -93,25 +93,25 @@ public class ConfigurableTest {
 
   /**
    * Get Pythia service base URL.
-   * 
+   *
    * @return Pythia service base URL.
    */
   public String getPythiaServiceUrl() {
     return this.propertyReader.getProperty(PYTHIA_SERVICE_ADDRESS);
   }
 
-  /**
-   * Get the account identifier.
-   * 
-   * @return the account identifier.
-   */
-  public String getAccountId() {
-    return this.propertyReader.getProperty(ACCOUNT_ID);
-  }
+//  /**
+//   * Get the account identifier.
+//   *
+//   * @return the account identifier.
+//   */
+//  public String getAccountId() {
+//    return this.propertyReader.getProperty(ACCOUNT_ID);
+//  }
 
   /**
    * Get the application identifier.
-   * 
+   *
    * @return the application identifier.
    */
   public String getAppId() {
@@ -120,7 +120,7 @@ public class ConfigurableTest {
 
   /**
    * Get API Private Key as Base64-encoded string.
-   * 
+   *
    * @return API Private Key as Base64-encoded string.
    */
   public String getApiPrivateKeyStr() {
@@ -129,7 +129,7 @@ public class ConfigurableTest {
 
   /**
    * Get API Private Key.
-   * 
+   *
    * @return API Private Key.
    */
   public VirgilPrivateKey getApiPrivateKey() {
@@ -144,80 +144,80 @@ public class ConfigurableTest {
     return this.apiPrivateKey;
   }
 
-  /**
-   * Get API Public Key.
-   * 
-   * @return API Public Key.
-   */
-  public VirgilPublicKey getApiPublicKey() {
-    if (this.apiPublicKey == null) {
-      try {
-        this.apiPublicKey = this.crypto
-            .importPublicKey(ConvertionUtils.base64ToBytes(this.propertyReader.getProperty(APP_PUBLIC_KEY)));
-      } catch (CryptoException e) {
-        fail("API Public Key is not defined");
-      }
-    }
-    return this.apiPublicKey;
-  }
+//  /**
+//   * Get API Public Key.
+//   *
+//   * @return API Public Key.
+//   */
+//  public VirgilPublicKey getApiPublicKey() {
+//    if (this.apiPublicKey == null) {
+//      try {
+//        this.apiPublicKey = this.crypto
+//            .importPublicKey(ConvertionUtils.base64ToBytes(this.propertyReader.getProperty(APP_PUBLIC_KEY)));
+//      } catch (CryptoException e) {
+//        fail("API Public Key is not defined");
+//      }
+//    }
+//    return this.apiPublicKey;
+//  }
 
   /**
    * Get API Private Key identifier.
-   * 
+   *
    * @return API Private Key identifier.
    */
   public String getApiPublicKeyId() {
     return this.propertyReader.getProperty(APP_PUBLIC_KEY_ID);
   }
 
-  /**
-   * Get the single proof key.
-   * 
-   * @return the proof key.
-   */
-  public List<String> getProofKeys1() {
-    return Arrays.asList(this.propertyReader.getProperty(PROOF_KEYS1).split(","));
-  }
+//  /**
+//   * Get the single proof key.
+//   *
+//   * @return the proof key.
+//   */
+//  public List<String> getProofKeys1() {
+//    return Arrays.asList(this.propertyReader.getProperty(PROOF_KEYS1).split(","));
+//  }
 
-  /**
-   * Get the proof keys pair.
-   * 
-   * @return the proof keys.
-   */
-  public List<String> getProofKeys2() {
-    return Arrays.asList(this.propertyReader.getProperty(PROOF_KEYS2).split(","));
-  }
-
-  /**
-   * Get the proof keys trinity.
-   *
-   * @return the proof keys.
-   */
-  public List<String> getProofKeys3() {
-    return Arrays.asList(this.propertyReader.getProperty(PROOF_KEYS3).split(","));
-  }
-
-  /**
-   * Get update token from version 1 to version 2.
-   * 
-   * @return the update token.
-   */
-  public String getUpdateToken1to2() {
-    return this.propertyReader.getProperty(UPDATE_TOKEN_1_2);
-  }
-
-  /**
-   * Get update token from version 2 to version3.
-   *
-   * @return the update token.
-   */
-  public String getUpdateToken2to3() {
-    return this.propertyReader.getProperty(UPDATE_TOKEN_2_3);
-  }
+//  /**
+//   * Get the proof keys pair.
+//   *
+//   * @return the proof keys.
+//   */
+//  public List<String> getProofKeys2() {
+//    return Arrays.asList(this.propertyReader.getProperty(PROOF_KEYS2).split(","));
+//  }
+//
+//  /**
+//   * Get the proof keys trinity.
+//   *
+//   * @return the proof keys.
+//   */
+//  public List<String> getProofKeys3() {
+//    return Arrays.asList(this.propertyReader.getProperty(PROOF_KEYS3).split(","));
+//  }
+//
+//  /**
+//   * Get update token from version 1 to version 2.
+//   *
+//   * @return the update token.
+//   */
+//  public String getUpdateToken1to2() {
+//    return this.propertyReader.getProperty(UPDATE_TOKEN_1_2);
+//  }
+//
+//  /**
+//   * Get update token from version 2 to version3.
+//   *
+//   * @return the update token.
+//   */
+//  public String getUpdateToken2to3() {
+//    return this.propertyReader.getProperty(UPDATE_TOKEN_2_3);
+//  }
 
   /**
    * Assert that array is not null and not empty.
-   * 
+   *
    * @param arrayDescription
    *          the short array description.
    * @param array
