@@ -40,7 +40,7 @@ import com.virgilsecurity.pythia.model.exception.ThrottlingException;
 import com.virgilsecurity.pythia.model.exception.VirgilPythiaServiceException;
 import com.virgilsecurity.pythia.model.request.GenerateSeedRequest;
 import com.virgilsecurity.pythia.model.request.TransformPasswordRequest;
-import com.virgilsecurity.sdk.VirgilInfo;
+import com.virgilsecurity.pythia.VirgilInfo;
 import com.virgilsecurity.sdk.common.ErrorResponse;
 import com.virgilsecurity.sdk.common.HttpError;
 import com.virgilsecurity.sdk.utils.ConvertionUtils;
