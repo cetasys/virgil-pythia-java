@@ -42,7 +42,7 @@ buildscript {
 
             // Virgil
             virgilSdk         : '7.1.0',
-            virgilCrypto      : '0.12.0',
+            virgilCrypto      : '0.13.1',
 
             // Serializer
             gson              : '2.8.6',
@@ -92,5 +92,5 @@ allprojects {
 }
 
 subprojects {
-    version = '0.3.3'
+    version = '0.3.4'
 }
