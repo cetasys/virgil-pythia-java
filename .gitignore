@@ -180,3 +180,6 @@ testsStg.sh
 testsProd.sh
 env.json
 publish.properties
+
+# macOS
+.DS_Store
